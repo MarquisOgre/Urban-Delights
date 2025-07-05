@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import {
-  ChefHat, BarChart3, Leaf, Plus, Download, FileText, Search, Package,
+  BarChart3, Leaf, Plus, Download, FileText, Search, Package,
   CircleDollarSign, TrendingUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -94,12 +94,17 @@ export default function IndexPage() {
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur border-b shadow-sm">
         <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex items-center gap-4">
-            <ChefHat size={32} className="text-orange-600" />
+            <img
+              src="/logo.png"
+              alt="Artisan Foods Logo"
+              width={40}
+              height={40}
+              className="object-contain"
+            />
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-red-500 text-transparent bg-clip-text">
                 Artisan Delights
               </h1>
-              <p className="text-sm text-gray-600">Traditional South Indian Podi Collection</p>
             </div>
           </div>
           <div className="flex flex-wrap gap-2 items-center">
@@ -124,7 +129,7 @@ export default function IndexPage() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6 flex-grow">
+      <main className="container mx-auto px-4 py-6 pb-28 flex-grow">
         {activeTab === 'recipes' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
@@ -177,14 +182,13 @@ export default function IndexPage() {
         {activeTab === 'add-recipe' && <AddRecipe />}
       </main>
 
-      {/* Sticky Footer */}
-      <footer className="bg-gray-100 border-t text-center text-sm text-gray-600 w-full mt-auto py-4">
+      {/* Fixed Footer */}
+      <footer
+        className="fixed bottom-0 left-0 w-full bg-gradient-to-r from-red-500 to-yellow-400 border-t text-center text-white font-bold py-4 z-30"
+        style={{ fontSize: '16px' }}
+      >
         <div className="container mx-auto px-4">
           <p>© {new Date().getFullYear()} Artisan Delights. Crafted with ❤️ in South India.</p>
-          <p className="mt-1">
-            <a href="#" className="text-orange-600 hover:underline">Privacy Policy</a> ·
-            <a href="#" className="ml-2 text-orange-600 hover:underline">Terms</a>
-          </p>
         </div>
       </footer>
 
