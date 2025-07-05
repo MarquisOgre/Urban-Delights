@@ -92,20 +92,18 @@ export default function IndexPage() {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-orange-50 to-red-50 font-sans">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur border-b shadow-sm">
-        <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex items-center gap-4">
+        <div className="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+          <div className="flex items-center gap-3">
             <img
               src="/logo.png"
               alt="Artisan Foods Logo"
-              width={40}
-              height={40}
+              width={32}
+              height={32}
               className="object-contain"
             />
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-red-500 text-transparent bg-clip-text">
-                Artisan Delights
-              </h1>
-            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-red-500 text-transparent bg-clip-text">
+              Artisan Delights
+            </h1>
           </div>
           <div className="flex flex-wrap gap-2 items-center">
             <Button variant={activeTab === 'recipes' ? 'default' : 'outline'} onClick={() => setActiveTab('recipes')}>
@@ -184,14 +182,13 @@ export default function IndexPage() {
 
       {/* Fixed Footer */}
       <footer
-          className="fixed bottom-0 left-0 w-full bg-gradient-to-r from-red-500 to-yellow-400 border-t text-center text-white font-bold py-2 z-30"
-          style={{ fontSize: '12px' }}
-        >
-          <div className="container mx-auto px-2">
-            <p>© {new Date().getFullYear()} Artisan Delights. Crafted with ❤️ in South India.</p>
-          </div>
-        </footer>
-
+        className="fixed bottom-0 left-0 w-full bg-gradient-to-r from-red-500 to-yellow-400 border-t text-center text-white font-bold py-2 z-30"
+        style={{ fontSize: '12px' }}
+      >
+        <div className="container mx-auto px-2">
+          <p>© {new Date().getFullYear()} Artisan Delights. Crafted with ❤️ in South India.</p>
+        </div>
+      </footer>
 
       {/* Back to Top Button */}
       {showTopButton && (
