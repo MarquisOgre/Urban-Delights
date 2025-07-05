@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, TrendingUp, TrendingDown, IndianRupee, Package, Edit, Save, X } from "lucide-react";
-import { masterIngredients, updateMasterIngredientPrice } from "@/data/recipes";
+import { Search, TrendingUp, TrendingDown, IndianRupee, Package, Edit, Save, X, Plus } from "lucide-react";
+import { masterIngredients, updateMasterIngredientPrice, addNewMasterIngredient } from "@/data/recipes";
 
 const MasterIngredientList = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -14,6 +14,9 @@ const MasterIngredientList = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editPrice, setEditPrice] = useState<string>("");
   const [ingredients, setIngredients] = useState(masterIngredients);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newIngredientName, setNewIngredientName] = useState("");
+  const [newIngredientPrice, setNewIngredientPrice] = useState("");
 
   const filteredIngredients = ingredients
     .filter(ingredient =>
@@ -58,6 +61,23 @@ const MasterIngredientList = () => {
   const handleEditCancel = () => {
     setEditingId(null);
     setEditPrice("");
+  };
+
+  const handleAddIngredient = () => {
+    const price = parseFloat(newIngredientPrice);
+    if (newIngredientName.trim() && !isNaN(price) && price > 0) {
+      addNewMasterIngredient(newIngredientName.trim(), price);
+      setIngredients([...masterIngredients]);
+      setNewIngredientName("");
+      setNewIngredientPrice("");
+      setShowAddForm(false);
+    }
+  };
+
+  const handleCancelAdd = () => {
+    setNewIngredientName("");
+    setNewIngredientPrice("");
+    setShowAddForm(false);
   };
 
   const averagePrice = ingredients.reduce((sum, ing) => sum + ing.pricePerKg, 0) / ingredients.length;
@@ -117,15 +137,58 @@ const MasterIngredientList = () => {
         </Card>
       </div>
 
-      {/* Search and Sort */}
+      {/* Main Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Package className="text-orange-600" />
-            Master Ingredient List
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Package className="text-orange-600" />
+              Ingredient List
+            </CardTitle>
+            <Button onClick={() => setShowAddForm(true)} size="sm" className="flex items-center gap-2">
+              <Plus size={16} />
+              Add Ingredient
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
+          {/* Add New Ingredient Form */}
+          {showAddForm && (
+            <div className="mb-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
+              <h3 className="text-lg font-semibold mb-4 text-orange-800">Add New Ingredient</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Ingredient Name</label>
+                  <Input
+                    placeholder="Enter ingredient name"
+                    value={newIngredientName}
+                    onChange={(e) => setNewIngredientName(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Price per Kg (₹)</label>
+                  <Input
+                    type="number"
+                    placeholder="Enter price"
+                    value={newIngredientPrice}
+                    onChange={(e) => setNewIngredientPrice(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2 mt-4">
+                <Button onClick={handleAddIngredient} size="sm">
+                  <Save size={16} className="mr-2" />
+                  Add Ingredient
+                </Button>
+                <Button onClick={handleCancelAdd} size="sm" variant="outline">
+                  <X size={16} className="mr-2" />
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Search and Sort */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />

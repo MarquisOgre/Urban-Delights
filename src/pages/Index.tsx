@@ -8,7 +8,7 @@ import { Search, Package, Plus, ChefHat, Leaf, Download, FileText } from "lucide
 import RecipeCard from "@/components/RecipeCard";
 import MasterIngredientList from "@/components/MasterIngredientList";
 import AddRecipe from "@/components/AddRecipe";
-import { recipes, calculateRecipeCost } from "@/data/recipes";
+import { recipes, calculateRecipeCost, masterIngredients } from "@/data/recipes";
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -25,7 +25,7 @@ const Index = () => {
   );
 
   const totalRecipes = recipes.length;
-  const totalIngredients = new Set(recipes.flatMap(r => r.ingredients.map(i => i.name))).size;
+  const totalIngredients = masterIngredients.length;
 
   const exportAllToExcel = () => {
     const wb = XLSX.utils.book_new();
@@ -163,7 +163,7 @@ const Index = () => {
             className="flex items-center gap-2"
           >
             <Leaf size={16} />
-            Master Ingredients
+            Ingredient List
           </Button>
           <Button
             variant={activeTab === "add-recipe" ? "default" : "outline"}

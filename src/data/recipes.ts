@@ -316,6 +316,13 @@ export const updateMasterIngredientPrice = (ingredientName: string, newPrice: nu
   }
 };
 
+export const addNewMasterIngredient = (name: string, pricePerKg: number) => {
+  const existingIngredient = masterIngredients.find(ing => ing.name.toLowerCase() === name.toLowerCase());
+  if (!existingIngredient) {
+    masterIngredients.push({ name, pricePerKg });
+  }
+};
+
 export const addNewRecipe = (recipe: Omit<Recipe, 'id'>) => {
   const newRecipe = {
     ...recipe,
