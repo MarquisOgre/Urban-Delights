@@ -80,7 +80,7 @@ export default function IndexPage() {
       const profit = ((recipe.sellingPrice - finalCost) / recipe.sellingPrice) * 100;
       return [recipe.name, `₹${recipe.sellingPrice}`, `₹${finalCost.toFixed(2)}`, `${profit.toFixed(1)}%`];
     });
-    doc.autoTable({
+    (doc as any).autoTable({
       startY: 30,
       head: [['Recipe', 'Selling Price', 'Cost Price', 'Profit Margin']],
       body: tableData,
@@ -92,7 +92,7 @@ export default function IndexPage() {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-orange-50 to-red-50 font-sans">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur border-b shadow-sm">
-        <div className="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+        <div className="container mx-auto px-4 py-2 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
           <div className="flex items-center gap-3">
             <img
               src="/logo.png"
@@ -101,7 +101,7 @@ export default function IndexPage() {
               height={32}
               className="object-contain"
             />
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-red-500 text-transparent bg-clip-text">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 text-transparent bg-clip-text">
               Artisan Delights
             </h1>
           </div>
@@ -115,7 +115,7 @@ export default function IndexPage() {
             <Button variant={activeTab === 'add-recipe' ? 'default' : 'outline'} onClick={() => setActiveTab('add-recipe')}>
               <Plus className="mr-2" size={16} /> Add Recipe
             </Button>
-            <div className="w-8" />
+            <div className="w-4" />
             <Button onClick={exportAllToExcel} variant="outline" size="sm">
               <FileText className="mr-2" size={16} /> Export Excel
             </Button>
@@ -127,10 +127,10 @@ export default function IndexPage() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6 pb-28 flex-grow">
+      <main className="container mx-auto px-4 py-2 pb-28 flex-grow">
         {activeTab === 'recipes' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
               {[{
                 label: 'Total Recipes', value: totalRecipes, icon: <Package size={28} className="text-blue-600" />
               }, {
@@ -161,7 +161,7 @@ export default function IndexPage() {
                 placeholder="Search recipes or ingredients..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 mb-4"
+                className="pl-10 mb-1"
               />
             </div>
 
