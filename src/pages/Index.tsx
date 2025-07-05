@@ -8,7 +8,7 @@ import { Search, Package, Plus, ChefHat, Leaf, Download, FileText } from "lucide
 import RecipeCard from "@/components/RecipeCard";
 import MasterIngredientList from "@/components/MasterIngredientList";
 import AddRecipe from "@/components/AddRecipe";
-import { recipes, calculateRecipeCost, masterIngredients } from "@/data/recipes";
+import { recipes, calculateRecipeCost, masterIngredients, getIngredientPrice } from "@/data/recipes";
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -60,7 +60,8 @@ const Index = () => {
       ];
 
       recipe.ingredients.forEach(ingredient => {
-        const cost = (ingredient.quantity / 1000) * ingredient.pricePerKg;
+        const pricePerKg = getIngredientPrice(ingredient.name);
+        const cost = (ingredient.quantity / 1000) * pricePerKg;
         recipeData.push([ingredient.name, ingredient.quantity.toString(), ingredient.unit, cost.toFixed(2)]);
       });
 
