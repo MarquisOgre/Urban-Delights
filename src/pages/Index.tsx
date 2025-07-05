@@ -91,40 +91,56 @@ export default function IndexPage() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-orange-50 to-red-50 font-sans">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur border-b shadow-sm">
-        <div className="container mx-auto px-4 py-2 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
-          <div className="flex items-center gap-3">
-            <img
-              src="/logo.png"
-              alt="Artisan Foods Logo"
-              width={32}
-              height={32}
-              className="object-contain"
-            />
-            <h1 className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 text-transparent bg-clip-text">
-              Artisan Delights
-            </h1>
-          </div>
-          <div className="flex flex-wrap gap-2 items-center">
-            <Button variant={activeTab === 'recipes' ? 'default' : 'outline'} onClick={() => setActiveTab('recipes')}>
-              <BarChart3 className="mr-2" size={16} /> Recipes
-            </Button>
-            <Button variant={activeTab === 'ingredients' ? 'default' : 'outline'} onClick={() => setActiveTab('ingredients')}>
-              <Leaf className="mr-2" size={16} /> Ingredient List
-            </Button>
-            <Button variant={activeTab === 'add-recipe' ? 'default' : 'outline'} onClick={() => setActiveTab('add-recipe')}>
-              <Plus className="mr-2" size={16} /> Add Recipe
-            </Button>
-            <div className="w-4" />
-            <Button onClick={exportAllToExcel} variant="outline" size="sm">
-              <FileText className="mr-2" size={16} /> Export Excel
-            </Button>
-            <Button onClick={exportAllToPDF} variant="outline" size="sm">
-              <Download className="mr-2" size={16} /> Export PDF
-            </Button>
-          </div>
-        </div>
-      </header>
+<header className="sticky top-0 z-40 bg-white/80 backdrop-blur border-b shadow-sm">
+  <div className="container mx-auto px-4 py-2 flex items-center justify-between relative">
+    
+    {/* Left: Logo */}
+    <div className="flex items-center gap-3">
+      <img
+        src="/logo.png"
+        alt="Artisan Foods Logo"
+        width={32}
+        height={32}
+        className="object-contain"
+      />
+      <h1 className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 text-transparent bg-clip-text">
+        Artisan Delights
+      </h1>
+    </div>
+
+    {/* Center: Navigation Tabs */}
+    <div className="absolute left-1/2 -translate-x-1/2 flex gap-2">
+      <Button
+        variant={activeTab === 'recipes' ? 'default' : 'outline'}
+        onClick={() => setActiveTab('recipes')}
+      >
+        <BarChart3 className="mr-2" size={16} /> Recipes
+      </Button>
+      <Button
+        variant={activeTab === 'ingredients' ? 'default' : 'outline'}
+        onClick={() => setActiveTab('ingredients')}
+      >
+        <Leaf className="mr-2" size={16} /> Ingredient List
+      </Button>
+      <Button
+        variant={activeTab === 'add-recipe' ? 'default' : 'outline'}
+        onClick={() => setActiveTab('add-recipe')}
+      >
+        <Plus className="mr-2" size={16} /> Add Recipe
+      </Button>
+    </div>
+
+    {/* Right: Export Buttons */}
+    <div className="flex gap-2">
+      <Button onClick={exportAllToExcel} variant="outline" size="sm">
+        <FileText className="mr-2" size={16} /> Export Excel
+      </Button>
+      <Button onClick={exportAllToPDF} variant="outline" size="sm">
+        <Download className="mr-2" size={16} /> Export PDF
+      </Button>
+    </div>
+  </div>
+</header>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-2 pb-28 flex-grow">
