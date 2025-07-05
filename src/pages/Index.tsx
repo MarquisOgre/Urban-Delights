@@ -1,292 +1,202 @@
+// index.tsx
+'use client';
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Search, Package, Plus, ChefHat, Leaf, Download, FileText, BarChart3 } from "lucide-react";
-import RecipeCard from "@/components/RecipeCard";
-import MasterIngredientList from "@/components/MasterIngredientList";
-import AddRecipe from "@/components/AddRecipe";
-import { recipes, calculateRecipeCost, masterIngredients, getIngredientPrice } from "@/data/recipes";
+import { useState, useEffect } from 'react';
+import {
+  ChefHat, BarChart3, Leaf, Plus, Download, FileText, Search, Package,
+  CircleDollarSign, TrendingUp
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import RecipeCard from '@/components/RecipeCard';
+import MasterIngredientList from '@/components/MasterIngredientList';
+import AddRecipe from '@/components/AddRecipe';
+import {
+  recipes,
+  calculateRecipeCost,
+  masterIngredients,
+} from '@/data/recipes';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
-const Index = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("dashboard");
+// Extend jsPDF to include autoTable method
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: (options: any) => jsPDF;
+  }
+}
 
-  const filteredRecipes = recipes.filter(recipe =>
-    recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    recipe.ingredients.some(ing => 
-      ing.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+export default function IndexPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState<'recipes' | 'ingredients' | 'add-recipe'>('recipes');
+  const [showTopButton, setShowTopButton] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowTopButton(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const filteredRecipes = recipes.filter(
+    recipe =>
+      recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      recipe.ingredients.some(ing => ing.name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const totalRecipes = recipes.length;
   const totalIngredients = masterIngredients.length;
-
-  const exportAllToExcel = () => {
-    const wb = XLSX.utils.book_new();
-    
-    // Summary sheet with logo and tagline
-    const summaryData = [
-      ['Artisan Foods - Traditional South Indian Podi Collection'],
-      ['All Recipes Summary'],
-      [],
-      ['Total Recipes', totalRecipes],
-      ['Total Unique Ingredients', totalIngredients],
-      [],
-      ['Recipe Name', 'Selling Price (₹/kg)', 'Cost Price (₹/kg)', 'Profit Margin (%)']
-    ];
-
-    recipes.forEach(recipe => {
-      const { finalCost } = calculateRecipeCost(recipe);
-      const profitMargin = ((recipe.sellingPrice - finalCost) / recipe.sellingPrice * 100).toFixed(1);
-      summaryData.push([recipe.name, recipe.sellingPrice, finalCost.toFixed(2), profitMargin]);
-    });
-
-    const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
-    XLSX.utils.book_append_sheet(wb, summaryWs, 'Summary');
-
-    // Individual recipe sheets
-    recipes.forEach(recipe => {
-      const { totalCost, finalCost } = calculateRecipeCost(recipe);
-      const recipeData = [
-        ['Artisan Foods - Traditional South Indian Podi Collection'],
-        ['Recipe Name', recipe.name],
-        ['Selling Price', `₹${recipe.sellingPrice}/kg`],
-        ['Final Cost', `₹${finalCost.toFixed(2)}/kg`],
-        [],
-        ['Ingredients', 'Quantity', 'Unit', 'Cost (₹)']
-      ];
-
-      recipe.ingredients.forEach(ingredient => {
-        const pricePerKg = getIngredientPrice(ingredient.name);
-        const cost = (ingredient.quantity / 1000) * pricePerKg;
-        recipeData.push([ingredient.name, ingredient.quantity.toString(), ingredient.unit, cost.toFixed(2)]);
-      });
-
-      const ws = XLSX.utils.aoa_to_sheet(recipeData);
-      XLSX.utils.book_append_sheet(wb, ws, recipe.name.replace(/[^\w]/g, '').substring(0, 30));
-    });
-
-    XLSX.writeFile(wb, 'Artisan_Foods_All_Recipes.xlsx');
-  };
-
-  const exportAllToPDF = () => {
-    const pdf = new jsPDF();
-    
-    // Title page with logo and tagline
-    pdf.setFontSize(24);
-    pdf.text('Artisan Foods', 20, 30);
-    pdf.setFontSize(16);
-    pdf.text('Traditional South Indian Podi Collection', 20, 45);
-    pdf.setFontSize(12);
-    pdf.text(`Total Recipes: ${totalRecipes}`, 20, 60);
-    pdf.text(`Total Ingredients: ${totalIngredients}`, 20, 70);
-
-    // Summary table
-    const summaryData = recipes.map(recipe => {
-      const { finalCost } = calculateRecipeCost(recipe);
-      const profitMargin = ((recipe.sellingPrice - finalCost) / recipe.sellingPrice * 100).toFixed(1);
-      return [recipe.name, `₹${recipe.sellingPrice}`, `₹${finalCost.toFixed(2)}`, `${profitMargin}%`];
-    });
-
-    (pdf as any).autoTable({
-      startY: 90,
-      head: [['Recipe Name', 'Selling Price', 'Cost Price', 'Profit Margin']],
-      body: summaryData,
-    });
-
-    pdf.save('Artisan_Foods_All_Recipes.pdf');
-  };
-
   const averagePrice = masterIngredients.reduce((sum, ing) => sum + ing.pricePerKg, 0) / masterIngredients.length;
   const highestPrice = Math.max(...masterIngredients.map(ing => ing.pricePerKg));
   const lowestPrice = Math.min(...masterIngredients.map(ing => ing.pricePerKg));
 
+  const exportAllToExcel = () => {
+    const wb = XLSX.utils.book_new();
+    const summaryData = [['Recipe Name', 'Selling Price (₹/kg)', 'Cost Price (₹/kg)', 'Profit Margin (%)']];
+    recipes.forEach(recipe => {
+      const { finalCost } = calculateRecipeCost(recipe);
+      const profitMargin = ((recipe.sellingPrice - finalCost) / recipe.sellingPrice) * 100;
+      summaryData.push([
+        recipe.name,
+        recipe.sellingPrice.toString(),
+        finalCost.toFixed(2),
+        `${profitMargin.toFixed(1)}%`
+      ]);
+    });
+    const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(wb, summaryWs, 'Summary');
+    XLSX.writeFile(wb, 'Artisan_Foods_All_Recipes.xlsx');
+  };
+
+  const exportAllToPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text('Artisan Delights - Podi Recipes', 20, 20);
+    const tableData = recipes.map(recipe => {
+      const { finalCost } = calculateRecipeCost(recipe);
+      const profit = ((recipe.sellingPrice - finalCost) / recipe.sellingPrice) * 100;
+      return [recipe.name, `₹${recipe.sellingPrice}`, `₹${finalCost.toFixed(2)}`, `${profit.toFixed(1)}%`];
+    });
+    doc.autoTable({
+      startY: 30,
+      head: [['Recipe', 'Selling Price', 'Cost Price', 'Profit Margin']],
+      body: tableData,
+    });
+    doc.save('Artisan_Foods_All_Recipes.pdf');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-orange-50 to-red-50 font-sans">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <img 
-                src="/src/public/logo.png" 
-                alt="Artisan Foods Logo" 
-                className="w-12 h-12 rounded-full"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-                  <ChefHat className="text-orange-600" size={32} />
-                  Artisan Foods
-                </h1>
-                <p className="text-gray-600 mt-1">Traditional South Indian Podi Collection</p>
-              </div>
+      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur border-b shadow-sm">
+        <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="flex items-center gap-4">
+            <ChefHat size={32} className="text-orange-600" />
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-red-500 text-transparent bg-clip-text">
+                Artisan Delights
+              </h1>
+              <p className="text-sm text-gray-600">Traditional South Indian Podi Collection</p>
             </div>
-            {(activeTab === "recipes" || activeTab === "dashboard") && (
-              <div className="flex gap-2">
-                <Button onClick={exportAllToExcel} size="sm" variant="outline">
-                  <FileText size={16} className="mr-2" />
-                  Export Excel
-                </Button>
-                <Button onClick={exportAllToPDF} size="sm" variant="outline">
-                  <Download size={16} className="mr-2" />
-                  Export PDF
-                </Button>
-              </div>
-            )}
+          </div>
+          <div className="flex flex-wrap gap-2 items-center">
+            <Button variant={activeTab === 'recipes' ? 'default' : 'outline'} onClick={() => setActiveTab('recipes')}>
+              <BarChart3 className="mr-2" size={16} /> Recipes
+            </Button>
+            <Button variant={activeTab === 'ingredients' ? 'default' : 'outline'} onClick={() => setActiveTab('ingredients')}>
+              <Leaf className="mr-2" size={16} /> Ingredient List
+            </Button>
+            <Button variant={activeTab === 'add-recipe' ? 'default' : 'outline'} onClick={() => setActiveTab('add-recipe')}>
+              <Plus className="mr-2" size={16} /> Add Recipe
+            </Button>
+            <div className="w-8" />
+            <Button onClick={exportAllToExcel} variant="outline" size="sm">
+              <FileText className="mr-2" size={16} /> Export Excel
+            </Button>
+            <Button onClick={exportAllToPDF} variant="outline" size="sm">
+              <Download className="mr-2" size={16} /> Export PDF
+            </Button>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Navigation Tabs */}
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex gap-2 mb-6">
-          <Button
-            variant={activeTab === "dashboard" ? "default" : "outline"}
-            onClick={() => setActiveTab("dashboard")}
-            className="flex items-center gap-2"
-          >
-            <BarChart3 size={16} />
-            Dashboard
-          </Button>
-          <Button
-            variant={activeTab === "recipes" ? "default" : "outline"}
-            onClick={() => setActiveTab("recipes")}
-            className="flex items-center gap-2"
-          >
-            <Package size={16} />
-            Recipes
-          </Button>
-          <Button
-            variant={activeTab === "ingredients" ? "default" : "outline"}
-            onClick={() => setActiveTab("ingredients")}
-            className="flex items-center gap-2"
-          >
-            <Leaf size={16} />
-            Ingredient List
-          </Button>
-          <Button
-            variant={activeTab === "add-recipe" ? "default" : "outline"}
-            onClick={() => setActiveTab("add-recipe")}
-            className="flex items-center gap-2"
-          >
-            <Plus size={16} />
-            Add Recipe
-          </Button>
-        </div>
-
-        {/* Search Bar */}
-        {activeTab === "recipes" && (
-          <div className="relative mb-6">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-            <Input
-              placeholder="Search recipes or ingredients..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        )}
-
-        {/* Content */}
-        {activeTab === "dashboard" && (
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-6 flex-grow">
+        {activeTab === 'recipes' && (
           <div className="space-y-6">
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2">
-                    <Package className="text-blue-600" size={20} />
-                    <div>
-                      <p className="text-sm text-gray-600">Total Recipes</p>
-                      <p className="text-2xl font-bold text-blue-600">{totalRecipes}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2">
-                    <Leaf className="text-green-600" size={20} />
-                    <div>
-                      <p className="text-sm text-gray-600">Total Ingredients</p>
-                      <p className="text-2xl font-bold text-green-600">{totalIngredients}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2">
-                    <ChefHat className="text-orange-600" size={20} />
-                    <div>
-                      <p className="text-sm text-gray-600">Average Ingredient Price</p>
-                      <p className="text-2xl font-bold text-orange-600">₹{averagePrice.toFixed(0)}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2">
-                    <BarChart3 className="text-purple-600" size={20} />
-                    <div>
-                      <p className="text-sm text-gray-600">Price Range</p>
-                      <p className="text-lg font-bold text-purple-600">₹{lowestPrice} - ₹{highestPrice}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+              {[{
+                label: 'Total Recipes', value: totalRecipes, icon: <Package size={28} className="text-blue-600" />
+              }, {
+                label: 'Total Ingredients', value: totalIngredients, icon: <Leaf size={28} className="text-green-600" />
+              }, {
+                label: 'Avg Ingredient Price', value: `₹${averagePrice.toFixed(2)}`, icon: <CircleDollarSign size={28} className="text-orange-600" />
+              }, {
+                label: 'Ingredient Price Range', value: `₹${lowestPrice} - ₹${highestPrice}`, icon: <TrendingUp size={28} className="text-purple-600" />
+              }].map((stat, index) => (
+                <div key={index}>
+                  <Card className="rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200">
+                    <CardContent className="p-4 flex items-center gap-4">
+                      {stat.icon}
+                      <div>
+                        <p className="text-sm text-gray-600">{stat.label}</p>
+                        <p className="text-xl font-semibold text-gray-800">{stat.value}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
             </div>
 
-            {/* Recent Recipes */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Recipes</CardTitle>
-                <CardDescription>Latest additions to your recipe collection</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {recipes.slice(0, 6).map((recipe) => (
-                    <div key={recipe.id} className="p-4 bg-gray-50 rounded-lg">
-                      <h3 className="font-semibold text-gray-900">{recipe.name}</h3>
-                      <p className="text-sm text-gray-600 mt-1">₹{recipe.sellingPrice}/kg</p>
-                      <Badge variant="secondary" className="mt-2">
-                        {recipe.ingredients.length} ingredients
-                      </Badge>
-                    </div>
-                  ))}
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <Input
+                placeholder="Search recipes or ingredients..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 mb-4"
+              />
+            </div>
+
+            {/* Recipe Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredRecipes.map(recipe => (
+                <div key={recipe.id}>
+                  <RecipeCard recipe={recipe} />
                 </div>
-              </CardContent>
-            </Card>
+              ))}
+            </div>
           </div>
         )}
 
-        {activeTab === "recipes" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredRecipes.map((recipe) => (
-              <RecipeCard key={recipe.id} recipe={recipe} />
-            ))}
-          </div>
-        )}
+        {activeTab === 'ingredients' && <MasterIngredientList />}
+        {activeTab === 'add-recipe' && <AddRecipe />}
+      </main>
 
-        {activeTab === "ingredients" && <MasterIngredientList />}
-        
-        {activeTab === "add-recipe" && <AddRecipe />}
-      </div>
+      {/* Sticky Footer */}
+      <footer className="bg-gray-100 border-t text-center text-sm text-gray-600 w-full mt-auto py-4">
+        <div className="container mx-auto px-4">
+          <p>© {new Date().getFullYear()} Artisan Delights. Crafted with ❤️ in South India.</p>
+          <p className="mt-1">
+            <a href="#" className="text-orange-600 hover:underline">Privacy Policy</a> ·
+            <a href="#" className="ml-2 text-orange-600 hover:underline">Terms</a>
+          </p>
+        </div>
+      </footer>
+
+      {/* Back to Top Button */}
+      {showTopButton && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="fixed bottom-6 right-6 z-50 p-3 bg-orange-500 text-white rounded-full shadow-lg hover:bg-orange-600 transition"
+        >
+          ↑
+        </button>
+      )}
     </div>
   );
-};
-
-export default Index;
+}

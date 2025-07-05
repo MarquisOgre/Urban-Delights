@@ -92,7 +92,7 @@ const MasterIngredientList = () => {
     
     // Ingredient list data with header
     const ingredientData = [
-      ['Artisan Foods - Traditional South Indian Podi Collection'],
+      ['Artisan Delights - Traditional South Indian Podi Collection'],
       ['Ingredient List'],
       [],
       ['Total Ingredients', ingredients.length],
@@ -118,7 +118,7 @@ const MasterIngredientList = () => {
     
     // Header with logo and tagline
     pdf.setFontSize(24);
-    pdf.text('Artisan Foods', 20, 30);
+    pdf.text('Artisan Delights', 20, 30);
     pdf.setFontSize(16);
     pdf.text('Traditional South Indian Podi Collection', 20, 45);
     
