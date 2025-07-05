@@ -185,7 +185,7 @@ export default function IndexPage() {
       {/* Fixed Footer */}
       <footer
         className="fixed bottom-0 left-0 w-full bg-gradient-to-r from-red-500 to-yellow-400 border-t text-center text-white font-bold py-4 z-30"
-        style={{ fontSize: '16px' }}
+        style={{ fontSize: '14px' }}
       >
         <div className="container mx-auto px-4">
           <p>© {new Date().getFullYear()} Artisan Delights. Crafted with ❤️ in South India.</p>
