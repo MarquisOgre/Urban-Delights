@@ -4,8 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, TrendingUp, TrendingDown, IndianRupee, Package, Edit, Save, X, Plus } from "lucide-react";
+import { Search, TrendingUp, TrendingDown, IndianRupee, Package, Edit, Save, X, Plus, FileText, Download } from "lucide-react";
 import { masterIngredients, updateMasterIngredientPrice, addNewMasterIngredient } from "@/data/recipes";
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const MasterIngredientList = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -84,6 +87,65 @@ const MasterIngredientList = () => {
   const highestPrice = Math.max(...ingredients.map(ing => ing.pricePerKg));
   const lowestPrice = Math.min(...ingredients.map(ing => ing.pricePerKg));
 
+  const exportToExcel = () => {
+    const wb = XLSX.utils.book_new();
+    
+    // Ingredient list data with header
+    const ingredientData = [
+      ['Artisan Foods - Traditional South Indian Podi Collection'],
+      ['Ingredient List'],
+      [],
+      ['Total Ingredients', ingredients.length],
+      ['Average Ingredient Price', `₹${averagePrice.toFixed(2)}`],
+      ['Highest Ingredient Price', `₹${highestPrice}`],
+      ['Lowest Ingredient Price', `₹${lowestPrice}`],
+      [],
+      ['Ingredient Name', 'Price per Kg (₹)']
+    ];
+
+    filteredIngredients.forEach(ingredient => {
+      ingredientData.push([ingredient.name, ingredient.pricePerKg]);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(ingredientData);
+    XLSX.utils.book_append_sheet(wb, ws, 'Ingredient List');
+
+    XLSX.writeFile(wb, 'Artisan_Foods_Ingredient_List.xlsx');
+  };
+
+  const exportToPDF = () => {
+    const pdf = new jsPDF();
+    
+    // Header with logo and tagline
+    pdf.setFontSize(24);
+    pdf.text('Artisan Foods', 20, 30);
+    pdf.setFontSize(16);
+    pdf.text('Traditional South Indian Podi Collection', 20, 45);
+    
+    pdf.setFontSize(18);
+    pdf.text('Ingredient List', 20, 65);
+    
+    pdf.setFontSize(12);
+    pdf.text(`Total Ingredients: ${ingredients.length}`, 20, 80);
+    pdf.text(`Average Ingredient Price: ₹${averagePrice.toFixed(2)}`, 20, 90);
+    pdf.text(`Highest Ingredient Price: ₹${highestPrice}`, 20, 100);
+    pdf.text(`Lowest Ingredient Price: ₹${lowestPrice}`, 20, 110);
+
+    // Ingredients table
+    const ingredientData = filteredIngredients.map(ingredient => [
+      ingredient.name,
+      `₹${ingredient.pricePerKg}`
+    ]);
+
+    (pdf as any).autoTable({
+      startY: 130,
+      head: [['Ingredient Name', 'Price per Kg']],
+      body: ingredientData,
+    });
+
+    pdf.save('Artisan_Foods_Ingredient_List.pdf');
+  };
+
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
@@ -105,7 +167,7 @@ const MasterIngredientList = () => {
             <div className="flex items-center gap-2">
               <IndianRupee className="text-green-600" size={20} />
               <div>
-                <p className="text-sm text-gray-600">Average Price</p>
+                <p className="text-sm text-gray-600">Average Ingredient Price</p>
                 <p className="text-2xl font-bold text-green-600">₹{averagePrice.toFixed(0)}</p>
               </div>
             </div>
@@ -117,7 +179,7 @@ const MasterIngredientList = () => {
             <div className="flex items-center gap-2">
               <TrendingUp className="text-red-600" size={20} />
               <div>
-                <p className="text-sm text-gray-600">Highest Price</p>
+                <p className="text-sm text-gray-600">Highest Ingredient Price</p>
                 <p className="text-2xl font-bold text-red-600">₹{highestPrice}</p>
               </div>
             </div>
@@ -129,7 +191,7 @@ const MasterIngredientList = () => {
             <div className="flex items-center gap-2">
               <TrendingDown className="text-orange-600" size={20} />
               <div>
-                <p className="text-sm text-gray-600">Lowest Price</p>
+                <p className="text-sm text-gray-600">Lowest Ingredient Price</p>
                 <p className="text-2xl font-bold text-orange-600">₹{lowestPrice}</p>
               </div>
             </div>
@@ -145,10 +207,20 @@ const MasterIngredientList = () => {
               <Package className="text-orange-600" />
               Ingredient List
             </CardTitle>
-            <Button onClick={() => setShowAddForm(true)} size="sm" className="flex items-center gap-2">
-              <Plus size={16} />
-              Add Ingredient
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={exportToExcel} size="sm" variant="outline">
+                <FileText size={16} className="mr-2" />
+                Export Excel
+              </Button>
+              <Button onClick={exportToPDF} size="sm" variant="outline">
+                <Download size={16} className="mr-2" />
+                Export PDF
+              </Button>
+              <Button onClick={() => setShowAddForm(true)} size="sm" className="flex items-center gap-2">
+                <Plus size={16} />
+                Add Ingredient
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>

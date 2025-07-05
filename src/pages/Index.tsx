@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Package, Plus, ChefHat, Leaf, Download, FileText } from "lucide-react";
+import { Search, Package, Plus, ChefHat, Leaf, Download, FileText, BarChart3 } from "lucide-react";
 import RecipeCard from "@/components/RecipeCard";
 import MasterIngredientList from "@/components/MasterIngredientList";
 import AddRecipe from "@/components/AddRecipe";
@@ -15,7 +15,7 @@ import 'jspdf-autotable';
 
 const Index = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("recipes");
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   const filteredRecipes = recipes.filter(recipe =>
     recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -30,9 +30,11 @@ const Index = () => {
   const exportAllToExcel = () => {
     const wb = XLSX.utils.book_new();
     
-    // Summary sheet
+    // Summary sheet with logo and tagline
     const summaryData = [
-      ['Artisan Foods - All Recipes Summary'],
+      ['Artisan Foods - Traditional South Indian Podi Collection'],
+      ['All Recipes Summary'],
+      [],
       ['Total Recipes', totalRecipes],
       ['Total Unique Ingredients', totalIngredients],
       [],
@@ -52,6 +54,7 @@ const Index = () => {
     recipes.forEach(recipe => {
       const { totalCost, finalCost } = calculateRecipeCost(recipe);
       const recipeData = [
+        ['Artisan Foods - Traditional South Indian Podi Collection'],
         ['Recipe Name', recipe.name],
         ['Selling Price', `₹${recipe.sellingPrice}/kg`],
         ['Final Cost', `₹${finalCost.toFixed(2)}/kg`],
@@ -75,7 +78,7 @@ const Index = () => {
   const exportAllToPDF = () => {
     const pdf = new jsPDF();
     
-    // Title page
+    // Title page with logo and tagline
     pdf.setFontSize(24);
     pdf.text('Artisan Foods', 20, 30);
     pdf.setFontSize(16);
@@ -100,6 +103,10 @@ const Index = () => {
     pdf.save('Artisan_Foods_All_Recipes.pdf');
   };
 
+  const averagePrice = masterIngredients.reduce((sum, ing) => sum + ing.pricePerKg, 0) / masterIngredients.length;
+  const highestPrice = Math.max(...masterIngredients.map(ing => ing.pricePerKg));
+  const lowestPrice = Math.min(...masterIngredients.map(ing => ing.pricePerKg));
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
       {/* Header */}
@@ -123,26 +130,18 @@ const Index = () => {
                 <p className="text-gray-600 mt-1">Traditional South Indian Podi Collection</p>
               </div>
             </div>
-            <div className="flex gap-2 items-center">
-              <Badge variant="secondary" className="bg-orange-100 text-orange-800">
-                {totalRecipes} Recipes
-              </Badge>
-              <Badge variant="secondary" className="bg-green-100 text-green-800">
-                {totalIngredients} Ingredients
-              </Badge>
-              {activeTab === "recipes" && (
-                <div className="flex gap-2 ml-4">
-                  <Button onClick={exportAllToExcel} size="sm" variant="outline">
-                    <FileText size={16} className="mr-2" />
-                    Export Excel
-                  </Button>
-                  <Button onClick={exportAllToPDF} size="sm" variant="outline">
-                    <Download size={16} className="mr-2" />
-                    Export PDF
-                  </Button>
-                </div>
-              )}
-            </div>
+            {(activeTab === "recipes" || activeTab === "dashboard") && (
+              <div className="flex gap-2">
+                <Button onClick={exportAllToExcel} size="sm" variant="outline">
+                  <FileText size={16} className="mr-2" />
+                  Export Excel
+                </Button>
+                <Button onClick={exportAllToPDF} size="sm" variant="outline">
+                  <Download size={16} className="mr-2" />
+                  Export PDF
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -150,6 +149,14 @@ const Index = () => {
       {/* Navigation Tabs */}
       <div className="container mx-auto px-4 py-4">
         <div className="flex gap-2 mb-6">
+          <Button
+            variant={activeTab === "dashboard" ? "default" : "outline"}
+            onClick={() => setActiveTab("dashboard")}
+            className="flex items-center gap-2"
+          >
+            <BarChart3 size={16} />
+            Dashboard
+          </Button>
           <Button
             variant={activeTab === "recipes" ? "default" : "outline"}
             onClick={() => setActiveTab("recipes")}
@@ -190,6 +197,82 @@ const Index = () => {
         )}
 
         {/* Content */}
+        {activeTab === "dashboard" && (
+          <div className="space-y-6">
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2">
+                    <Package className="text-blue-600" size={20} />
+                    <div>
+                      <p className="text-sm text-gray-600">Total Recipes</p>
+                      <p className="text-2xl font-bold text-blue-600">{totalRecipes}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2">
+                    <Leaf className="text-green-600" size={20} />
+                    <div>
+                      <p className="text-sm text-gray-600">Total Ingredients</p>
+                      <p className="text-2xl font-bold text-green-600">{totalIngredients}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2">
+                    <ChefHat className="text-orange-600" size={20} />
+                    <div>
+                      <p className="text-sm text-gray-600">Average Ingredient Price</p>
+                      <p className="text-2xl font-bold text-orange-600">₹{averagePrice.toFixed(0)}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="text-purple-600" size={20} />
+                    <div>
+                      <p className="text-sm text-gray-600">Price Range</p>
+                      <p className="text-lg font-bold text-purple-600">₹{lowestPrice} - ₹{highestPrice}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Recent Recipes */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Recipes</CardTitle>
+                <CardDescription>Latest additions to your recipe collection</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {recipes.slice(0, 6).map((recipe) => (
+                    <div key={recipe.id} className="p-4 bg-gray-50 rounded-lg">
+                      <h3 className="font-semibold text-gray-900">{recipe.name}</h3>
+                      <p className="text-sm text-gray-600 mt-1">₹{recipe.sellingPrice}/kg</p>
+                      <Badge variant="secondary" className="mt-2">
+                        {recipe.ingredients.length} ingredients
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {activeTab === "recipes" && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredRecipes.map((recipe) => (
