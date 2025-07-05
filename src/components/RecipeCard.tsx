@@ -1,12 +1,14 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Eye, IndianRupee, Scale, Clock, AlertTriangle } from "lucide-react";
+import { Eye, IndianRupee, Scale, Clock, AlertTriangle, Download, FileText } from "lucide-react";
 import { Recipe, calculateIngredientCost, calculateRecipeCost, getIngredientPrice } from "@/data/recipes";
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -17,6 +19,89 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
 
   const { totalCost, finalCost } = calculateRecipeCost(recipe);
   const profitMargin = ((recipe.sellingPrice - finalCost) / recipe.sellingPrice * 100).toFixed(1);
+
+  const exportToExcel = () => {
+    const wb = XLSX.utils.book_new();
+    
+    // Recipe Details
+    const recipeData = [
+      ['Recipe Name', recipe.name],
+      ['Description', 'Traditional South Indian Podi'],
+      ['Selling Price', `₹${recipe.sellingPrice}/kg`],
+      ['Final Cost', `₹${finalCost.toFixed(2)}/kg`],
+      ['Profit Margin', `${profitMargin}%`],
+      ['Shelf Life', recipe.shelfLife],
+      [],
+      ['Ingredients', '', '', ''],
+      ['Name', 'Quantity', 'Unit', 'Cost (₹)']
+    ];
+
+    recipe.ingredients.forEach(ingredient => {
+      const cost = calculateIngredientCost(ingredient);
+      recipeData.push([ingredient.name, ingredient.quantity.toString(), ingredient.unit, cost.toFixed(2)]);
+    });
+
+    recipeData.push(
+      [],
+      ['Total Raw Material Cost', `₹${totalCost.toFixed(2)}`],
+      ['Overheads', `₹${recipe.overheads}`],
+      ['Final Cost per kg', `₹${finalCost.toFixed(2)}`],
+      [],
+      ['Nutrition (per 100g)', '', '', ''],
+      ['Calories', `${recipe.nutrition.calories} kcal`, '', ''],
+      ['Protein', `${recipe.nutrition.protein}g`, '', ''],
+      ['Fat', `${recipe.nutrition.fat}g`, '', ''],
+      ['Carbs', `${recipe.nutrition.carbs}g`, '', '']
+    );
+
+    const ws = XLSX.utils.aoa_to_sheet(recipeData);
+    XLSX.utils.book_append_sheet(wb, ws, 'Recipe Details');
+    XLSX.writeFile(wb, `${recipe.name.replace(/\s+/g, '_')}_Recipe.xlsx`);
+  };
+
+  const exportToPDF = () => {
+    const pdf = new jsPDF();
+    
+    // Title
+    pdf.setFontSize(20);
+    pdf.text(recipe.name, 20, 20);
+    
+    // Basic Info
+    pdf.setFontSize(12);
+    pdf.text('Traditional South Indian Podi', 20, 35);
+    pdf.text(`Selling Price: ₹${recipe.sellingPrice}/kg`, 20, 45);
+    pdf.text(`Final Cost: ₹${finalCost.toFixed(2)}/kg`, 20, 55);
+    pdf.text(`Profit Margin: ${profitMargin}%`, 20, 65);
+    
+    // Ingredients table
+    const ingredientData = recipe.ingredients.map(ingredient => [
+      ingredient.name,
+      `${ingredient.quantity}${ingredient.unit}`,
+      `₹${getIngredientPrice(ingredient.name)}/kg`,
+      `₹${calculateIngredientCost(ingredient).toFixed(2)}`
+    ]);
+
+    (pdf as any).autoTable({
+      startY: 80,
+      head: [['Ingredient', 'Quantity', 'Price/kg', 'Cost']],
+      body: ingredientData,
+    });
+
+    // Cost breakdown
+    const finalY = (pdf as any).lastAutoTable.finalY + 20;
+    pdf.text(`Total Raw Material Cost: ₹${totalCost.toFixed(2)}`, 20, finalY);
+    pdf.text(`Overheads: ₹${recipe.overheads}`, 20, finalY + 10);
+    pdf.text(`Final Cost per kg: ₹${finalCost.toFixed(2)}`, 20, finalY + 20);
+    
+    // Nutrition
+    pdf.text('Nutrition (per 100g):', 20, finalY + 40);
+    pdf.text(`Calories: ${recipe.nutrition.calories} kcal`, 20, finalY + 50);
+    pdf.text(`Protein: ${recipe.nutrition.protein}g`, 20, finalY + 60);
+    pdf.text(`Fat: ${recipe.nutrition.fat}g`, 20, finalY + 70);
+    pdf.text(`Carbs: ${recipe.nutrition.carbs}g`, 20, finalY + 80);
+
+    pdf.save(`${recipe.name.replace(/\s+/g, '_')}_Recipe.pdf`);
+  };
 
   return (
     <>
@@ -69,14 +154,32 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
               </div>
             </div>
             
-            <Button 
-              onClick={() => setIsDialogOpen(true)}
-              className="w-full mt-4 bg-orange-600 hover:bg-orange-700"
-              size="sm"
-            >
-              <Eye size={16} className="mr-2" />
-              View Details
-            </Button>
+            <div className="flex gap-2 mt-4">
+              <Button 
+                onClick={() => setIsDialogOpen(true)}
+                className="flex-1 bg-orange-600 hover:bg-orange-700"
+                size="sm"
+              >
+                <Eye size={16} className="mr-2" />
+                View Details
+              </Button>
+              <Button 
+                onClick={exportToExcel}
+                variant="outline"
+                size="sm"
+                className="px-3"
+              >
+                <FileText size={16} />
+              </Button>
+              <Button 
+                onClick={exportToPDF}
+                variant="outline"
+                size="sm"
+                className="px-3"
+              >
+                <Download size={16} />
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
