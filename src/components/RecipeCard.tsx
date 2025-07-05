@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Eye, IndianRupee, Scale, Clock, AlertTriangle } from "lucide-react";
-import { Recipe } from "@/data/recipes";
+import { Recipe, calculateIngredientCost, calculateRecipeCost, getIngredientPrice } from "@/data/recipes";
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -15,7 +15,8 @@ interface RecipeCardProps {
 const RecipeCard = ({ recipe }: RecipeCardProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const profitMargin = ((recipe.sellingPrice - recipe.finalCost) / recipe.sellingPrice * 100).toFixed(1);
+  const { totalCost, finalCost } = calculateRecipeCost(recipe);
+  const profitMargin = ((recipe.sellingPrice - finalCost) / recipe.sellingPrice * 100).toFixed(1);
 
   return (
     <>
@@ -38,7 +39,7 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
               <span className="text-gray-600">Cost Price:</span>
               <span className="font-semibold text-red-600 flex items-center">
                 <IndianRupee size={14} />
-                {recipe.finalCost}/kg
+                {finalCost.toFixed(2)}/kg
               </span>
             </div>
             
@@ -94,17 +95,21 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900">Ingredients & Costs</h3>
               <div className="space-y-2">
-                {recipe.ingredients.map((ingredient, index) => (
-                  <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                    <div>
-                      <span className="font-medium text-sm">{ingredient.name}</span>
-                      <div className="text-xs text-gray-600">
-                        {ingredient.quantity}{ingredient.unit} @ ₹{ingredient.pricePerKg}/kg
+                {recipe.ingredients.map((ingredient, index) => {
+                  const pricePerKg = getIngredientPrice(ingredient.name);
+                  const cost = calculateIngredientCost(ingredient);
+                  return (
+                    <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <div>
+                        <span className="font-medium text-sm">{ingredient.name}</span>
+                        <div className="text-xs text-gray-600">
+                          {ingredient.quantity}{ingredient.unit} @ ₹{pricePerKg}/kg
+                        </div>
                       </div>
+                      <span className="font-semibold text-orange-600">₹{cost.toFixed(2)}</span>
                     </div>
-                    <span className="font-semibold text-orange-600">₹{ingredient.cost}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               
               <Separator />
@@ -112,7 +117,7 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Raw Material Cost:</span>
-                  <span className="font-semibold">₹{recipe.totalCost}</span>
+                  <span className="font-semibold">₹{totalCost.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Overheads:</span>
@@ -120,7 +125,7 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
                 </div>
                 <div className="flex justify-between text-lg font-bold text-orange-700">
                   <span>Final Cost:</span>
-                  <span>₹{recipe.finalCost}/kg</span>
+                  <span>₹{finalCost.toFixed(2)}/kg</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold text-green-700">
                   <span>Selling Price:</span>

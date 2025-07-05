@@ -4,15 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, TrendingUp, TrendingDown, IndianRupee, Package } from "lucide-react";
-import { masterIngredients } from "@/data/recipes";
+import { Search, TrendingUp, TrendingDown, IndianRupee, Package, Edit, Save, X } from "lucide-react";
+import { masterIngredients, updateMasterIngredientPrice } from "@/data/recipes";
 
 const MasterIngredientList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<'name' | 'price'>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editPrice, setEditPrice] = useState<string>("");
+  const [ingredients, setIngredients] = useState(masterIngredients);
 
-  const filteredIngredients = masterIngredients
+  const filteredIngredients = ingredients
     .filter(ingredient =>
       ingredient.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -37,9 +40,29 @@ const MasterIngredientList = () => {
     }
   };
 
-  const averagePrice = masterIngredients.reduce((sum, ing) => sum + ing.pricePerKg, 0) / masterIngredients.length;
-  const highestPrice = Math.max(...masterIngredients.map(ing => ing.pricePerKg));
-  const lowestPrice = Math.min(...masterIngredients.map(ing => ing.pricePerKg));
+  const handleEditStart = (index: number, currentPrice: number) => {
+    setEditingId(index);
+    setEditPrice(currentPrice.toString());
+  };
+
+  const handleEditSave = (index: number, ingredientName: string) => {
+    const newPrice = parseFloat(editPrice);
+    if (!isNaN(newPrice) && newPrice > 0) {
+      updateMasterIngredientPrice(ingredientName, newPrice);
+      setIngredients([...masterIngredients]);
+    }
+    setEditingId(null);
+    setEditPrice("");
+  };
+
+  const handleEditCancel = () => {
+    setEditingId(null);
+    setEditPrice("");
+  };
+
+  const averagePrice = ingredients.reduce((sum, ing) => sum + ing.pricePerKg, 0) / ingredients.length;
+  const highestPrice = Math.max(...ingredients.map(ing => ing.pricePerKg));
+  const lowestPrice = Math.min(...ingredients.map(ing => ing.pricePerKg));
 
   return (
     <div className="space-y-6">
@@ -51,7 +74,7 @@ const MasterIngredientList = () => {
               <Package className="text-blue-600" size={20} />
               <div>
                 <p className="text-sm text-gray-600">Total Ingredients</p>
-                <p className="text-2xl font-bold text-blue-600">{masterIngredients.length}</p>
+                <p className="text-2xl font-bold text-blue-600">{ingredients.length}</p>
               </div>
             </div>
           </CardContent>
@@ -154,12 +177,51 @@ const MasterIngredientList = () => {
                     </Badge>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-lg font-bold text-orange-600 flex items-center">
-                    <IndianRupee size={16} />
-                    {ingredient.pricePerKg}
-                  </div>
-                  <div className="text-xs text-gray-500">per kg</div>
+                <div className="text-right flex items-center gap-2">
+                  {editingId === index ? (
+                    <div className="flex items-center gap-1">
+                      <IndianRupee size={16} />
+                      <Input
+                        value={editPrice}
+                        onChange={(e) => setEditPrice(e.target.value)}
+                        className="w-20 h-8"
+                        type="number"
+                      />
+                      <Button
+                        size="sm"
+                        onClick={() => handleEditSave(index, ingredient.name)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Save size={12} />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleEditCancel}
+                        className="h-8 w-8 p-0"
+                      >
+                        <X size={12} />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-orange-600 flex items-center">
+                          <IndianRupee size={16} />
+                          {ingredient.pricePerKg}
+                        </div>
+                        <div className="text-xs text-gray-500">per kg</div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleEditStart(index, ingredient.pricePerKg)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Edit size={12} />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
