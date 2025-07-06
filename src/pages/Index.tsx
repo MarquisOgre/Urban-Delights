@@ -272,7 +272,7 @@ export default function IndexPage() {
         style={{ fontSize: '11px' }}
       >
         <div className="container mx-auto px-2">
-          <p className="truncate">© {new Date().getFullYear()} Artisan Delights. Crafted with ❤️ in South India.</p>
+          <p className="truncate">© {new Date().getFullYear()} Artisan Delights. Crafted with ❤️ by Dexorzo Creations.</p>
         </div>
       </footer>
 
