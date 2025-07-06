@@ -9,7 +9,113 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      master_ingredients: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          price_per_kg: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          price_per_kg: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          price_per_kg?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      recipe_ingredients: {
+        Row: {
+          created_at: string
+          id: string
+          ingredient_name: string
+          quantity: number
+          recipe_id: string
+          unit: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ingredient_name: string
+          quantity: number
+          recipe_id: string
+          unit: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ingredient_name?: string
+          quantity?: number
+          recipe_id?: string
+          unit?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_ingredients_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recipes: {
+        Row: {
+          calories: number | null
+          carbs: number | null
+          created_at: string
+          fat: number | null
+          id: string
+          name: string
+          overheads: number
+          preparation: string | null
+          protein: number | null
+          selling_price: number
+          shelf_life: string | null
+          storage: string | null
+          updated_at: string
+        }
+        Insert: {
+          calories?: number | null
+          carbs?: number | null
+          created_at?: string
+          fat?: number | null
+          id?: string
+          name: string
+          overheads?: number
+          preparation?: string | null
+          protein?: number | null
+          selling_price: number
+          shelf_life?: string | null
+          storage?: string | null
+          updated_at?: string
+        }
+        Update: {
+          calories?: number | null
+          carbs?: number | null
+          created_at?: string
+          fat?: number | null
+          id?: string
+          name?: string
+          overheads?: number
+          preparation?: string | null
+          protein?: number | null
+          selling_price?: number
+          shelf_life?: string | null
+          storage?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

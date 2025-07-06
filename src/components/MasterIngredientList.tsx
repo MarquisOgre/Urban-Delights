@@ -5,23 +5,29 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, TrendingUp, TrendingDown, IndianRupee, Package, Edit, Save, X, Plus, FileText, Download } from "lucide-react";
-import { masterIngredients, updateMasterIngredientPrice, addNewMasterIngredient } from "@/data/recipes";
+import { addMasterIngredient, updateMasterIngredientPrice, type MasterIngredient } from "@/services/database";
+import { useToast } from "@/hooks/use-toast";
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
-const MasterIngredientList = () => {
+interface MasterIngredientListProps {
+  masterIngredients: MasterIngredient[];
+  onRefresh: () => void;
+}
+
+const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredientListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<'name' | 'price'>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [editPrice, setEditPrice] = useState<string>("");
-  const [ingredients, setIngredients] = useState(masterIngredients);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newIngredientName, setNewIngredientName] = useState("");
   const [newIngredientPrice, setNewIngredientPrice] = useState("");
+  const { toast } = useToast();
 
-  const filteredIngredients = ingredients
+  const filteredIngredients = masterIngredients
     .filter(ingredient =>
       ingredient.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -32,8 +38,8 @@ const MasterIngredientList = () => {
           : b.name.localeCompare(a.name);
       } else {
         return sortDirection === 'asc'
-          ? a.pricePerKg - b.pricePerKg
-          : b.pricePerKg - a.pricePerKg;
+          ? a.price_per_kg - b.price_per_kg
+          : b.price_per_kg - a.price_per_kg;
       }
     });
 
@@ -46,16 +52,28 @@ const MasterIngredientList = () => {
     }
   };
 
-  const handleEditStart = (index: number, currentPrice: number) => {
-    setEditingId(index);
+  const handleEditStart = (id: string, currentPrice: number) => {
+    setEditingId(id);
     setEditPrice(currentPrice.toString());
   };
 
-  const handleEditSave = (index: number, ingredientName: string) => {
+  const handleEditSave = async (id: string) => {
     const newPrice = parseFloat(editPrice);
     if (!isNaN(newPrice) && newPrice > 0) {
-      updateMasterIngredientPrice(ingredientName, newPrice);
-      setIngredients([...masterIngredients]);
+      try {
+        await updateMasterIngredientPrice(id, newPrice);
+        onRefresh();
+        toast({
+          title: "Price updated",
+          description: "Ingredient price has been updated successfully",
+        });
+      } catch (error) {
+        toast({
+          title: "Error updating price",
+          description: "Failed to update ingredient price",
+          variant: "destructive"
+        });
+      }
     }
     setEditingId(null);
     setEditPrice("");
@@ -66,14 +84,26 @@ const MasterIngredientList = () => {
     setEditPrice("");
   };
 
-  const handleAddIngredient = () => {
+  const handleAddIngredient = async () => {
     const price = parseFloat(newIngredientPrice);
     if (newIngredientName.trim() && !isNaN(price) && price > 0) {
-      addNewMasterIngredient(newIngredientName.trim(), price);
-      setIngredients([...masterIngredients]);
-      setNewIngredientName("");
-      setNewIngredientPrice("");
-      setShowAddForm(false);
+      try {
+        await addMasterIngredient(newIngredientName.trim(), price);
+        onRefresh();
+        setNewIngredientName("");
+        setNewIngredientPrice("");
+        setShowAddForm(false);
+        toast({
+          title: "Ingredient added",
+          description: "New ingredient has been added successfully",
+        });
+      } catch (error) {
+        toast({
+          title: "Error adding ingredient",
+          description: "Failed to add new ingredient",
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -83,9 +113,15 @@ const MasterIngredientList = () => {
     setShowAddForm(false);
   };
 
-  const averagePrice = ingredients.reduce((sum, ing) => sum + ing.pricePerKg, 0) / ingredients.length;
-  const highestPrice = Math.max(...ingredients.map(ing => ing.pricePerKg));
-  const lowestPrice = Math.min(...ingredients.map(ing => ing.pricePerKg));
+  const averagePrice = masterIngredients.length > 0 
+    ? masterIngredients.reduce((sum, ing) => sum + ing.price_per_kg, 0) / masterIngredients.length 
+    : 0;
+  const highestPrice = masterIngredients.length > 0 
+    ? Math.max(...masterIngredients.map(ing => ing.price_per_kg)) 
+    : 0;
+  const lowestPrice = masterIngredients.length > 0 
+    ? Math.min(...masterIngredients.map(ing => ing.price_per_kg)) 
+    : 0;
 
   const exportToExcel = () => {
     const wb = XLSX.utils.book_new();
@@ -95,7 +131,7 @@ const MasterIngredientList = () => {
       ['Artisan Delights - Traditional South Indian Podi Collection'],
       ['Ingredient List'],
       [],
-      ['Total Ingredients', ingredients.length],
+      ['Total Ingredients', masterIngredients.length],
       ['Average Ingredient Price', `₹${averagePrice.toFixed(2)}`],
       ['Highest Ingredient Price', `₹${highestPrice}`],
       ['Lowest Ingredient Price', `₹${lowestPrice}`],
@@ -104,7 +140,7 @@ const MasterIngredientList = () => {
     ];
 
     filteredIngredients.forEach(ingredient => {
-      ingredientData.push([ingredient.name, ingredient.pricePerKg]);
+      ingredientData.push([ingredient.name, ingredient.price_per_kg]);
     });
 
     const ws = XLSX.utils.aoa_to_sheet(ingredientData);
@@ -126,7 +162,7 @@ const MasterIngredientList = () => {
     pdf.text('Ingredient List', 20, 65);
     
     pdf.setFontSize(12);
-    pdf.text(`Total Ingredients: ${ingredients.length}`, 20, 80);
+    pdf.text(`Total Ingredients: ${masterIngredients.length}`, 20, 80);
     pdf.text(`Average Ingredient Price: ₹${averagePrice.toFixed(2)}`, 20, 90);
     pdf.text(`Highest Ingredient Price: ₹${highestPrice}`, 20, 100);
     pdf.text(`Lowest Ingredient Price: ₹${lowestPrice}`, 20, 110);
@@ -134,7 +170,7 @@ const MasterIngredientList = () => {
     // Ingredients table
     const ingredientData = filteredIngredients.map(ingredient => [
       ingredient.name,
-      `₹${ingredient.pricePerKg}`
+      `₹${ingredient.price_per_kg}`
     ]);
 
     (pdf as any).autoTable({
@@ -156,7 +192,7 @@ const MasterIngredientList = () => {
               <Package className="text-blue-600" size={20} />
               <div>
                 <p className="text-sm text-gray-600">Total Ingredients</p>
-                <p className="text-2xl font-bold text-blue-600">{ingredients.length}</p>
+                <p className="text-2xl font-bold text-blue-600">{masterIngredients.length}</p>
               </div>
             </div>
           </CardContent>
@@ -296,24 +332,24 @@ const MasterIngredientList = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredIngredients.map((ingredient, index) => (
+            {filteredIngredients.map((ingredient) => (
               <div
-                key={index}
+                key={ingredient.id}
                 className="flex justify-between items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <div className="flex-1">
                   <h3 className="font-medium text-gray-900">{ingredient.name}</h3>
                   <div className="flex items-center gap-2 mt-2">
                     <Badge 
-                      variant={ingredient.pricePerKg > averagePrice ? "destructive" : "secondary"}
+                      variant={ingredient.price_per_kg > averagePrice ? "destructive" : "secondary"}
                       className="text-xs"
                     >
-                      {ingredient.pricePerKg > averagePrice ? "High" : "Low"} Cost
+                      {ingredient.price_per_kg > averagePrice ? "High" : "Low"} Cost
                     </Badge>
                   </div>
                 </div>
                 <div className="text-right flex items-center gap-2">
-                  {editingId === index ? (
+                  {editingId === ingredient.id ? (
                     <div className="flex items-center gap-1">
                       <IndianRupee size={16} />
                       <Input
@@ -324,7 +360,7 @@ const MasterIngredientList = () => {
                       />
                       <Button
                         size="sm"
-                        onClick={() => handleEditSave(index, ingredient.name)}
+                        onClick={() => handleEditSave(ingredient.id)}
                         className="h-8 w-8 p-0"
                       >
                         <Save size={12} />
@@ -343,14 +379,14 @@ const MasterIngredientList = () => {
                       <div className="text-right">
                         <div className="text-lg font-bold text-orange-600 flex items-center">
                           <IndianRupee size={16} />
-                          {ingredient.pricePerKg}
+                          {ingredient.price_per_kg}
                         </div>
                         <div className="text-xs text-gray-500">per kg</div>
                       </div>
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleEditStart(index, ingredient.pricePerKg)}
+                        onClick={() => handleEditStart(ingredient.id, ingredient.price_per_kg)}
                         className="h-8 w-8 p-0"
                       >
                         <Edit size={12} />

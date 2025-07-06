@@ -6,22 +6,27 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, Save } from "lucide-react";
-import { masterIngredients, addNewRecipe } from "@/data/recipes";
+import { addRecipeWithIngredients, type MasterIngredient } from "@/services/database";
 import { useToast } from "@/hooks/use-toast";
 
 interface NewIngredient {
-  name: string;
+  ingredient_name: string;
   quantity: number;
   unit: string;
 }
 
-const AddRecipe = () => {
+interface AddRecipeProps {
+  masterIngredients: MasterIngredient[];
+  onRecipeAdded: () => void;
+}
+
+const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
   const [recipeName, setRecipeName] = useState("");
   const [preparation, setPreparation] = useState("");
   const [sellingPrice, setSellingPrice] = useState<number>(0);
   const [overheads, setOverheads] = useState<number>(90);
   const [ingredients, setIngredients] = useState<NewIngredient[]>([
-    { name: "", quantity: 0, unit: "g" }
+    { ingredient_name: "", quantity: 0, unit: "g" }
   ]);
   const [nutrition, setNutrition] = useState({
     calories: 0,
@@ -32,7 +37,7 @@ const AddRecipe = () => {
   const { toast } = useToast();
 
   const addIngredient = () => {
-    setIngredients([...ingredients, { name: "", quantity: 0, unit: "g" }]);
+    setIngredients([...ingredients, { ingredient_name: "", quantity: 0, unit: "g" }]);
   };
 
   const removeIngredient = (index: number) => {
@@ -47,7 +52,7 @@ const AddRecipe = () => {
     setIngredients(updated);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!recipeName.trim() || !preparation.trim() || sellingPrice <= 0) {
       toast({
         title: "Validation Error",
@@ -58,7 +63,7 @@ const AddRecipe = () => {
     }
 
     const invalidIngredients = ingredients.filter(ing => 
-      !ing.name || ing.quantity <= 0 || !masterIngredients.find(master => master.name === ing.name)
+      !ing.ingredient_name || ing.quantity <= 0 || !masterIngredients.find(master => master.name === ing.ingredient_name)
     );
 
     if (invalidIngredients.length > 0) {
@@ -71,31 +76,42 @@ const AddRecipe = () => {
     }
 
     const newRecipe = {
-      id: Date.now(),
       name: recipeName,
-      ingredients: ingredients,
       preparation: preparation,
-      sellingPrice: sellingPrice,
+      selling_price: sellingPrice,
       overheads: overheads,
-      nutrition: nutrition,
-      shelfLife: "6 months in sealed packaging, away from moisture and sunlight",
-      storage: "Store in a cool, dry place in an airtight container after opening"
+      shelf_life: "6 months in sealed packaging, away from moisture and sunlight",
+      storage: "Store in a cool, dry place in an airtight container after opening",
+      calories: nutrition.calories || null,
+      protein: nutrition.protein || null,
+      fat: nutrition.fat || null,
+      carbs: nutrition.carbs || null
     };
 
-    addNewRecipe(newRecipe);
-    
-    // Reset form
-    setRecipeName("");
-    setPreparation("");
-    setSellingPrice(0);
-    setOverheads(90);
-    setIngredients([{ name: "", quantity: 0, unit: "g" }]);
-    setNutrition({ calories: 0, protein: 0, fat: 0, carbs: 0 });
+    try {
+      await addRecipeWithIngredients(newRecipe, ingredients);
+      
+      // Reset form
+      setRecipeName("");
+      setPreparation("");
+      setSellingPrice(0);
+      setOverheads(90);
+      setIngredients([{ ingredient_name: "", quantity: 0, unit: "g" }]);
+      setNutrition({ calories: 0, protein: 0, fat: 0, carbs: 0 });
 
-    toast({
-      title: "Recipe Added",
-      description: `${newRecipe.name} has been added successfully!`,
-    });
+      onRecipeAdded();
+
+      toast({
+        title: "Recipe Added",
+        description: `${newRecipe.name} has been added successfully!`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error adding recipe",
+        description: "Failed to add recipe to database",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -156,12 +172,12 @@ const AddRecipe = () => {
                   <div className="col-span-5">
                     <select
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-                      value={ingredient.name}
-                      onChange={(e) => updateIngredient(index, 'name', e.target.value)}
+                      value={ingredient.ingredient_name}
+                      onChange={(e) => updateIngredient(index, 'ingredient_name', e.target.value)}
                     >
                       <option value="">Select ingredient</option>
                       {masterIngredients.map((master) => (
-                        <option key={master.name} value={master.name}>
+                        <option key={master.id} value={master.name}>
                           {master.name}
                         </option>
                       ))}

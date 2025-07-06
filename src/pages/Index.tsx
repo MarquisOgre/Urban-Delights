@@ -1,4 +1,4 @@
-// index.tsx
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -12,26 +12,24 @@ import { Card, CardContent } from '@/components/ui/card';
 import RecipeCard from '@/components/RecipeCard';
 import MasterIngredientList from '@/components/MasterIngredientList';
 import AddRecipe from '@/components/AddRecipe';
-import {
-  recipes,
-  calculateRecipeCost,
-  masterIngredients,
-} from '@/data/recipes';
+import { useToast } from "@/hooks/use-toast";
 import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-
-// Extend jsPDF to include autoTable method
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-  }
-}
+import {
+  fetchMasterIngredients,
+  fetchRecipesWithIngredients,
+  calculateRecipeCost,
+  type MasterIngredient,
+  type RecipeWithIngredients
+} from '@/services/database';
 
 export default function IndexPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<'recipes' | 'ingredients' | 'add-recipe'>('recipes');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'recipes' | 'ingredients' | 'add-recipe'>('dashboard');
   const [showTopButton, setShowTopButton] = useState(false);
+  const [recipes, setRecipes] = useState<RecipeWithIngredients[]>([]);
+  const [masterIngredients, setMasterIngredients] = useState<MasterIngredient[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,27 +39,59 @@ export default function IndexPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Load data from database
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const [recipesData, ingredientsData] = await Promise.all([
+          fetchRecipesWithIngredients(),
+          fetchMasterIngredients()
+        ]);
+        setRecipes(recipesData);
+        setMasterIngredients(ingredientsData);
+      } catch (error) {
+        console.error('Error loading data:', error);
+        toast({
+          title: "Error loading data",
+          description: "Failed to load recipes and ingredients from database",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [toast]);
+
   const filteredRecipes = recipes.filter(
     recipe =>
       recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      recipe.ingredients.some(ing => ing.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      recipe.ingredients.some(ing => ing.ingredient_name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const totalRecipes = recipes.length;
   const totalIngredients = masterIngredients.length;
-  const averagePrice = masterIngredients.reduce((sum, ing) => sum + ing.pricePerKg, 0) / masterIngredients.length;
-  const highestPrice = Math.max(...masterIngredients.map(ing => ing.pricePerKg));
-  const lowestPrice = Math.min(...masterIngredients.map(ing => ing.pricePerKg));
+  const averagePrice = masterIngredients.length > 0 
+    ? masterIngredients.reduce((sum, ing) => sum + ing.price_per_kg, 0) / masterIngredients.length 
+    : 0;
+  const highestPrice = masterIngredients.length > 0 
+    ? Math.max(...masterIngredients.map(ing => ing.price_per_kg)) 
+    : 0;
+  const lowestPrice = masterIngredients.length > 0 
+    ? Math.min(...masterIngredients.map(ing => ing.price_per_kg)) 
+    : 0;
 
   const exportAllToExcel = () => {
     const wb = XLSX.utils.book_new();
     const summaryData = [['Recipe Name', 'Selling Price (₹/kg)', 'Cost Price (₹/kg)', 'Profit Margin (%)']];
     recipes.forEach(recipe => {
-      const { finalCost } = calculateRecipeCost(recipe);
-      const profitMargin = ((recipe.sellingPrice - finalCost) / recipe.sellingPrice) * 100;
+      const { finalCost } = calculateRecipeCost(recipe, masterIngredients);
+      const profitMargin = ((recipe.selling_price - finalCost) / recipe.selling_price) * 100;
       summaryData.push([
         recipe.name,
-        recipe.sellingPrice.toString(),
+        recipe.selling_price.toString(),
         finalCost.toFixed(2),
         `${profitMargin.toFixed(1)}%`
       ]);
@@ -71,22 +101,34 @@ export default function IndexPage() {
     XLSX.writeFile(wb, 'Artisan_Foods_All_Recipes.xlsx');
   };
 
-  const exportAllToPDF = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text('Artisan Delights - Podi Recipes', 20, 20);
-    const tableData = recipes.map(recipe => {
-      const { finalCost } = calculateRecipeCost(recipe);
-      const profit = ((recipe.sellingPrice - finalCost) / recipe.sellingPrice) * 100;
-      return [recipe.name, `₹${recipe.sellingPrice}`, `₹${finalCost.toFixed(2)}`, `${profit.toFixed(1)}%`];
-    });
-    (doc as any).autoTable({
-      startY: 30,
-      head: [['Recipe', 'Selling Price', 'Cost Price', 'Profit Margin']],
-      body: tableData,
-    });
-    doc.save('Artisan_Foods_All_Recipes.pdf');
+  const refreshData = async () => {
+    try {
+      const [recipesData, ingredientsData] = await Promise.all([
+        fetchRecipesWithIngredients(),
+        fetchMasterIngredients()
+      ]);
+      setRecipes(recipesData);
+      setMasterIngredients(ingredientsData);
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+      toast({
+        title: "Error refreshing data",
+        description: "Failed to refresh data from database",
+        variant: "destructive"
+      });
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-red-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500 mx-auto"></div>
+          <p className="mt-4 text-lg text-gray-600">Loading recipes and ingredients...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-orange-50 to-red-50 font-sans">
@@ -194,7 +236,7 @@ export default function IndexPage() {
               >
                 <Plus className="mr-1" size={14} /> Add
               </Button>
-            </div>
+            </div>  
           </div>
         </div>
       </header>
@@ -246,15 +288,32 @@ export default function IndexPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {filteredRecipes.map(recipe => (
                 <div key={recipe.id}>
-                  <RecipeCard recipe={recipe} />
+                  <RecipeCard recipe={recipe} masterIngredients={masterIngredients} />
                 </div>
               ))}
             </div>
+
+            {filteredRecipes.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <Package size={48} className="mx-auto mb-4 opacity-50" />
+                <p>No recipes found matching your search.</p>
+              </div>
+            )}
           </div>
         )}
 
-        {activeTab === 'ingredients' && <MasterIngredientList />}
-        {activeTab === 'add-recipe' && <AddRecipe />}
+        {activeTab === 'ingredients' && (
+          <MasterIngredientList 
+            masterIngredients={masterIngredients} 
+            onRefresh={refreshData} 
+          />
+        )}
+        {activeTab === 'add-recipe' && (
+          <AddRecipe 
+            masterIngredients={masterIngredients} 
+            onRecipeAdded={refreshData} 
+          />
+        )}
       </main>
 
       {/* Fixed Footer */}

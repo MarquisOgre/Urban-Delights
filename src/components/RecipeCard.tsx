@@ -4,22 +4,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Eye, IndianRupee, Scale, Clock, AlertTriangle, FileText, Calculator } from "lucide-react";
-import { Recipe, calculateIngredientCost, calculateRecipeCost, getIngredientPrice } from "@/data/recipes";
+import { calculateIngredientCost, calculateRecipeCost, type RecipeWithIngredients, type MasterIngredient } from "@/services/database";
 import * as XLSX from 'xlsx';
 
 interface RecipeCardProps {
-  recipe: Recipe;
+  recipe: RecipeWithIngredients;
+  masterIngredients: MasterIngredient[];
 }
 
-const RecipeCard = ({ recipe }: RecipeCardProps) => {
+const RecipeCard = ({ recipe, masterIngredients }: RecipeCardProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [desiredQty, setDesiredQty] = useState<number>(1);
 
-  const { totalCost, finalCost } = calculateRecipeCost(recipe);
-  const profitMargin = ((recipe.sellingPrice - finalCost) / recipe.sellingPrice * 100).toFixed(1);
+  const { totalCost, finalCost } = calculateRecipeCost(recipe, masterIngredients);
+  const profitMargin = ((recipe.selling_price - finalCost) / recipe.selling_price * 100).toFixed(1);
 
   // Calculate scaled ingredients based on desired quantity
   const scaledIngredients = recipe.ingredients.map(ingredient => ({
@@ -40,18 +41,18 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
       ['Recipe Name', recipe.name],
       ['Description', 'Traditional South Indian Podi'],
       ['Desired Quantity', `${desiredQty} kg`],
-      ['Selling Price', `₹${recipe.sellingPrice * desiredQty}`],
+      ['Selling Price', `₹${recipe.selling_price * desiredQty}`],
       ['Final Cost', `₹${scaledFinalCost.toFixed(2)}`],
       ['Profit Margin', `${profitMargin}%`],
-      ['Shelf Life', recipe.shelfLife],
+      ['Shelf Life', recipe.shelf_life || 'N/A'],
       [],
       ['Ingredients', '', '', ''],
       ['Name', 'Quantity', 'Unit', 'Cost (₹)']
     ];
 
     scaledIngredients.forEach(ingredient => {
-      const cost = calculateIngredientCost(ingredient);
-      recipeData.push([ingredient.name, ingredient.quantity.toString(), ingredient.unit, cost.toFixed(2)]);
+      const cost = calculateIngredientCost(ingredient, masterIngredients);
+      recipeData.push([ingredient.ingredient_name, ingredient.quantity.toString(), ingredient.unit, cost.toFixed(2)]);
     });
 
     recipeData.push(
@@ -61,10 +62,10 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
       ['Final Cost', `₹${scaledFinalCost.toFixed(2)}`],
       [],
       ['Nutrition (per 100g)', '', '', ''],
-      ['Calories', `${recipe.nutrition.calories} kcal`, '', ''],
-      ['Protein', `${recipe.nutrition.protein}g`, '', ''],
-      ['Fat', `${recipe.nutrition.fat}g`, '', ''],
-      ['Carbs', `${recipe.nutrition.carbs}g`, '', '']
+      ['Calories', `${recipe.calories || 0} kcal`, '', ''],
+      ['Protein', `${recipe.protein || 0}g`, '', ''],
+      ['Fat', `${recipe.fat || 0}g`, '', ''],
+      ['Carbs', `${recipe.carbs || 0}g`, '', '']
     );
 
     const ws = XLSX.utils.aoa_to_sheet(recipeData);
@@ -119,7 +120,7 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
               <span className="text-gray-600">Selling Price:</span>
               <span className="font-semibold text-green-600 flex items-center">
                 <IndianRupee size={14} />
-                {(recipe.sellingPrice * desiredQty).toFixed(2)}
+                {(recipe.selling_price * desiredQty).toFixed(2)}
                 {desiredQty !== 1 && <span className="text-xs ml-1">({desiredQty}kg)</span>}
               </span>
             </div>
@@ -134,7 +135,7 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
             <div className="grid grid-cols-2 gap-4 text-xs text-gray-600">
               <div className="flex items-center gap-1">
                 <Scale size={12} />
-                <span>{recipe.nutrition.calories} kcal/100g</span>
+                <span>{recipe.calories || 0} kcal/100g</span>
               </div>
               <div className="flex items-center gap-1">
                 <Clock size={12} />
@@ -181,12 +182,13 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
               <h3 className="text-lg font-semibold text-gray-900">Ingredients & Costs ({desiredQty}kg batch)</h3>
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 {scaledIngredients.map((ingredient, index) => {
-                  const pricePerKg = getIngredientPrice(ingredient.name);
-                  const cost = calculateIngredientCost(ingredient);
+                  const masterIngredient = masterIngredients.find(mi => mi.name === ingredient.ingredient_name);
+                  const pricePerKg = masterIngredient?.price_per_kg || 0;
+                  const cost = calculateIngredientCost(ingredient, masterIngredients);
                   return (
                     <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded text-sm">
                       <div className="flex-1 min-w-0">
-                        <span className="font-medium truncate block">{ingredient.name}</span>
+                        <span className="font-medium truncate block">{ingredient.ingredient_name}</span>
                         <div className="text-xs text-gray-600">
                           {ingredient.quantity}{ingredient.unit} @ ₹{pricePerKg}/kg
                         </div>
@@ -214,7 +216,7 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
                 </div>
                 <div className="flex justify-between text-base sm:text-lg font-bold text-green-700">
                   <span>Selling Price:</span>
-                  <span>₹{(recipe.sellingPrice * desiredQty).toFixed(2)}</span>
+                  <span>₹{(recipe.selling_price * desiredQty).toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -223,26 +225,26 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900">Preparation Method</h3>
               <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded">
-                {recipe.preparation}
+                {recipe.preparation || "No preparation method available"}
               </p>
               
               <h3 className="text-lg font-semibold text-gray-900">Nutrition (per 100g)</h3>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="bg-blue-50 p-3 rounded">
                   <div className="font-semibold text-blue-700">Calories</div>
-                  <div className="text-xl sm:text-2xl font-bold text-blue-800">{recipe.nutrition.calories}</div>
+                  <div className="text-xl sm:text-2xl font-bold text-blue-800">{recipe.calories || 0}</div>
                 </div>
                 <div className="bg-green-50 p-3 rounded">
                   <div className="font-semibold text-green-700">Protein</div>
-                  <div className="text-xl sm:text-2xl font-bold text-green-800">{recipe.nutrition.protein}g</div>
+                  <div className="text-xl sm:text-2xl font-bold text-green-800">{recipe.protein || 0}g</div>
                 </div>
                 <div className="bg-yellow-50 p-3 rounded">
-                  <div className="font-semibent text-yellow-700">Fat</div>
-                  <div className="text-xl sm:text-2xl font-bold text-yellow-800">{recipe.nutrition.fat}g</div>
+                  <div className="font-semibold text-yellow-700">Fat</div>
+                  <div className="text-xl sm:text-2xl font-bold text-yellow-800">{recipe.fat || 0}g</div>
                 </div>
                 <div className="bg-purple-50 p-3 rounded">
                   <div className="font-semibold text-purple-700">Carbs</div>
-                  <div className="text-xl sm:text-2xl font-bold text-purple-800">{recipe.nutrition.carbs}g</div>
+                  <div className="text-xl sm:text-2xl font-bold text-purple-800">{recipe.carbs || 0}g</div>
                 </div>
               </div>
               
@@ -251,8 +253,8 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
                   <AlertTriangle className="text-orange-600 mt-1 flex-shrink-0" size={16} />
                   <div>
                     <h4 className="font-semibold text-orange-800">Storage & Shelf Life</h4>
-                    <p className="text-sm text-orange-700 mt-1">{recipe.shelfLife}</p>
-                    <p className="text-sm text-orange-700 mt-1">{recipe.storage}</p>
+                    <p className="text-sm text-orange-700 mt-1">{recipe.shelf_life || "N/A"}</p>
+                    <p className="text-sm text-orange-700 mt-1">{recipe.storage || "N/A"}</p>
                   </div>
                 </div>
               </div>
