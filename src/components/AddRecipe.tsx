@@ -6,14 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, Save } from "lucide-react";
-import { addRecipeWithIngredients, calculateIngredientCost, type MasterIngredient } from "@/services/database";
+import { addRecipeWithIngredients, calculateIngredientCostFromPartial, type MasterIngredient, type NewIngredient } from "@/services/database";
 import { useToast } from "@/hooks/use-toast";
-
-interface NewIngredient {
-  ingredient_name: string;
-  quantity: number;
-  unit: string;
-}
 
 interface AddRecipeProps {
   masterIngredients: MasterIngredient[];
@@ -38,7 +32,7 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
   // Calculate selling price automatically
   const totalCost = ingredients.reduce((sum, ingredient) => {
     if (!ingredient.ingredient_name || ingredient.quantity <= 0) return sum;
-    return sum + calculateIngredientCost(ingredient, masterIngredients);
+    return sum + calculateIngredientCostFromPartial(ingredient, masterIngredients);
   }, 0);
   
   const finalCost = totalCost + overheads;

@@ -104,15 +104,22 @@ export const deleteMasterIngredient = async (id: string): Promise<void> => {
   }
 };
 
+// Helper type for new ingredients (without database-generated fields)
+export interface NewIngredient {
+  ingredient_name: string;
+  quantity: number;
+  unit: string;
+}
+
 // Add new recipe with ingredients (auto-calculate selling price)
 export const addRecipeWithIngredients = async (
   recipe: Omit<Recipe, 'id' | 'created_at' | 'updated_at' | 'selling_price'>,
-  ingredients: Omit<RecipeIngredient, 'id' | 'recipe_id' | 'created_at'>[],
+  ingredients: NewIngredient[],
   masterIngredients: MasterIngredient[]
 ): Promise<RecipeWithIngredients> => {
   // Calculate selling price
   const totalCost = ingredients.reduce((sum, ingredient) => {
-    return sum + calculateIngredientCost(ingredient, masterIngredients);
+    return sum + calculateIngredientCostFromPartial(ingredient, masterIngredients);
   }, 0);
   
   const finalCost = totalCost + recipe.overheads;
@@ -155,7 +162,24 @@ export const addRecipeWithIngredients = async (
   };
 };
 
-// Calculate ingredient cost
+// Calculate ingredient cost from partial ingredient data (for new recipes)
+export const calculateIngredientCostFromPartial = (ingredient: NewIngredient, masterIngredients: MasterIngredient[]): number => {
+  const masterIngredient = masterIngredients.find(mi => mi.name === ingredient.ingredient_name);
+  if (!masterIngredient) return 0;
+
+  let quantityInKg = ingredient.quantity;
+  if (ingredient.unit === 'g') {
+    quantityInKg = ingredient.quantity / 1000;
+  } else if (ingredient.unit === 'ml') {
+    quantityInKg = ingredient.quantity / 1000;
+  } else if (ingredient.unit === 'l') {
+    quantityInKg = ingredient.quantity;
+  }
+
+  return quantityInKg * masterIngredient.price_per_kg;
+};
+
+// Calculate ingredient cost from full RecipeIngredient (for existing recipes)
 export const calculateIngredientCost = (ingredient: RecipeIngredient, masterIngredients: MasterIngredient[]): number => {
   const masterIngredient = masterIngredients.find(mi => mi.name === ingredient.ingredient_name);
   if (!masterIngredient) return 0;
