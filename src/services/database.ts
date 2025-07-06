@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -123,7 +122,7 @@ export const addRecipeWithIngredients = async (
   }, 0);
   
   const finalCost = totalCost + recipe.overheads;
-  const sellingPrice = Math.ceil((finalCost * 2) / 100) * 100;
+  const sellingPrice = calculateSellingPrice(finalCost);
 
   // Insert recipe first
   const { data: newRecipe, error: recipeError } = await supabase
@@ -160,6 +159,34 @@ export const addRecipeWithIngredients = async (
     ...newRecipe,
     ingredients: newIngredients || []
   };
+};
+
+// Helper function to calculate selling price with proper rounding and minimum profit margin
+export const calculateSellingPrice = (finalCost: number): number => {
+  // Base selling price with 2x multiplier
+  let sellingPrice = finalCost * 2;
+  
+  // Round to nearest fifty or hundred
+  if (sellingPrice <= 100) {
+    // For amounts <= 100, round to nearest 50
+    sellingPrice = Math.ceil(sellingPrice / 50) * 50;
+  } else {
+    // For amounts > 100, round to nearest 100
+    sellingPrice = Math.ceil(sellingPrice / 100) * 100;
+  }
+  
+  // Ensure minimum 50% profit margin
+  const minimumSellingPrice = finalCost * 1.5; // 50% profit margin
+  if (sellingPrice < minimumSellingPrice) {
+    // Round the minimum price using the same logic
+    if (minimumSellingPrice <= 100) {
+      sellingPrice = Math.ceil(minimumSellingPrice / 50) * 50;
+    } else {
+      sellingPrice = Math.ceil(minimumSellingPrice / 100) * 100;
+    }
+  }
+  
+  return sellingPrice;
 };
 
 // Calculate ingredient cost from partial ingredient data (for new recipes)

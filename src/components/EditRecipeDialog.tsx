@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { calculateRecipeCost, type RecipeWithIngredients, type MasterIngredient } from "@/services/database";
+import { calculateRecipeCost, calculateSellingPrice, type RecipeWithIngredients, type MasterIngredient } from "@/services/database";
 import { useToast } from "@/hooks/use-toast";
 
 interface EditIngredient {
@@ -53,7 +52,7 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
     overheads
   }, masterIngredients);
 
-  const calculatedSellingPrice = Math.ceil((finalCost * 2) / 100) * 100;
+  const calculatedSellingPrice = calculateSellingPrice(finalCost);
 
   useEffect(() => {
     if (open && recipe) {

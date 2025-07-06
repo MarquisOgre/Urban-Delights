@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, Save } from "lucide-react";
-import { addRecipeWithIngredients, calculateIngredientCostFromPartial, type MasterIngredient, type NewIngredient } from "@/services/database";
+import { addRecipeWithIngredients, calculateIngredientCostFromPartial, calculateSellingPrice, type MasterIngredient, type NewIngredient } from "@/services/database";
 import { useToast } from "@/hooks/use-toast";
 
 interface AddRecipeProps {
@@ -36,7 +35,7 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
   }, 0);
   
   const finalCost = totalCost + overheads;
-  const calculatedSellingPrice = Math.ceil((finalCost * 2) / 100) * 100;
+  const calculatedSellingPrice = calculateSellingPrice(finalCost);
 
   const addIngredient = () => {
     setIngredients([...ingredients, { ingredient_name: "", quantity: 0, unit: "g" }]);
