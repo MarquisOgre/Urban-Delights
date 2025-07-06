@@ -176,7 +176,7 @@ export const calculateSellingPrice = (finalCost: number): number => {
   }
   
   // Ensure minimum 50% profit margin
-  const minimumSellingPrice = finalCost * 1.5; // 50% profit margin
+  const minimumSellingPrice = finalCost * 2; // 100% profit margin
   if (sellingPrice < minimumSellingPrice) {
     // Round the minimum price using the same logic
     if (minimumSellingPrice <= 100) {
