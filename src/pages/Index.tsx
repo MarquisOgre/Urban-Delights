@@ -91,85 +91,146 @@ export default function IndexPage() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-orange-50 to-red-50 font-sans">
       {/* Header */}
-<header className="sticky top-0 z-40 bg-white/80 backdrop-blur border-b shadow-sm">
-  <div className="container mx-auto px-4 py-2 flex items-center justify-between relative">
-    
-    {/* Left: Logo */}
-    <div className="flex items-center gap-3">
-      <img
-        src="/logo.png"
-        alt="Artisan Foods Logo"
-        width={32}
-        height={32}
-        className="object-contain"
-      />
-      <h1 className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 text-transparent bg-clip-text">
-        Artisan Delights
-      </h1>
-    </div>
+      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur border-b shadow-sm">
+        <div className="container mx-auto px-2 sm:px-4 py-2 flex items-center justify-between relative">
+          
+          {/* Left: Logo */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <img
+              src="/logo.png"
+              alt="Artisan Foods Logo"
+              width={28}
+              height={28}
+              className="object-contain sm:w-8 sm:h-8"
+            />
+            <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 text-transparent bg-clip-text">
+              <span className="hidden sm:inline">Artisan Delights</span>
+              <span className="sm:hidden">Artisan</span>
+            </h1>
+          </div>
 
-    {/* Center: Navigation Tabs */}
-    <div className="absolute left-1/2 -translate-x-1/2 flex gap-2">
-      <Button
-        variant={activeTab === 'recipes' ? 'default' : 'outline'}
-        onClick={() => setActiveTab('recipes')}
-      >
-        <BarChart3 className="mr-2" size={16} /> Recipes
-      </Button>
-      <Button
-        variant={activeTab === 'ingredients' ? 'default' : 'outline'}
-        onClick={() => setActiveTab('ingredients')}
-      >
-        <Leaf className="mr-2" size={16} /> Ingredient List
-      </Button>
-      <Button
-        variant={activeTab === 'add-recipe' ? 'default' : 'outline'}
-        onClick={() => setActiveTab('add-recipe')}
-      >
-        <Plus className="mr-2" size={16} /> Add Recipe
-      </Button>
-    </div>
+          {/* Center: Navigation Tabs - Hidden on mobile, shown on tablet+ */}
+          <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 gap-2">
+            <Button
+              variant={activeTab === 'dashboard' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('dashboard')}
+              size="sm"
+            >
+              <BarChart3 className="mr-2" size={16} /> Dashboard
+            </Button>
+            <Button
+              variant={activeTab === 'recipes' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('recipes')}
+              size="sm"
+            >
+              <Package className="mr-2" size={16} /> Recipes
+            </Button>
+            <Button
+              variant={activeTab === 'ingredients' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('ingredients')}
+              size="sm"
+            >
+              <Leaf className="mr-2" size={16} /> Ingredients
+            </Button>
+            <Button
+              variant={activeTab === 'add-recipe' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('add-recipe')}
+              size="sm"
+            >
+              <Plus className="mr-2" size={16} /> Add Recipe
+            </Button>
+          </div>
 
-    {/* Right: Export Buttons */}
-    <div className="flex gap-2">
-      <Button onClick={exportAllToExcel} variant="outline" size="sm">
-        <FileText className="mr-2" size={16} /> Export Excel
-      </Button>
-      <Button onClick={exportAllToPDF} variant="outline" size="sm">
-        <Download className="mr-2" size={16} /> Export PDF
-      </Button>
-    </div>
-  </div>
-</header>
+          {/* Right: Export Buttons - Hidden on mobile */}
+          <div className="hidden sm:flex gap-2">
+            <Button onClick={exportAllToExcel} variant="outline" size="sm">
+              <FileText className="mr-2" size={16} /> 
+              <span className="hidden lg:inline">Export Excel</span>
+              <span className="lg:hidden">Excel</span>
+            </Button>
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <Button onClick={exportAllToExcel} variant="outline" size="sm">
+              <FileText size={16} />
+            </Button>
+          </div>
+        </div>
+
+        {/* Mobile Navigation - Shown below header on mobile */}
+        <div className="md:hidden border-t bg-white/90 backdrop-blur">
+          <div className="container mx-auto px-2 py-2">
+            <div className="flex gap-1 overflow-x-auto">
+              <Button
+                variant={activeTab === 'dashboard' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('dashboard')}
+                size="sm"
+                className="whitespace-nowrap"
+              >
+                <BarChart3 className="mr-1" size={14} /> Dashboard
+              </Button>
+              <Button
+                variant={activeTab === 'recipes' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('recipes')}
+                size="sm"
+                className="whitespace-nowrap"
+              >
+                <Package className="mr-1" size={14} /> Recipes
+              </Button>
+              <Button
+                variant={activeTab === 'ingredients' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('ingredients')}
+                size="sm"
+                className="whitespace-nowrap"
+              >
+                <Leaf className="mr-1" size={14} /> Ingredients
+              </Button>
+              <Button
+                variant={activeTab === 'add-recipe' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('add-recipe')}
+                size="sm"
+                className="whitespace-nowrap"
+              >
+                <Plus className="mr-1" size={14} /> Add
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-2 pb-28 flex-grow">
-        {activeTab === 'recipes' && (
-          <div className="space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <main className="container mx-auto px-2 sm:px-4 py-2 pb-28 flex-grow">
+        {activeTab === 'dashboard' && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {[{
-                label: 'Total Recipes', value: totalRecipes, icon: <Package size={28} className="text-blue-600" />
+                label: 'Total Recipes', value: totalRecipes, icon: <Package size={24} className="text-blue-600" />
               }, {
-                label: 'Total Ingredients', value: totalIngredients, icon: <Leaf size={28} className="text-green-600" />
+                label: 'Total Ingredients', value: totalIngredients, icon: <Leaf size={24} className="text-green-600" />
               }, {
-                label: 'Avg Ingredient Price', value: `₹${averagePrice.toFixed(2)}`, icon: <CircleDollarSign size={28} className="text-orange-600" />
+                label: 'Avg Ingredient Price', value: `₹${averagePrice.toFixed(2)}`, icon: <CircleDollarSign size={24} className="text-orange-600" />
               }, {
-                label: 'Ingredient Price Range', value: `₹${lowestPrice} - ₹${highestPrice}`, icon: <TrendingUp size={28} className="text-purple-600" />
+                label: 'Price Range', value: `₹${lowestPrice} - ₹${highestPrice}`, icon: <TrendingUp size={24} className="text-purple-600" />
               }].map((stat, index) => (
                 <div key={index}>
                   <Card className="rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200">
-                    <CardContent className="p-4 flex items-center gap-4">
-                      {stat.icon}
-                      <div>
-                        <p className="text-sm text-gray-600">{stat.label}</p>
-                        <p className="text-xl font-semibold text-gray-800">{stat.value}</p>
+                    <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-4">
+                      <div className="hidden sm:block">{stat.icon}</div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs sm:text-sm text-gray-600 truncate">{stat.label}</p>
+                        <p className="text-lg sm:text-xl font-semibold text-gray-800">{stat.value}</p>
                       </div>
                     </CardContent>
                   </Card>
                 </div>
               ))}
             </div>
+          </div>
+        )}
 
+        {activeTab === 'recipes' && (
+          <div className="space-y-3">
             {/* Search Bar */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -182,7 +243,7 @@ export default function IndexPage() {
             </div>
 
             {/* Recipe Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {filteredRecipes.map(recipe => (
                 <div key={recipe.id}>
                   <RecipeCard recipe={recipe} />
@@ -199,10 +260,10 @@ export default function IndexPage() {
       {/* Fixed Footer */}
       <footer
         className="fixed bottom-0 left-0 w-full bg-gradient-to-r from-red-500 to-yellow-400 border-t text-center text-white font-bold py-2 z-30"
-        style={{ fontSize: '12px' }}
+        style={{ fontSize: '11px' }}
       >
         <div className="container mx-auto px-2">
-          <p>© {new Date().getFullYear()} Artisan Delights. Crafted with ❤️ in South India.</p>
+          <p className="truncate">© {new Date().getFullYear()} Artisan Delights. Crafted with ❤️ in South India.</p>
         </div>
       </footer>
 
@@ -210,7 +271,7 @@ export default function IndexPage() {
       {showTopButton && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-6 right-6 z-50 p-3 bg-orange-500 text-white rounded-full shadow-lg hover:bg-orange-600 transition"
+          className="fixed bottom-16 right-4 z-50 p-2 sm:p-3 bg-orange-500 text-white rounded-full shadow-lg hover:bg-orange-600 transition text-sm sm:text-base"
         >
           ↑
         </button>
