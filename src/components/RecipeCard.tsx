@@ -6,17 +6,22 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Eye, IndianRupee, Scale, Clock, AlertTriangle, FileText, Calculator } from "lucide-react";
+import { Eye, IndianRupee, Scale, Clock, AlertTriangle, FileText, Calculator, Edit, Trash2 } from "lucide-react";
 import { calculateIngredientCost, calculateRecipeCost, type RecipeWithIngredients, type MasterIngredient } from "@/services/database";
+import EditRecipeDialog from "./EditRecipeDialog";
+import DeleteRecipeDialog from "./DeleteRecipeDialog";
 import * as XLSX from 'xlsx';
 
 interface RecipeCardProps {
   recipe: RecipeWithIngredients;
   masterIngredients: MasterIngredient[];
+  onRecipeUpdated: () => void;
 }
 
-const RecipeCard = ({ recipe, masterIngredients }: RecipeCardProps) => {
+const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [desiredQty, setDesiredQty] = useState<number>(1);
 
   const { totalCost, finalCost } = calculateRecipeCost(recipe, masterIngredients);
@@ -73,15 +78,38 @@ const RecipeCard = ({ recipe, masterIngredients }: RecipeCardProps) => {
     XLSX.writeFile(wb, `${recipe.name.replace(/\s+/g, '_')}_${desiredQty}kg_Recipe.xlsx`);
   };
 
+  const handleQtyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 1;
+    setDesiredQty(Math.max(1, value));
+  };
+
   return (
     <>
       <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-orange-500">
         <CardHeader className="pb-3">
           <div className="flex justify-between items-start">
             <CardTitle className="text-lg sm:text-xl text-gray-900">{recipe.name}</CardTitle>
-            <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
-              {profitMargin}% Profit
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
+                {profitMargin}% Profit
+              </Badge>
+              <Button
+                onClick={() => setIsEditDialogOpen(true)}
+                size="sm"
+                variant="outline"
+                className="p-1 h-7 w-7"
+              >
+                <Edit size={12} />
+              </Button>
+              <Button
+                onClick={() => setIsDeleteDialogOpen(true)}
+                size="sm"
+                variant="outline"
+                className="p-1 h-7 w-7 text-red-600 hover:text-red-700"
+              >
+                <Trash2 size={12} />
+              </Button>
+            </div>
           </div>
           <CardDescription className="text-sm text-gray-600">
             Traditional South Indian Podi
@@ -98,10 +126,10 @@ const RecipeCard = ({ recipe, masterIngredients }: RecipeCardProps) => {
               </div>
               <Input
                 type="number"
-                min="0.1"
-                step="0.1"
+                min="1"
+                step="1"
                 value={desiredQty}
-                onChange={(e) => setDesiredQty(parseFloat(e.target.value) || 1)}
+                onChange={handleQtyChange}
                 className="w-full h-8 text-sm"
                 placeholder="Enter quantity in kg"
               />
@@ -262,6 +290,21 @@ const RecipeCard = ({ recipe, masterIngredients }: RecipeCardProps) => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <EditRecipeDialog
+        recipe={recipe}
+        masterIngredients={masterIngredients}
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        onRecipeUpdated={onRecipeUpdated}
+      />
+
+      <DeleteRecipeDialog
+        recipe={recipe}
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onRecipeDeleted={onRecipeUpdated}
+      />
     </>
   );
 };

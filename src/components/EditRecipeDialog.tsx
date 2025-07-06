@@ -1,48 +1,79 @@
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, Save } from "lucide-react";
-import { addRecipeWithIngredients, calculateIngredientCost, type MasterIngredient } from "@/services/database";
+import { supabase } from "@/integrations/supabase/client";
+import { calculateRecipeCost, type RecipeWithIngredients, type MasterIngredient } from "@/services/database";
 import { useToast } from "@/hooks/use-toast";
 
-interface NewIngredient {
+interface EditIngredient {
+  id?: string;
   ingredient_name: string;
   quantity: number;
   unit: string;
 }
 
-interface AddRecipeProps {
+interface EditRecipeDialogProps {
+  recipe: RecipeWithIngredients;
   masterIngredients: MasterIngredient[];
-  onRecipeAdded: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onRecipeUpdated: () => void;
 }
 
-const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
+const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRecipeUpdated }: EditRecipeDialogProps) => {
   const [recipeName, setRecipeName] = useState("");
   const [preparation, setPreparation] = useState("");
   const [overheads, setOverheads] = useState<number>(90);
-  const [ingredients, setIngredients] = useState<NewIngredient[]>([
-    { ingredient_name: "", quantity: 0, unit: "g" }
-  ]);
+  const [ingredients, setIngredients] = useState<EditIngredient[]>([]);
   const [nutrition, setNutrition] = useState({
     calories: 0,
     protein: 0,
     fat: 0,
     carbs: 0
   });
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   // Calculate selling price automatically
-  const totalCost = ingredients.reduce((sum, ingredient) => {
-    if (!ingredient.ingredient_name || ingredient.quantity <= 0) return sum;
-    return sum + calculateIngredientCost(ingredient, masterIngredients);
-  }, 0);
-  
-  const finalCost = totalCost + overheads;
+  const { finalCost } = calculateRecipeCost({
+    ...recipe,
+    ingredients: ingredients.map(ing => ({
+      id: ing.id || '',
+      recipe_id: recipe.id,
+      ingredient_name: ing.ingredient_name,
+      quantity: ing.quantity,
+      unit: ing.unit,
+      created_at: ''
+    })),
+    overheads
+  }, masterIngredients);
+
   const calculatedSellingPrice = Math.ceil((finalCost * 2) / 100) * 100;
+
+  useEffect(() => {
+    if (open && recipe) {
+      setRecipeName(recipe.name);
+      setPreparation(recipe.preparation || "");
+      setOverheads(recipe.overheads);
+      setIngredients(recipe.ingredients.map(ing => ({
+        id: ing.id,
+        ingredient_name: ing.ingredient_name,
+        quantity: ing.quantity,
+        unit: ing.unit
+      })));
+      setNutrition({
+        calories: recipe.calories || 0,
+        protein: recipe.protein || 0,
+        fat: recipe.fat || 0,
+        carbs: recipe.carbs || 0
+      });
+    }
+  }, [open, recipe]);
 
   const addIngredient = () => {
     setIngredients([...ingredients, { ingredient_name: "", quantity: 0, unit: "g" }]);
@@ -54,7 +85,7 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
     }
   };
 
-  const updateIngredient = (index: number, field: keyof NewIngredient, value: string | number) => {
+  const updateIngredient = (index: number, field: keyof EditIngredient, value: string | number) => {
     const updated = [...ingredients];
     updated[index] = { ...updated[index], [field]: value };
     setIngredients(updated);
@@ -83,53 +114,80 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
       return;
     }
 
-    const newRecipe = {
-      name: recipeName,
-      preparation: preparation,
-      overheads: overheads,
-      shelf_life: "6 months in sealed packaging, away from moisture and sunlight",
-      storage: "Store in a cool, dry place in an airtight container after opening",
-      calories: nutrition.calories || null,
-      protein: nutrition.protein || null,
-      fat: nutrition.fat || null,
-      carbs: nutrition.carbs || null
-    };
+    setLoading(true);
 
     try {
-      await addRecipeWithIngredients(newRecipe, ingredients, masterIngredients);
-      
-      // Reset form
-      setRecipeName("");
-      setPreparation("");
-      setOverheads(90);
-      setIngredients([{ ingredient_name: "", quantity: 0, unit: "g" }]);
-      setNutrition({ calories: 0, protein: 0, fat: 0, carbs: 0 });
+      // Update recipe
+      const { error: recipeError } = await supabase
+        .from('recipes')
+        .update({
+          name: recipeName,
+          preparation: preparation,
+          selling_price: calculatedSellingPrice,
+          overheads: overheads,
+          calories: nutrition.calories || null,
+          protein: nutrition.protein || null,
+          fat: nutrition.fat || null,
+          carbs: nutrition.carbs || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', recipe.id);
 
-      onRecipeAdded();
+      if (recipeError) throw recipeError;
+
+      // Delete existing ingredients
+      const { error: deleteError } = await supabase
+        .from('recipe_ingredients')
+        .delete()
+        .eq('recipe_id', recipe.id);
+
+      if (deleteError) throw deleteError;
+
+      // Insert new ingredients
+      const { error: ingredientsError } = await supabase
+        .from('recipe_ingredients')
+        .insert(ingredients.map(ing => ({
+          recipe_id: recipe.id,
+          ingredient_name: ing.ingredient_name,
+          quantity: ing.quantity,
+          unit: ing.unit
+        })));
+
+      if (ingredientsError) throw ingredientsError;
+
+      onRecipeUpdated();
+      onOpenChange(false);
 
       toast({
-        title: "Recipe Added",
-        description: `${newRecipe.name} has been added successfully with selling price ₹${calculatedSellingPrice}!`,
+        title: "Recipe Updated",
+        description: `${recipeName} has been updated successfully!`,
       });
     } catch (error) {
+      console.error('Error updating recipe:', error);
       toast({
-        title: "Error adding recipe",
-        description: "Failed to add recipe to database",
+        title: "Error updating recipe",
+        description: "Failed to update recipe in database",
         variant: "destructive"
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Plus className="text-orange-600" />
-            Add New Recipe
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Save className="text-orange-600" />
+            Edit Recipe
+          </DialogTitle>
+          <DialogDescription>
+            Update recipe details. Selling price is auto-calculated as Cost Price × 2 (rounded to hundreds).
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="space-y-6">
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -150,7 +208,6 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
                 readOnly
                 className="bg-gray-100"
               />
-              <p className="text-xs text-gray-500 mt-1">Cost Price × 2 (rounded to hundreds)</p>
             </div>
           </div>
 
@@ -162,29 +219,6 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
               value={overheads}
               onChange={(e) => setOverheads(Number(e.target.value))}
             />
-          </div>
-
-          {/* Cost Preview */}
-          <div className="bg-blue-50 p-4 rounded-lg border">
-            <h4 className="font-semibold text-blue-800 mb-2">Cost Preview</h4>
-            <div className="space-y-1 text-sm">
-              <div className="flex justify-between">
-                <span>Raw Material Cost:</span>
-                <span>₹{totalCost.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Overheads:</span>
-                <span>₹{overheads}</span>
-              </div>
-              <div className="flex justify-between font-semibold">
-                <span>Final Cost:</span>
-                <span>₹{finalCost.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between font-bold text-green-700">
-                <span>Selling Price:</span>
-                <span>₹{calculatedSellingPrice}</span>
-              </div>
-            </div>
           </div>
 
           {/* Ingredients */}
@@ -303,14 +337,27 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
             </div>
           </div>
 
-          <Button onClick={handleSave} className="w-full bg-orange-600 hover:bg-orange-700">
-            <Save size={16} className="mr-2" />
-            Save Recipe
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
+          <div className="flex gap-2">
+            <Button 
+              onClick={handleSave} 
+              className="flex-1 bg-orange-600 hover:bg-orange-700"
+              disabled={loading}
+            >
+              <Save size={16} className="mr-2" />
+              {loading ? "Updating..." : "Update Recipe"}
+            </Button>
+            <Button 
+              onClick={() => onOpenChange(false)} 
+              variant="outline"
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
-export default AddRecipe;
+export default EditRecipeDialog;

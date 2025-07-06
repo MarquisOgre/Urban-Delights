@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import {
-  BarChart3, Leaf, Plus, Download, FileText, Search, Package,
+  Leaf, Plus, Search, Package,
   CircleDollarSign, TrendingUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,18 +13,16 @@ import RecipeCard from '@/components/RecipeCard';
 import MasterIngredientList from '@/components/MasterIngredientList';
 import AddRecipe from '@/components/AddRecipe';
 import { useToast } from "@/hooks/use-toast";
-import * as XLSX from 'xlsx';
 import {
   fetchMasterIngredients,
   fetchRecipesWithIngredients,
-  calculateRecipeCost,
   type MasterIngredient,
   type RecipeWithIngredients
 } from '@/services/database';
 
 export default function IndexPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'recipes' | 'ingredients' | 'add-recipe'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'recipes' | 'ingredients' | 'add-recipe'>('recipes');
   const [showTopButton, setShowTopButton] = useState(false);
   const [recipes, setRecipes] = useState<RecipeWithIngredients[]>([]);
   const [masterIngredients, setMasterIngredients] = useState<MasterIngredient[]>([]);
@@ -83,24 +81,6 @@ export default function IndexPage() {
     ? Math.min(...masterIngredients.map(ing => ing.price_per_kg)) 
     : 0;
 
-  const exportAllToExcel = () => {
-    const wb = XLSX.utils.book_new();
-    const summaryData = [['Recipe Name', 'Selling Price (₹/kg)', 'Cost Price (₹/kg)', 'Profit Margin (%)']];
-    recipes.forEach(recipe => {
-      const { finalCost } = calculateRecipeCost(recipe, masterIngredients);
-      const profitMargin = ((recipe.selling_price - finalCost) / recipe.selling_price) * 100;
-      summaryData.push([
-        recipe.name,
-        recipe.selling_price.toString(),
-        finalCost.toFixed(2),
-        `${profitMargin.toFixed(1)}%`
-      ]);
-    });
-    const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
-    XLSX.utils.book_append_sheet(wb, summaryWs, 'Summary');
-    XLSX.writeFile(wb, 'Artisan_Foods_All_Recipes.xlsx');
-  };
-
   const refreshData = async () => {
     try {
       const [recipesData, ingredientsData] = await Promise.all([
@@ -154,13 +134,6 @@ export default function IndexPage() {
           {/* Center: Navigation Tabs - Hidden on mobile, shown on tablet+ */}
           <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 gap-2">
             <Button
-              variant={activeTab === 'dashboard' ? 'default' : 'outline'}
-              onClick={() => setActiveTab('dashboard')}
-              size="sm"
-            >
-              <BarChart3 className="mr-2" size={16} /> Dashboard
-            </Button>
-            <Button
               variant={activeTab === 'recipes' ? 'default' : 'outline'}
               onClick={() => setActiveTab('recipes')}
               size="sm"
@@ -182,36 +155,12 @@ export default function IndexPage() {
               <Plus className="mr-2" size={16} /> Add Recipe
             </Button>
           </div>
-
-          {/* Right: Export Buttons - Hidden on mobile */}
-          <div className="hidden sm:flex gap-2">
-            <Button onClick={exportAllToExcel} variant="outline" size="sm">
-              <FileText className="mr-2" size={16} /> 
-              <span className="hidden lg:inline">Export Excel</span>
-              <span className="lg:hidden">Excel</span>
-            </Button>
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <Button onClick={exportAllToExcel} variant="outline" size="sm">
-              <FileText size={16} />
-            </Button>
-          </div>
         </div>
 
         {/* Mobile Navigation - Shown below header on mobile */}
         <div className="md:hidden border-t bg-white/90 backdrop-blur">
           <div className="container mx-auto px-2 py-2">
             <div className="flex gap-1 overflow-x-auto">
-              <Button
-                variant={activeTab === 'dashboard' ? 'default' : 'outline'}
-                onClick={() => setActiveTab('dashboard')}
-                size="sm"
-                className="whitespace-nowrap"
-              >
-                <BarChart3 className="mr-1" size={14} /> Dashboard
-              </Button>
               <Button
                 variant={activeTab === 'recipes' ? 'default' : 'outline'}
                 onClick={() => setActiveTab('recipes')}
@@ -243,8 +192,9 @@ export default function IndexPage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-2 sm:px-4 py-2 pb-28 flex-grow">
-        {activeTab === 'dashboard' && (
+        {activeTab === 'recipes' && (
           <div className="space-y-4">
+            {/* Dashboard Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {[{
                 label: 'Total Recipes', value: totalRecipes, icon: <Package size={24} className="text-blue-600" />
@@ -268,11 +218,7 @@ export default function IndexPage() {
                 </div>
               ))}
             </div>
-          </div>
-        )}
 
-        {activeTab === 'recipes' && (
-          <div className="space-y-3">
             {/* Search Bar */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -288,7 +234,11 @@ export default function IndexPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {filteredRecipes.map(recipe => (
                 <div key={recipe.id}>
-                  <RecipeCard recipe={recipe} masterIngredients={masterIngredients} />
+                  <RecipeCard 
+                    recipe={recipe} 
+                    masterIngredients={masterIngredients} 
+                    onRecipeUpdated={refreshData}
+                  />
                 </div>
               ))}
             </div>

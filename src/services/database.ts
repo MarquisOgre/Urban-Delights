@@ -91,15 +91,40 @@ export const updateMasterIngredientPrice = async (id: string, pricePerKg: number
   }
 };
 
-// Add new recipe with ingredients
+// Delete master ingredient
+export const deleteMasterIngredient = async (id: string): Promise<void> => {
+  const { error } = await supabase
+    .from('master_ingredients')
+    .delete()
+    .eq('id', id);
+  
+  if (error) {
+    console.error('Error deleting master ingredient:', error);
+    throw error;
+  }
+};
+
+// Add new recipe with ingredients (auto-calculate selling price)
 export const addRecipeWithIngredients = async (
-  recipe: Omit<Recipe, 'id' | 'created_at' | 'updated_at'>,
-  ingredients: Omit<RecipeIngredient, 'id' | 'recipe_id' | 'created_at'>[]
+  recipe: Omit<Recipe, 'id' | 'created_at' | 'updated_at' | 'selling_price'>,
+  ingredients: Omit<RecipeIngredient, 'id' | 'recipe_id' | 'created_at'>[],
+  masterIngredients: MasterIngredient[]
 ): Promise<RecipeWithIngredients> => {
+  // Calculate selling price
+  const totalCost = ingredients.reduce((sum, ingredient) => {
+    return sum + calculateIngredientCost(ingredient, masterIngredients);
+  }, 0);
+  
+  const finalCost = totalCost + recipe.overheads;
+  const sellingPrice = Math.ceil((finalCost * 2) / 100) * 100;
+
   // Insert recipe first
   const { data: newRecipe, error: recipeError } = await supabase
     .from('recipes')
-    .insert(recipe)
+    .insert({
+      ...recipe,
+      selling_price: sellingPrice
+    })
     .select()
     .single();
   
