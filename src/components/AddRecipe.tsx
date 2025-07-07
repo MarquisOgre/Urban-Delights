@@ -304,7 +304,7 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
                   id="carbs"
                   type="number"
                   value={nutrition.carbs || ""}
-                  onChange={(e) => setNutrition({...nutrition, carbs: Number e.target.value)})}
+                  onChange={(e) => setNutrition({...nutrition, carbs: Number(e.target.value)})}
                 />
               </div>
             </div>
