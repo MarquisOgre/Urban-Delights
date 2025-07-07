@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -69,7 +68,7 @@ export default function IndexPage() {
       recipe.ingredients.some(ing => ing.ingredient_name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const visibleRecipes = showHiddenRecipes ? filteredRecipes : filteredRecipes.filter(recipe => !recipe.is_hidden);
+  const visibleRecipes = showHiddenRecipes ? filteredRecipes : filteredRecipes.filter(recipe => !(recipe.is_hidden || false));
 
   const refreshData = async () => {
     try {

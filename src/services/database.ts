@@ -7,6 +7,7 @@ export type RecipeIngredient = Database['public']['Tables']['recipe_ingredients'
 
 export interface RecipeWithIngredients extends Recipe {
   ingredients: RecipeIngredient[];
+  is_hidden?: boolean;
 }
 
 export interface NewRecipe {

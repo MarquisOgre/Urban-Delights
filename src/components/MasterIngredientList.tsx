@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Save, IndianRupee, AlertTriangle, Search } from "lucide-react";
+import { Plus, Edit, Trash2, Save, IndianRupee, AlertTriangle, Search, Leaf } from "lucide-react";
 import { addMasterIngredient, updateMasterIngredientPrice, deleteMasterIngredient, type MasterIngredient } from "@/services/database";
 import { useToast } from "@/hooks/use-toast";
 

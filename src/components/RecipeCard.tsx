@@ -44,7 +44,7 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
 
   const handleToggleVisibility = async () => {
     try {
-      await updateRecipeVisibility(recipe.id, !recipe.is_hidden);
+      await updateRecipeVisibility(recipe.id, !(recipe.is_hidden || false));
       onRecipeUpdated();
       toast({
         title: "Recipe Updated",
