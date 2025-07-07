@@ -75,6 +75,7 @@ export type Database = {
           created_at: string
           fat: number | null
           id: string
+          is_hidden: boolean | null
           name: string
           overheads: number
           preparation: string | null
@@ -90,6 +91,7 @@ export type Database = {
           created_at?: string
           fat?: number | null
           id?: string
+          is_hidden?: boolean | null
           name: string
           overheads?: number
           preparation?: string | null
@@ -105,6 +107,7 @@ export type Database = {
           created_at?: string
           fat?: number | null
           id?: string
+          is_hidden?: boolean | null
           name?: string
           overheads?: number
           preparation?: string | null
