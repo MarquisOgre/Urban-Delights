@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import {
-  Leaf, Plus, Search, Package, FileText
+  Leaf, Plus, Search, Package, FileText, Eye, EyeOff
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,7 @@ export default function IndexPage() {
   const [recipes, setRecipes] = useState<RecipeWithIngredients[]>([]);
   const [masterIngredients, setMasterIngredients] = useState<MasterIngredient[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showHiddenRecipes, setShowHiddenRecipes] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -67,6 +68,8 @@ export default function IndexPage() {
       recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       recipe.ingredients.some(ing => ing.ingredient_name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const visibleRecipes = showHiddenRecipes ? filteredRecipes : filteredRecipes.filter(recipe => !recipe.is_hidden);
 
   const refreshData = async () => {
     try {
@@ -121,6 +124,29 @@ export default function IndexPage() {
     });
     
     XLSX.writeFile(wb, `Artisan_Delights_All_Recipes.xlsx`);
+  };
+
+  const exportIngredientsToExcel = () => {
+    const ingredientsData = [
+      ['Artisan Delights - Master Ingredients List'],
+      [''],
+      ['Ingredient Name', 'Price per Kg (₹)', 'Created Date', 'Updated Date']
+    ];
+
+    masterIngredients.forEach(ingredient => {
+      ingredientsData.push([
+        ingredient.name,
+        ingredient.price_per_kg.toString(),
+        new Date(ingredient.created_at).toLocaleDateString(),
+        new Date(ingredient.updated_at).toLocaleDateString()
+      ]);
+    });
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(ingredientsData);
+    XLSX.utils.book_append_sheet(wb, ws, 'Master Ingredients');
+    
+    XLSX.writeFile(wb, `Artisan_Delights_Master_Ingredients.xlsx`);
   };
 
   if (loading) {
@@ -180,8 +206,8 @@ export default function IndexPage() {
             </Button>
           </div>
 
-          {/* Right: Export Excel Button */}
-          {activeTab === 'recipes' && (
+          {/* Right: Export Buttons */}
+          <div className="flex gap-2">
             <Button 
               onClick={exportAllRecipesToExcel}
               variant="outline"
@@ -189,9 +215,18 @@ export default function IndexPage() {
               className="hidden sm:flex"
             >
               <FileText size={16} className="mr-2" />
-              Export Excel
+              Export Recipes
             </Button>
-          )}
+            <Button 
+              onClick={exportIngredientsToExcel}
+              variant="outline"
+              size="sm"
+              className="hidden sm:flex"
+            >
+              <FileText size={16} className="mr-2" />
+              Export Ingredients
+            </Button>
+          </div>
         </div>
 
         {/* Mobile Navigation - Shown below header on mobile */}
@@ -224,7 +259,7 @@ export default function IndexPage() {
                   <Plus className="mr-1" size={14} /> Add
                 </Button>
               </div>
-              {activeTab === 'recipes' && (
+              <div className="flex gap-1">
                 <Button 
                   onClick={exportAllRecipesToExcel}
                   variant="outline"
@@ -232,9 +267,18 @@ export default function IndexPage() {
                   className="whitespace-nowrap"
                 >
                   <FileText size={14} className="mr-1" />
-                  Excel
+                  Recipes
                 </Button>
-              )}
+                <Button 
+                  onClick={exportIngredientsToExcel}
+                  variant="outline"
+                  size="sm"
+                  className="whitespace-nowrap"
+                >
+                  <FileText size={14} className="mr-1" />
+                  Ingredients
+                </Button>
+              </div>
             </div>  
           </div>
         </div>
@@ -244,20 +288,42 @@ export default function IndexPage() {
       <main className="container mx-auto px-2 sm:px-4 py-2 pb-28 flex-grow">
         {activeTab === 'recipes' && (
           <div className="space-y-4">
-            {/* Search Bar */}
-            <div className="relative max-w-md mx-auto">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <Input
-                placeholder="Search recipes or ingredients..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 mb-1"
-              />
+            {/* Stats and Search */}
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+              <div className="flex gap-4">
+                <div className="bg-white p-3 rounded-lg shadow-sm border">
+                  <div className="text-2xl font-bold text-orange-600">{recipes.length}</div>
+                  <div className="text-sm text-gray-600">Total Recipes</div>
+                </div>
+                <div className="bg-white p-3 rounded-lg shadow-sm border">
+                  <div className="text-2xl font-bold text-green-600">{masterIngredients.length}</div>
+                  <div className="text-sm text-gray-600">Ingredients</div>
+                </div>
+                <Button
+                  onClick={() => setShowHiddenRecipes(!showHiddenRecipes)}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  {showHiddenRecipes ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showHiddenRecipes ? 'Hide Hidden' : 'Show Hidden'}
+                </Button>
+              </div>
+              
+              <div className="relative w-full max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <Input
+                  placeholder="Search recipes or ingredients..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </div>
 
             {/* Recipe Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {filteredRecipes.map(recipe => (
+              {visibleRecipes.map(recipe => (
                 <div key={recipe.id}>
                   <RecipeCard 
                     recipe={recipe} 
@@ -268,7 +334,7 @@ export default function IndexPage() {
               ))}
             </div>
 
-            {filteredRecipes.length === 0 && (
+            {visibleRecipes.length === 0 && (
               <div className="text-center py-8 text-gray-500">
                 <Package size={48} className="mx-auto mb-4 opacity-50" />
                 <p>No recipes found matching your search.</p>

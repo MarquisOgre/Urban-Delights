@@ -6,10 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Eye, IndianRupee, Scale, Clock, AlertTriangle, Calculator, Edit, Trash2 } from "lucide-react";
-import { calculateIngredientCost, calculateRecipeCost, type RecipeWithIngredients, type MasterIngredient } from "@/services/database";
+import { Eye, IndianRupee, Scale, Clock, AlertTriangle, Calculator, Edit, Trash2, EyeOff } from "lucide-react";
+import { calculateIngredientCost, calculateRecipeCost, updateRecipeVisibility, type RecipeWithIngredients, type MasterIngredient } from "@/services/database";
 import EditRecipeDialog from "./EditRecipeDialog";
 import DeleteRecipeDialog from "./DeleteRecipeDialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface RecipeCardProps {
   recipe: RecipeWithIngredients;
@@ -22,6 +23,7 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [desiredQty, setDesiredQty] = useState<number>(1);
+  const { toast } = useToast();
 
   const { totalCost, finalCost } = calculateRecipeCost(recipe, masterIngredients);
   const profitMargin = ((recipe.selling_price - finalCost) / recipe.selling_price * 100).toFixed(1);
@@ -40,9 +42,26 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
     setDesiredQty(Math.max(1, value));
   };
 
+  const handleToggleVisibility = async () => {
+    try {
+      await updateRecipeVisibility(recipe.id, !recipe.is_hidden);
+      onRecipeUpdated();
+      toast({
+        title: "Recipe Updated",
+        description: `Recipe ${recipe.is_hidden ? 'shown' : 'hidden'} successfully`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update recipe visibility",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <>
-      <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-orange-500">
+      <Card className={`hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-orange-500 ${recipe.is_hidden ? 'opacity-60' : ''}`}>
         <CardHeader className="pb-3">
           <div className="flex justify-between items-start">
             <CardTitle className="text-lg sm:text-xl text-gray-900">{recipe.name}</CardTitle>
@@ -50,6 +69,15 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
               <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
                 {profitMargin}% Profit
               </Badge>
+              <Button
+                onClick={handleToggleVisibility}
+                size="sm"
+                variant="outline"
+                className="p-1 h-7 w-7"
+                title={recipe.is_hidden ? "Show Recipe" : "Hide Recipe"}
+              >
+                {recipe.is_hidden ? <Eye size={12} /> : <EyeOff size={12} />}
+              </Button>
               <Button
                 onClick={() => setIsEditDialogOpen(true)}
                 size="sm"
@@ -143,7 +171,7 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
       </Card>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto mx-2 sm:mx-auto">
+        <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto mx-2 sm:mx-auto">
           <DialogHeader>
             <DialogTitle className="text-xl sm:text-2xl text-orange-700">{recipe.name}</DialogTitle>
             <DialogDescription>
@@ -155,7 +183,7 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
             {/* Ingredients & Costs */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900">Ingredients & Costs ({desiredQty}kg batch)</h3>
-              <div className="space-y-2 max-h-80 overflow-y-auto">
+              <div className="space-y-2 max-h-96 overflow-y-auto">
                 {scaledIngredients.map((ingredient, index) => {
                   const masterIngredient = masterIngredients.find(mi => mi.name === ingredient.ingredient_name);
                   const pricePerKg = masterIngredient?.price_per_kg || 0;
