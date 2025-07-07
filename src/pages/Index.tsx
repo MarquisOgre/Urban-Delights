@@ -86,7 +86,7 @@ const Index = () => {
       recipe.ingredients.some(ing => ing.ingredient_name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const visibleRecipes = filteredRecipes.filter(recipe => !(recipe.is_hidden || false));
+  const visibleRecipes = filteredRecipes.filter(recipe => !recipe.is_hidden);
 
   const refreshData = async () => {
     try {
@@ -260,7 +260,7 @@ const Index = () => {
                 </Button>
               </div>
             </div>
-            <CostCalculator masterIngredients={masterIngredients} />
+            <CostCalculator />
           </TabsContent>
         </Tabs>
       </div>
