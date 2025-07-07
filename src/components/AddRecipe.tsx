@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -76,6 +77,19 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
       return;
     }
 
+    // Check for duplicate ingredients
+    const ingredientNames = ingredients.map(ing => ing.ingredient_name);
+    const duplicates = ingredientNames.filter((name, index) => ingredientNames.indexOf(name) !== index);
+    
+    if (duplicates.length > 0) {
+      toast({
+        title: "Duplicate Entry",
+        description: `Duplicate ingredients found: ${duplicates.join(', ')}. Please remove duplicates.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
     const newRecipe = {
       name: recipeName,
       preparation: preparation,
@@ -143,7 +157,7 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
                 readOnly
                 className="bg-gray-100"
               />
-              <p className="text-xs text-gray-500 mt-1">Cost Price × 2 (rounded to hundreds)</p>
+              <p className="text-xs text-gray-500 mt-1">Final Cost × 2 (rounded to 50s & 100s)</p>
             </div>
           </div>
 
@@ -290,7 +304,7 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
                   id="carbs"
                   type="number"
                   value={nutrition.carbs || ""}
-                  onChange={(e) => setNutrition({...nutrition, carbs: Number(e.target.value)})}
+                  onChange={(e) => setNutrition({...nutrition, carbs: Number e.target.value)})}
                 />
               </div>
             </div>

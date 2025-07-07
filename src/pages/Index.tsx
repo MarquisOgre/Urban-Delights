@@ -3,12 +3,10 @@
 
 import { useState, useEffect } from 'react';
 import {
-  Leaf, Plus, Search, Package,
-  CircleDollarSign, TrendingUp
+  Leaf, Plus, Search, Package, FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
 import RecipeCard from '@/components/RecipeCard';
 import MasterIngredientList from '@/components/MasterIngredientList';
 import AddRecipe from '@/components/AddRecipe';
@@ -19,6 +17,7 @@ import {
   type MasterIngredient,
   type RecipeWithIngredients
 } from '@/services/database';
+import * as XLSX from 'xlsx';
 
 export default function IndexPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -69,18 +68,6 @@ export default function IndexPage() {
       recipe.ingredients.some(ing => ing.ingredient_name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const totalRecipes = recipes.length;
-  const totalIngredients = masterIngredients.length;
-  const averagePrice = masterIngredients.length > 0 
-    ? masterIngredients.reduce((sum, ing) => sum + ing.price_per_kg, 0) / masterIngredients.length 
-    : 0;
-  const highestPrice = masterIngredients.length > 0 
-    ? Math.max(...masterIngredients.map(ing => ing.price_per_kg)) 
-    : 0;
-  const lowestPrice = masterIngredients.length > 0 
-    ? Math.min(...masterIngredients.map(ing => ing.price_per_kg)) 
-    : 0;
-
   const refreshData = async () => {
     try {
       const [recipesData, ingredientsData] = await Promise.all([
@@ -97,6 +84,43 @@ export default function IndexPage() {
         variant: "destructive"
       });
     }
+  };
+
+  const exportAllRecipesToExcel = () => {
+    const wb = XLSX.utils.book_new();
+    
+    recipes.forEach((recipe) => {
+      const recipeData = [
+        ['Artisan Delights - Traditional South Indian Podi Collection'],
+        [''],
+        ['Recipe Name', recipe.name],
+        ['Description', 'Traditional South Indian Podi'],
+        ['Selling Price', `₹${recipe.selling_price}`],
+        ['Overheads', `₹${recipe.overheads}`],
+        ['Shelf Life', recipe.shelf_life || 'N/A'],
+        [],
+        ['Ingredients', '', '', ''],
+        ['Name', 'Quantity', 'Unit', 'Notes']
+      ];
+
+      recipe.ingredients.forEach(ingredient => {
+        recipeData.push([ingredient.ingredient_name, ingredient.quantity.toString(), ingredient.unit, '']);
+      });
+
+      recipeData.push(
+        [],
+        ['Nutrition (per 100g)', '', '', ''],
+        ['Calories', `${recipe.calories || 0} kcal`, '', ''],
+        ['Protein', `${recipe.protein || 0}g`, '', ''],
+        ['Fat', `${recipe.fat || 0}g`, '', ''],
+        ['Carbs', `${recipe.carbs || 0}g`, '', '']
+      );
+
+      const ws = XLSX.utils.aoa_to_sheet(recipeData);
+      XLSX.utils.book_append_sheet(wb, ws, recipe.name.substring(0, 30));
+    });
+    
+    XLSX.writeFile(wb, `Artisan_Delights_All_Recipes.xlsx`);
   };
 
   if (loading) {
@@ -155,36 +179,62 @@ export default function IndexPage() {
               <Plus className="mr-2" size={16} /> Add Recipe
             </Button>
           </div>
+
+          {/* Right: Export Excel Button */}
+          {activeTab === 'recipes' && (
+            <Button 
+              onClick={exportAllRecipesToExcel}
+              variant="outline"
+              size="sm"
+              className="hidden sm:flex"
+            >
+              <FileText size={16} className="mr-2" />
+              Export Excel
+            </Button>
+          )}
         </div>
 
         {/* Mobile Navigation - Shown below header on mobile */}
         <div className="md:hidden border-t bg-white/90 backdrop-blur">
           <div className="container mx-auto px-2 py-2">
-            <div className="flex gap-1 overflow-x-auto">
-              <Button
-                variant={activeTab === 'recipes' ? 'default' : 'outline'}
-                onClick={() => setActiveTab('recipes')}
-                size="sm"
-                className="whitespace-nowrap"
-              >
-                <Package className="mr-1" size={14} /> Recipes
-              </Button>
-              <Button
-                variant={activeTab === 'ingredients' ? 'default' : 'outline'}
-                onClick={() => setActiveTab('ingredients')}
-                size="sm"
-                className="whitespace-nowrap"
-              >
-                <Leaf className="mr-1" size={14} /> Ingredients
-              </Button>
-              <Button
-                variant={activeTab === 'add-recipe' ? 'default' : 'outline'}
-                onClick={() => setActiveTab('add-recipe')}
-                size="sm"
-                className="whitespace-nowrap"
-              >
-                <Plus className="mr-1" size={14} /> Add
-              </Button>
+            <div className="flex gap-1 overflow-x-auto justify-between">
+              <div className="flex gap-1">
+                <Button
+                  variant={activeTab === 'recipes' ? 'default' : 'outline'}
+                  onClick={() => setActiveTab('recipes')}
+                  size="sm"
+                  className="whitespace-nowrap"
+                >
+                  <Package className="mr-1" size={14} /> Recipes
+                </Button>
+                <Button
+                  variant={activeTab === 'ingredients' ? 'default' : 'outline'}
+                  onClick={() => setActiveTab('ingredients')}
+                  size="sm"
+                  className="whitespace-nowrap"
+                >
+                  <Leaf className="mr-1" size={14} /> Ingredients
+                </Button>
+                <Button
+                  variant={activeTab === 'add-recipe' ? 'default' : 'outline'}
+                  onClick={() => setActiveTab('add-recipe')}
+                  size="sm"
+                  className="whitespace-nowrap"
+                >
+                  <Plus className="mr-1" size={14} /> Add
+                </Button>
+              </div>
+              {activeTab === 'recipes' && (
+                <Button 
+                  onClick={exportAllRecipesToExcel}
+                  variant="outline"
+                  size="sm"
+                  className="whitespace-nowrap"
+                >
+                  <FileText size={14} className="mr-1" />
+                  Excel
+                </Button>
+              )}
             </div>  
           </div>
         </div>
@@ -194,33 +244,8 @@ export default function IndexPage() {
       <main className="container mx-auto px-2 sm:px-4 py-2 pb-28 flex-grow">
         {activeTab === 'recipes' && (
           <div className="space-y-4">
-            {/* Dashboard Stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              {[{
-                label: 'Total Recipes', value: totalRecipes, icon: <Package size={24} className="text-blue-600" />
-              }, {
-                label: 'Total Ingredients', value: totalIngredients, icon: <Leaf size={24} className="text-green-600" />
-              }, {
-                label: 'Avg Ingredient Price', value: `₹${averagePrice.toFixed(2)}`, icon: <CircleDollarSign size={24} className="text-orange-600" />
-              }, {
-                label: 'Price Range', value: `₹${lowestPrice} - ₹${highestPrice}`, icon: <TrendingUp size={24} className="text-purple-600" />
-              }].map((stat, index) => (
-                <div key={index}>
-                  <Card className="rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200">
-                    <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-4">
-                      <div className="hidden sm:block">{stat.icon}</div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs sm:text-sm text-gray-600 truncate">{stat.label}</p>
-                        <p className="text-lg sm:text-xl font-semibold text-gray-800">{stat.value}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              ))}
-            </div>
-
             {/* Search Bar */}
-            <div className="relative">
+            <div className="relative max-w-md mx-auto">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               <Input
                 placeholder="Search recipes or ingredients..."

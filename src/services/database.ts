@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -166,21 +167,26 @@ export const calculateSellingPrice = (finalCost: number): number => {
   // Base selling price with 2x multiplier
   let sellingPrice = finalCost * 2;
   
-  // Round to nearest fifty or hundred
-  if (sellingPrice <= 100) {
-    // For amounts <= 100, round to nearest 50
-    sellingPrice = Math.ceil(sellingPrice / 50) * 50;
+  // Round to nearest fifty or hundred based on value
+  if (sellingPrice <= 50) {
+    // For amounts 1-50, round to 0 (but ensure minimum viable price)
+    sellingPrice = Math.max(50, Math.ceil(sellingPrice / 50) * 50);
+  } else if (sellingPrice <= 100) {
+    // For amounts 51-100, round to 100
+    sellingPrice = 100;
   } else {
     // For amounts > 100, round to nearest 100
     sellingPrice = Math.ceil(sellingPrice / 100) * 100;
   }
   
-  // Ensure minimum 50% profit margin
-  const minimumSellingPrice = finalCost * 2; // 100% profit margin
+  // Ensure minimum 50% profit margin (selling price should be at least 1.5x final cost)
+  const minimumSellingPrice = finalCost * 1.5;
   if (sellingPrice < minimumSellingPrice) {
     // Round the minimum price using the same logic
-    if (minimumSellingPrice <= 100) {
-      sellingPrice = Math.ceil(minimumSellingPrice / 50) * 50;
+    if (minimumSellingPrice <= 50) {
+      sellingPrice = Math.max(50, Math.ceil(minimumSellingPrice / 50) * 50);
+    } else if (minimumSellingPrice <= 100) {
+      sellingPrice = 100;
     } else {
       sellingPrice = Math.ceil(minimumSellingPrice / 100) * 100;
     }

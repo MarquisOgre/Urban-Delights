@@ -1,9 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Plus, Trash2, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { calculateRecipeCost, calculateSellingPrice, type RecipeWithIngredients, type MasterIngredient } from "@/services/database";
@@ -35,6 +37,8 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
     fat: 0,
     carbs: 0
   });
+  const [autoCalculatePrice, setAutoCalculatePrice] = useState(true);
+  const [manualSellingPrice, setManualSellingPrice] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -53,6 +57,7 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
   }, masterIngredients);
 
   const calculatedSellingPrice = calculateSellingPrice(finalCost);
+  const displaySellingPrice = autoCalculatePrice ? calculatedSellingPrice : manualSellingPrice;
 
   useEffect(() => {
     if (open && recipe) {
@@ -71,6 +76,8 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
         fat: recipe.fat || 0,
         carbs: recipe.carbs || 0
       });
+      setManualSellingPrice(recipe.selling_price);
+      setAutoCalculatePrice(true);
     }
   }, [open, recipe]);
 
@@ -113,6 +120,19 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
       return;
     }
 
+    // Check for duplicate ingredients
+    const ingredientNames = ingredients.map(ing => ing.ingredient_name);
+    const duplicates = ingredientNames.filter((name, index) => ingredientNames.indexOf(name) !== index);
+    
+    if (duplicates.length > 0) {
+      toast({
+        title: "Duplicate Entry",
+        description: `Duplicate ingredients found: ${duplicates.join(', ')}. Please remove duplicates.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -122,7 +142,7 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
         .update({
           name: recipeName,
           preparation: preparation,
-          selling_price: calculatedSellingPrice,
+          selling_price: displaySellingPrice,
           overheads: overheads,
           calories: nutrition.calories || null,
           protein: nutrition.protein || null,
@@ -182,7 +202,7 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
             Edit Recipe
           </DialogTitle>
           <DialogDescription>
-            Update recipe details. Selling price is auto-calculated as Cost Price × 2 (rounded to hundreds).
+            Update recipe details. You can choose to auto-calculate or manually set the selling price.
           </DialogDescription>
         </DialogHeader>
         
@@ -199,14 +219,27 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
               />
             </div>
             <div>
-              <Label htmlFor="calculatedSellingPrice">Selling Price (₹/kg) - Auto-calculated</Label>
+              <div className="flex items-center justify-between mb-2">
+                <Label htmlFor="sellingPrice">Selling Price (₹/kg)</Label>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">Auto Calculate</span>
+                  <Switch
+                    checked={autoCalculatePrice}
+                    onCheckedChange={setAutoCalculatePrice}
+                  />
+                </div>
+              </div>
               <Input
-                id="calculatedSellingPrice"
+                id="sellingPrice"
                 type="number"
-                value={calculatedSellingPrice}
-                readOnly
-                className="bg-gray-100"
+                value={displaySellingPrice}
+                onChange={(e) => setManualSellingPrice(Number(e.target.value))}
+                readOnly={autoCalculatePrice}
+                className={autoCalculatePrice ? "bg-gray-100" : ""}
               />
+              {autoCalculatePrice && (
+                <p className="text-xs text-gray-500 mt-1">Final Cost × 2 (rounded to 50s & 100s)</p>
+              )}
             </div>
           </div>
 

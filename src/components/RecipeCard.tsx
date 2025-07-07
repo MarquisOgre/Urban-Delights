@@ -6,11 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Eye, IndianRupee, Scale, Clock, AlertTriangle, FileText, Calculator, Edit, Trash2 } from "lucide-react";
+import { Eye, IndianRupee, Scale, Clock, AlertTriangle, Calculator, Edit, Trash2 } from "lucide-react";
 import { calculateIngredientCost, calculateRecipeCost, type RecipeWithIngredients, type MasterIngredient } from "@/services/database";
 import EditRecipeDialog from "./EditRecipeDialog";
 import DeleteRecipeDialog from "./DeleteRecipeDialog";
-import * as XLSX from 'xlsx';
 
 interface RecipeCardProps {
   recipe: RecipeWithIngredients;
@@ -35,48 +34,6 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
 
   const scaledTotalCost = totalCost * desiredQty;
   const scaledFinalCost = finalCost * desiredQty;
-
-  const exportToExcel = () => {
-    const wb = XLSX.utils.book_new();
-    
-    // Recipe Details with logo and tagline
-    const recipeData = [
-      ['Artisan Delights - Traditional South Indian Podi Collection'],
-      [''],
-      ['Recipe Name', recipe.name],
-      ['Description', 'Traditional South Indian Podi'],
-      ['Desired Quantity', `${desiredQty} kg`],
-      ['Selling Price', `₹${recipe.selling_price * desiredQty}`],
-      ['Final Cost', `₹${scaledFinalCost.toFixed(2)}`],
-      ['Profit Margin', `${profitMargin}%`],
-      ['Shelf Life', recipe.shelf_life || 'N/A'],
-      [],
-      ['Ingredients', '', '', ''],
-      ['Name', 'Quantity', 'Unit', 'Cost (₹)']
-    ];
-
-    scaledIngredients.forEach(ingredient => {
-      const cost = calculateIngredientCost(ingredient, masterIngredients);
-      recipeData.push([ingredient.ingredient_name, ingredient.quantity.toString(), ingredient.unit, cost.toFixed(2)]);
-    });
-
-    recipeData.push(
-      [],
-      ['Total Raw Material Cost', `₹${scaledTotalCost.toFixed(2)}`],
-      ['Overheads', `₹${recipe.overheads * desiredQty}`],
-      ['Final Cost', `₹${scaledFinalCost.toFixed(2)}`],
-      [],
-      ['Nutrition (per 100g)', '', '', ''],
-      ['Calories', `${recipe.calories || 0} kcal`, '', ''],
-      ['Protein', `${recipe.protein || 0}g`, '', ''],
-      ['Fat', `${recipe.fat || 0}g`, '', ''],
-      ['Carbs', `${recipe.carbs || 0}g`, '', '']
-    );
-
-    const ws = XLSX.utils.aoa_to_sheet(recipeData);
-    XLSX.utils.book_append_sheet(wb, ws, 'Recipe Details');
-    XLSX.writeFile(wb, `${recipe.name.replace(/\s+/g, '_')}_${desiredQty}kg_Recipe.xlsx`);
-  };
 
   const handleQtyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value) || 1;
@@ -171,24 +128,14 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
               </div>
             </div>
             
-            <div className="flex gap-2 mt-4">
+            <div className="mt-4">
               <Button 
                 onClick={() => setIsDialogOpen(true)}
-                className="flex-1 bg-orange-600 hover:bg-orange-700 text-sm sm:text-base"
+                className="w-full bg-orange-600 hover:bg-orange-700 text-sm sm:text-base"
                 size="sm"
               >
                 <Eye size={16} className="mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">View Details</span>
-                <span className="sm:hidden">Details</span>
-              </Button>
-              <Button 
-                onClick={exportToExcel}
-                variant="outline"
-                size="sm"
-                className="px-2 sm:px-3"
-              >
-                <FileText size={16} />
-                <span className="hidden sm:inline ml-2">Excel</span>
+                View Details
               </Button>
             </div>
           </div>
@@ -196,7 +143,7 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
       </Card>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mx-2 sm:mx-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto mx-2 sm:mx-auto">
           <DialogHeader>
             <DialogTitle className="text-xl sm:text-2xl text-orange-700">{recipe.name}</DialogTitle>
             <DialogDescription>
@@ -208,7 +155,7 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
             {/* Ingredients & Costs */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900">Ingredients & Costs ({desiredQty}kg batch)</h3>
-              <div className="space-y-2 max-h-64 overflow-y-auto">
+              <div className="space-y-2 max-h-80 overflow-y-auto">
                 {scaledIngredients.map((ingredient, index) => {
                   const masterIngredient = masterIngredients.find(mi => mi.name === ingredient.ingredient_name);
                   const pricePerKg = masterIngredient?.price_per_kg || 0;
