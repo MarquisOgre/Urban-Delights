@@ -189,8 +189,8 @@ const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredient
           <Card key={ingredient.id} className="hover:shadow-md transition-shadow duration-200">
             <CardHeader className="pb-2">
               <div className="flex justify-between items-center">
-                <CardTitle className="text-lg text-gray-900">{ingredient.name}</CardTitle>
-                <Badge variant="secondary" className="bg-green-100 text-green-800 text-sm px-2 py-1">
+                <CardTitle className="text-lg text-gray-900 flex-1">{ingredient.name}</CardTitle>
+                <Badge variant="secondary" className="bg-green-100 text-green-800 text-sm px-2 py-1 mr-2">
                   <IndianRupee size={14} className="mr-1" />
                   {ingredient.price_per_kg}/kg
                 </Badge>

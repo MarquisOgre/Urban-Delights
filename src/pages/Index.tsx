@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Download, Search, FileText } from 'lucide-react';
+import { Download, Search, FileText, Settings } from 'lucide-react';
 import {
   fetchMasterIngredients,
   fetchRecipesWithIngredients,
@@ -76,17 +76,71 @@ const Index = () => {
 
     // Create workbook with multiple sheets
     const wb = XLSX.utils.book_new();
-    const recipesWs = XLSX.utils.json_to_sheet(recipesData);
-    const ingredientsWs = XLSX.utils.json_to_sheet(ingredientsData);
     
-    XLSX.utils.book_append_sheet(wb, recipesWs, 'Recipes');
-    XLSX.utils.book_append_sheet(wb, ingredientsWs, 'Ingredients');
+    // First sheet - List of all recipes
+    const recipesWs = XLSX.utils.json_to_sheet(recipesData);
+    XLSX.utils.book_append_sheet(wb, recipesWs, 'All Recipes');
+    
+    // Individual recipe sheets
+    recipes.forEach((recipe, index) => {
+      const totalIngredientCost = recipe.ingredients.reduce((sum, ingredient) => {
+        const masterIngredient = masterIngredients.find(mi => mi.name === ingredient.ingredient_name);
+        if (masterIngredient) {
+          const costPerUnit = masterIngredient.price_per_kg / 1000;
+          return sum + (ingredient.quantity * costPerUnit);
+        }
+        return sum;
+      }, 0);
+
+      const finalCost = totalIngredientCost + recipe.overheads;
+      
+      const recipeDetails = [
+        { Field: 'Recipe Name', Value: recipe.name },
+        { Field: 'Selling Price (₹)', Value: recipe.selling_price },
+        { Field: 'Overheads (₹)', Value: recipe.overheads },
+        { Field: 'Total Ingredient Cost (₹)', Value: totalIngredientCost.toFixed(2) },
+        { Field: 'Final Cost (₹)', Value: finalCost.toFixed(2) },
+        { Field: 'Profit (₹)', Value: (recipe.selling_price - finalCost).toFixed(2) },
+        { Field: 'Profit Margin (%)', Value: (((recipe.selling_price - finalCost) / recipe.selling_price) * 100).toFixed(2) },
+        { Field: '', Value: '' },
+        { Field: 'Nutritional Information', Value: '' },
+        { Field: 'Calories', Value: recipe.calories || 'N/A' },
+        { Field: 'Protein (g)', Value: recipe.protein || 'N/A' },
+        { Field: 'Fat (g)', Value: recipe.fat || 'N/A' },
+        { Field: 'Carbs (g)', Value: recipe.carbs || 'N/A' },
+        { Field: '', Value: '' },
+        { Field: 'Storage & Preparation', Value: '' },
+        { Field: 'Shelf Life', Value: recipe.shelf_life || 'N/A' },
+        { Field: 'Storage', Value: recipe.storage || 'N/A' },
+        { Field: 'Preparation Method', Value: recipe.preparation || 'N/A' },
+        { Field: '', Value: '' },
+        { Field: 'Ingredients', Value: '' },
+        ...recipe.ingredients.map(ingredient => {
+          const masterIngredient = masterIngredients.find(mi => mi.name === ingredient.ingredient_name);
+          const pricePerKg = masterIngredient ? masterIngredient.price_per_kg : 0;
+          const costPerUnit = pricePerKg / 1000;
+          const totalCost = ingredient.quantity * costPerUnit;
+          return {
+            Field: `${ingredient.ingredient_name} (${ingredient.quantity}${ingredient.unit})`,
+            Value: `₹${totalCost.toFixed(2)} (₹${pricePerKg}/kg)`
+          };
+        })
+      ];
+
+      const recipeWs = XLSX.utils.json_to_sheet(recipeDetails);
+      const sheetName = `${recipe.name.substring(0, 25)}${recipe.name.length > 25 ? '...' : ''}`;
+      XLSX.utils.book_append_sheet(wb, recipeWs, sheetName);
+    });
+    
+    // Last sheet - Ingredients
+    const ingredientsWs = XLSX.utils.json_to_sheet(ingredientsData);
+    XLSX.utils.book_append_sheet(wb, ingredientsWs, 'Master Ingredients');
     
     XLSX.writeFile(wb, 'artisan_delights_data.xlsx');
 
     toast({
       title: 'Export Successful',
-      description: 'All data has been exported to Excel file with separate sheets',
+      description: `Exported ${recipes.length + 2} sheets: All recipes overview, ${recipes.length} individual recipe sheets, and master ingredients`,
     });
   };
 
@@ -126,7 +180,6 @@ const Index = () => {
                 { label: 'Recipes', key: 'recipes' },
                 { label: 'Ingredient List', key: 'ingredients' },
                 { label: 'Add Recipe', key: 'add-recipe' },
-                { label: 'Manage Recipes', key: 'manage-recipes' },
               ].map(link => (
                 <button
                   key={link.key}
@@ -142,8 +195,20 @@ const Index = () => {
               ))}
             </div>
 
-            {/* Export Button */}
+            {/* Action Buttons */}
             <div className="flex items-center space-x-2">
+              <Button
+                onClick={() => setCurrentView('manage-recipes')}
+                size="sm"
+                className={`${
+                  currentView === 'manage-recipes'
+                    ? 'bg-orange-100 text-orange-800'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
+              >
+                <Settings size={16} className="mr-1" />
+                Manage Recipes
+              </Button>
               <Button
                 onClick={exportAllData}
                 size="sm"
@@ -189,7 +254,7 @@ const Index = () => {
             </div>
 
             {/* Recipe Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {visibleRecipes.map(recipe => (
                 <RecipeCard
                   key={recipe.id}
