@@ -188,8 +188,12 @@ const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredient
         {filteredIngredients.map((ingredient) => (
           <Card key={ingredient.id} className="hover:shadow-md transition-shadow duration-200">
             <CardHeader className="pb-2">
-              <div className="flex justify-between items-start">
+              <div className="flex justify-between items-center">
                 <CardTitle className="text-lg text-gray-900">{ingredient.name}</CardTitle>
+                <Badge variant="secondary" className="bg-green-100 text-green-800 text-sm px-2 py-1">
+                  <IndianRupee size={14} className="mr-1" />
+                  {ingredient.price_per_kg}/kg
+                </Badge>
                 <div className="flex gap-1">
                   <Button
                     onClick={() => handleEditIngredient(ingredient)}
@@ -211,12 +215,6 @@ const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredient
               </div>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-center">
-                <Badge variant="secondary" className="bg-green-100 text-green-800 text-lg px-3 py-1">
-                  <IndianRupee size={16} className="mr-1" />
-                  {ingredient.price_per_kg}/kg
-                </Badge>
-              </div>
             </CardContent>
           </Card>
         ))}

@@ -171,9 +171,9 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
     <div className="max-w-4xl mx-auto space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center justify-center gap-2">
             <Plus className="text-orange-600" />
-            Add New Recipe
+            ADD NEW RECIPE
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">

@@ -50,8 +50,9 @@ const Index = () => {
     refetchRecipes();
   };
 
-  const exportRecipesToExcel = () => {
-    const exportData = recipes.map(recipe => ({
+  const exportAllData = () => {
+    // Export recipes data (basic info without ingredients)
+    const recipesData = recipes.map(recipe => ({
       'Recipe Name': recipe.name,
       'Selling Price (₹)': recipe.selling_price,
       'Overheads (₹)': recipe.overheads,
@@ -65,33 +66,27 @@ const Index = () => {
       'Status': recipe.is_hidden ? 'Hidden' : 'Visible',
     }));
 
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Recipes');
-    XLSX.writeFile(wb, 'recipes_export.xlsx');
-
-    toast({
-      title: 'Export Successful',
-      description: 'Recipes have been exported to Excel file',
-    });
-  };
-
-  const exportIngredientsToExcel = () => {
-    const exportData = masterIngredients.map(ingredient => ({
+    // Export ingredients data
+    const ingredientsData = masterIngredients.map(ingredient => ({
       'Ingredient Name': ingredient.name,
       'Price per Kg (₹)': ingredient.price_per_kg,
       'Created Date': new Date(ingredient.created_at).toLocaleDateString(),
       'Last Updated': new Date(ingredient.updated_at).toLocaleDateString(),
     }));
 
-    const ws = XLSX.utils.json_to_sheet(exportData);
+    // Create workbook with multiple sheets
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Ingredients');
-    XLSX.writeFile(wb, 'ingredients_export.xlsx');
+    const recipesWs = XLSX.utils.json_to_sheet(recipesData);
+    const ingredientsWs = XLSX.utils.json_to_sheet(ingredientsData);
+    
+    XLSX.utils.book_append_sheet(wb, recipesWs, 'Recipes');
+    XLSX.utils.book_append_sheet(wb, ingredientsWs, 'Ingredients');
+    
+    XLSX.writeFile(wb, 'artisan_delights_data.xlsx');
 
     toast({
       title: 'Export Successful',
-      description: 'Ingredients have been exported to Excel file',
+      description: 'All data has been exported to Excel file with separate sheets',
     });
   };
 
@@ -147,30 +142,22 @@ const Index = () => {
               ))}
             </div>
 
-            {/* Export Buttons */}
+            {/* Export Button */}
             <div className="flex items-center space-x-2">
               <Button
-                onClick={exportRecipesToExcel}
+                onClick={exportAllData}
                 size="sm"
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
                 <Download size={16} className="mr-1" />
-                Export Recipes
-              </Button>
-              <Button
-                onClick={exportIngredientsToExcel}
-                size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Download size={16} className="mr-1" />
-                Export Ingredients
+                Export Data
               </Button>
             </div>
           </div>
         </div>
       </nav>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-2">
         {/* Content based on current view */}
         {currentView === 'recipes' && (
           <div className="space-y-6">
