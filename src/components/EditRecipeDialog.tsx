@@ -29,7 +29,7 @@ interface EditRecipeDialogProps {
 const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRecipeUpdated }: EditRecipeDialogProps) => {
   const [recipeName, setRecipeName] = useState("");
   const [preparation, setPreparation] = useState("");
-  const [overheads, setOverheads] = useState<number>(90);
+  const [overheads, setOverheads] = useState<number>(100);
   const [ingredients, setIngredients] = useState<EditIngredient[]>([]);
   const [nutrition, setNutrition] = useState({
     calories: 0,
@@ -238,7 +238,7 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
                 className={autoCalculatePrice ? "bg-gray-100" : ""}
               />
               {autoCalculatePrice && (
-                <p className="text-xs text-gray-500 mt-1">Final Cost × 2 (rounded to 50s & 100s)</p>
+                <p className="text-xs text-gray-500 mt-1">Final Cost × 2</p>
               )}
             </div>
           </div>

@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Plus, Trash2, Save } from "lucide-react";
 import { addRecipeWithIngredients, calculateIngredientCostFromPartial, calculateSellingPrice, type MasterIngredient, type NewIngredient } from "@/services/database";
 import { useToast } from "@/hooks/use-toast";
@@ -17,7 +17,7 @@ interface AddRecipeProps {
 const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
   const [recipeName, setRecipeName] = useState("");
   const [preparation, setPreparation] = useState("");
-  const [overheads, setOverheads] = useState<number>(90);
+  const [overheads, setOverheads] = useState<number>(100);
   const [ingredients, setIngredients] = useState<NewIngredient[]>([
     { ingredient_name: "", quantity: 0, unit: "g" }
   ]);
@@ -27,6 +27,8 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
     fat: 0,
     carbs: 0
   });
+  const [autoCalculatePrice, setAutoCalculatePrice] = useState(true);
+  const [manualSellingPrice, setManualSellingPrice] = useState<number>(0);
   const { toast } = useToast();
 
   // Calculate selling price automatically
@@ -37,6 +39,7 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
   
   const finalCost = totalCost + overheads;
   const calculatedSellingPrice = calculateSellingPrice(finalCost);
+  const displaySellingPrice = autoCalculatePrice ? calculatedSellingPrice : manualSellingPrice;
 
   const addIngredient = () => {
     setIngredients([...ingredients, { ingredient_name: "", quantity: 0, unit: "g" }]);
@@ -103,20 +106,57 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
     };
 
     try {
-      await addRecipeWithIngredients(newRecipe, ingredients, masterIngredients);
+      // Create a modified version of addRecipeWithIngredients for manual price
+      if (!autoCalculatePrice) {
+        // Calculate costs
+        const totalCost = ingredients.reduce((sum, ingredient) => {
+          return sum + calculateIngredientCostFromPartial(ingredient, masterIngredients);
+        }, 0);
+        
+        // Insert recipe with manual price
+        const { supabase } = await import('@/integrations/supabase/client');
+        const { data: recipeData, error: recipeError } = await supabase
+          .from('recipes')
+          .insert({
+            ...newRecipe,
+            selling_price: manualSellingPrice
+          })
+          .select()
+          .single();
+        
+        if (recipeError) throw recipeError;
+        
+        // Insert ingredients
+        const ingredientInserts = ingredients.map(ingredient => ({
+          recipe_id: recipeData.id,
+          ingredient_name: ingredient.ingredient_name,
+          quantity: ingredient.quantity,
+          unit: ingredient.unit
+        }));
+        
+        const { error: ingredientsError } = await supabase
+          .from('recipe_ingredients')
+          .insert(ingredientInserts);
+        
+        if (ingredientsError) throw ingredientsError;
+      } else {
+        await addRecipeWithIngredients(newRecipe, ingredients, masterIngredients);
+      }
       
       // Reset form
       setRecipeName("");
       setPreparation("");
-      setOverheads(90);
+      setOverheads(100);
       setIngredients([{ ingredient_name: "", quantity: 0, unit: "g" }]);
       setNutrition({ calories: 0, protein: 0, fat: 0, carbs: 0 });
+      setAutoCalculatePrice(true);
+      setManualSellingPrice(0);
 
       onRecipeAdded();
 
       toast({
         title: "Recipe Added",
-        description: `${newRecipe.name} has been added successfully with selling price ₹${calculatedSellingPrice}!`,
+        description: `${newRecipe.name} has been added successfully with selling price ₹${displaySellingPrice}!`,
       });
     } catch (error) {
       toast({
@@ -149,15 +189,27 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
               />
             </div>
             <div>
-              <Label htmlFor="calculatedSellingPrice">Selling Price (₹/kg) - Auto-calculated</Label>
+              <div className="flex items-center justify-between mb-2">
+                <Label htmlFor="sellingPrice">Selling Price (₹/kg)</Label>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">Auto Calculate</span>
+                  <Switch
+                    checked={autoCalculatePrice}
+                    onCheckedChange={setAutoCalculatePrice}
+                  />
+                </div>
+              </div>
               <Input
-                id="calculatedSellingPrice"
+                id="sellingPrice"
                 type="number"
-                value={calculatedSellingPrice}
-                readOnly
-                className="bg-gray-100"
+                value={displaySellingPrice}
+                onChange={(e) => setManualSellingPrice(Number(e.target.value))}
+                readOnly={autoCalculatePrice}
+                className={autoCalculatePrice ? "bg-gray-100" : ""}
               />
-              <p className="text-xs text-gray-500 mt-1">Final Cost × 2 (rounded to 50s & 100s)</p>
+              {autoCalculatePrice && (
+                <p className="text-xs text-gray-500 mt-1">Final Cost × 2</p>
+              )}
             </div>
           </div>
 
@@ -189,7 +241,7 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
               </div>
               <div className="flex justify-between font-bold text-green-700">
                 <span>Selling Price:</span>
-                <span>₹{calculatedSellingPrice}</span>
+                <span>₹{displaySellingPrice.toFixed(2)}</span>
               </div>
             </div>
           </div>

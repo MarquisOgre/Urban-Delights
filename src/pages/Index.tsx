@@ -16,6 +16,7 @@ import {
 import RecipeCard from '@/components/RecipeCard';
 import MasterIngredientList from '@/components/MasterIngredientList';
 import AddRecipe from '@/components/AddRecipe';
+import ManageRecipes from '@/components/ManageRecipes';
 import { useToast } from '@/hooks/use-toast';
 import * as XLSX from 'xlsx';
 
@@ -229,43 +230,7 @@ const Index = () => {
         )}
 
         {currentView === 'manage-recipes' && (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-orange-800 mb-2">Manage All Recipes</h2>
-              <p className="text-gray-600">View and manage the visibility of all your recipes</p>
-            </div>
-
-            {/* Search Bar */}
-            <div className="max-w-md mx-auto mb-6">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <Input
-                  placeholder="Search all recipes..."
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            {/* Recipe Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredRecipes.map(recipe => (
-                <RecipeCard
-                  key={recipe.id}
-                  recipe={recipe}
-                  masterIngredients={masterIngredients}
-                  onRecipeUpdated={refreshData}
-                />
-              ))}
-            </div>
-
-            {filteredRecipes.length === 0 && (
-              <div className="text-center py-12 text-gray-500 text-lg">
-                {searchTerm ? 'No recipes found matching your search.' : 'No recipes available.'}
-              </div>
-            )}
-          </div>
+          <ManageRecipes recipes={recipes} onRecipeUpdated={refreshData} />
         )}
       </div>
 

@@ -58,21 +58,8 @@ export const fetchRecipesWithIngredients = async (): Promise<RecipeWithIngredien
 };
 
 export const calculateSellingPrice = (finalCost: number): number => {
-  const basePrice = finalCost * 2;
-  
-  // Ensure minimum 50% profit margin
-  const minSellingPrice = finalCost * 1.5;
-  const targetPrice = Math.max(basePrice, minSellingPrice);
-  
-  // Round to nearest 50 or 100
-  if (targetPrice <= 50) {
-    return 50; // Minimum price
-  } else if (targetPrice <= 100) {
-    return 100;
-  } else {
-    // For prices above 100, round to nearest 50
-    return Math.ceil(targetPrice / 50) * 50;
-  }
+  // Simply multiply by 2, no rounding
+  return finalCost * 2;
 };
 
 export const calculateIngredientCost = (ingredient: RecipeIngredient, masterIngredients: MasterIngredient[]): number => {
