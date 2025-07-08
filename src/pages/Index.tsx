@@ -193,6 +193,12 @@ const Index = () => {
                   {link.label}
                 </button>
               ))}
+              <a
+                href="/investor-pitch"
+                className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-orange-600 transition-colors"
+              >
+                Investor Pitch
+              </a>
             </div>
 
             {/* Action Buttons */}
