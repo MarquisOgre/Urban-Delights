@@ -35,7 +35,7 @@ const ManageRecipes = ({ recipes, onRecipeUpdated }: ManageRecipesProps) => {
     <div className="space-y-6">
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-orange-800 mb-2">Manage All Recipes</h2>
-        <p className="text-gray-600">Enable or disable recipe visibility</p>
+        {/*<p className="text-gray-600">Enable or disable recipe visibility</p>*/}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -54,7 +54,7 @@ const ManageRecipes = ({ recipes, onRecipeUpdated }: ManageRecipesProps) => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2 text-sm">
+              {/* <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Selling Price:</span>
                   <span className="font-semibold text-green-600">₹{recipe.selling_price}</span>
@@ -73,7 +73,7 @@ const ManageRecipes = ({ recipes, onRecipeUpdated }: ManageRecipesProps) => {
                     {recipe.is_hidden ? 'Hidden' : 'Visible'}
                   </span>
                 </div>
-              </div>
+              </div> */}
 
               <Button
                 onClick={() => handleToggleVisibility(recipe)}
