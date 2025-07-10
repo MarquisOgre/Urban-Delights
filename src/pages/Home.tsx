@@ -274,7 +274,7 @@ const Home = () => {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Phone className="w-4 h-4" />
-                  <span className="text-gray-400">+91 12345 67890</span>
+                  <span className="text-gray-400">+91 8500 60 6000</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Mail className="w-4 h-4" />
