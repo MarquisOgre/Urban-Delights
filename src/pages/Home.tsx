@@ -41,19 +41,22 @@ const Home = () => {
       <nav className="bg-white/90 backdrop-blur-sm shadow-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2">
               <img src="/logo.png" alt="Artisan Delights" className="h-10 w-10" />
               <span className="text-2xl font-bold text-orange-600">Artisan Delights</span>
-            </div>
+            </Link>
             <div className="hidden md:flex items-center gap-8">
               <Link to="/" className="text-orange-600 font-medium">Home</Link>
+              <Link to="/about" className="text-gray-700 hover:text-orange-600 transition-colors">About Us</Link>
               <Link to="/recipes" className="text-gray-700 hover:text-orange-600 transition-colors">Recipes Dashboard</Link>
               <Link to="/investor-pitch" className="text-gray-700 hover:text-orange-600 transition-colors">Investor Pitch</Link>
               <Link to="/contact" className="text-gray-700 hover:text-orange-600 transition-colors">Contact</Link>
-              <Button className="bg-orange-600 hover:bg-orange-700 text-white">
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Shop Now
-              </Button>
+              <Link to="/about">
+                <Button className="bg-orange-600 hover:bg-orange-700 text-white">
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  Shop Now
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -75,13 +78,17 @@ const Home = () => {
             Handcrafted South Indian Spice Blends Made with Love & Tradition
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 text-lg">
-              <ShoppingCart className="w-5 h-5 mr-2" />
-              Shop Our Products
-            </Button>
-            <Button size="lg" variant="outline" className="bg-white/20 border-white text-white hover:bg-white hover:text-orange-600 px-8 py-4 text-lg">
-              Learn Our Story
-            </Button>
+            <Link to="/about">
+              <Button size="lg" className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 text-lg">
+                <ShoppingCart className="w-5 h-5 mr-2" />
+                Shop Our Products
+              </Button>
+            </Link>
+            <Link to="/about">
+              <Button size="lg" variant="outline" className="bg-white/20 border-white text-white hover:bg-white hover:text-orange-600 px-8 py-4 text-lg">
+                Learn Our Story
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -152,9 +159,11 @@ const Home = () => {
                   <p className="text-gray-600 text-sm mb-4">{product.description}</p>
                   <div className="flex items-center justify-between">
                     <span className="text-orange-600 font-bold text-lg">₹250-300</span>
-                    <Button size="sm" className="bg-orange-600 hover:bg-orange-700 text-white">
-                      Add to Cart
-                    </Button>
+                    <Link to="/contact">
+                      <Button size="sm" className="bg-orange-600 hover:bg-orange-700 text-white">
+                        Add to Cart
+                      </Button>
+                    </Link>
                   </div>
                 </CardContent>
               </Card>
@@ -178,9 +187,11 @@ const Home = () => {
                 dry-roast them to perfection, and blend them in small batches to ensure maximum freshness and authenticity.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button className="bg-orange-600 hover:bg-orange-700 text-white">
-                  Read Our Full Story
-                </Button>
+                <Link to="/about">
+                  <Button className="bg-orange-600 hover:bg-orange-700 text-white">
+                    Read Our Full Story
+                  </Button>
+                </Link>
                 <Link to="/investor-pitch">
                   <Button variant="outline" className="border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white">
                     Investor Information
@@ -211,10 +222,12 @@ const Home = () => {
             Join thousands of satisfied customers who have made our spice blends a part of their daily cooking.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-orange-600 hover:bg-gray-100 px-8 py-4 text-lg">
-              <ShoppingCart className="w-5 h-5 mr-2" />
-              Start Shopping
-            </Button>
+            <Link to="/about">
+              <Button size="lg" className="bg-white text-orange-600 hover:bg-gray-100 px-8 py-4 text-lg">
+                <ShoppingCart className="w-5 h-5 mr-2" />
+                Start Shopping
+              </Button>
+            </Link>
             <Link to="/contact">
               <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-orange-600 px-8 py-4 text-lg">
                 <Phone className="w-5 h-5 mr-2" />
@@ -230,10 +243,10 @@ const Home = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <div className="flex items-center gap-2 mb-4">
+              <Link to="/" className="flex items-center gap-2 mb-4">
                 <img src="/logo.png" alt="Artisan Delights" className="h-8 w-8" />
                 <span className="text-xl font-bold">Artisan Delights</span>
-              </div>
+              </Link>
               <p className="text-gray-400">
                 Handcrafted South Indian spice blends made with traditional recipes and premium ingredients.
               </p>
@@ -242,8 +255,8 @@ const Home = () => {
               <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
               <ul className="space-y-2">
                 <li><Link to="/" className="text-gray-400 hover:text-white transition-colors">Home</Link></li>
-                <li><Link to="/products" className="text-gray-400 hover:text-white transition-colors">Products</Link></li>
                 <li><Link to="/about" className="text-gray-400 hover:text-white transition-colors">About Us</Link></li>
+                <li><Link to="/recipes" className="text-gray-400 hover:text-white transition-colors">Recipes</Link></li>
                 <li><Link to="/contact" className="text-gray-400 hover:text-white transition-colors">Contact</Link></li>
               </ul>
             </div>
