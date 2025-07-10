@@ -1,8 +1,27 @@
+'use client';
+
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Package, Globe, TrendingUp, DollarSign, Target, Building } from 'lucide-react';
+import {
+  CheckCircle,
+  Package,
+  Globe,
+  TrendingUp,
+  DollarSign,
+  Target,
+  Building,
+} from 'lucide-react';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 const InvestorPitch = () => {
+  const [currentView, setCurrentView] = useState('investor-pitch');
+
+  const exportAllData = () => {
+    alert('Export All Data triggered!');
+  };
+
   const products = [
     'Putnalu Podi', 'Palli Podi', 'Karvepaku Podi', 'Kobari Powder',
     'Sambar Powder', 'Rasam Powder', 'Chutney Podi', 'Idly Podi',
@@ -22,18 +41,19 @@ const InvestorPitch = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100 py-8">
-      <div className="container mx-auto px-4 space-y-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-orange-800 mb-4">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100 pb-24">
+      <Header currentView={currentView} setCurrentView={setCurrentView} exportAllData={exportAllData} />
+
+      <div className="container mx-auto px-4 py-10 space-y-8">
+        <div className="text-center mb-6">
+          <h1 className="text-4xl font-bold text-orange-800 mb-2">
             Artisan Delights – Investor Pitch Summary
           </h1>
           <p className="text-lg text-gray-600">Handcrafted South Indian Spice Blends for Global Markets</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Brand Introduction & Vision */}
+          {/* Brand Introduction */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -61,7 +81,7 @@ const InvestorPitch = () => {
             </CardContent>
           </Card>
 
-          {/* Product Line Overview */}
+          {/* Product Overview */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -70,15 +90,13 @@ const InvestorPitch = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <h3 className="font-semibold text-orange-700 mb-2">12 Podis:</h3>
-                <div className="grid grid-cols-2 gap-1">
-                  {products.map((product, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
-                      {product}
-                    </Badge>
-                  ))}
-                </div>
+              <h3 className="font-semibold text-orange-700 mb-2">12 Podis:</h3>
+              <div className="grid grid-cols-2 gap-1">
+                {products.map((product, index) => (
+                  <Badge key={index} variant="secondary" className="text-xs">
+                    {product}
+                  </Badge>
+                ))}
               </div>
               <div>
                 <h3 className="font-semibold text-orange-700">Highlights:</h3>
@@ -92,7 +110,7 @@ const InvestorPitch = () => {
             </CardContent>
           </Card>
 
-          {/* Production, Packaging & Distribution */}
+          {/* Production */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -133,21 +151,17 @@ const InvestorPitch = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <h3 className="font-semibold text-orange-700">India:</h3>
-                <ul className="list-disc pl-4 space-y-1 text-sm">
-                  <li>Urban foodies & health-conscious consumers</li>
-                  <li>Rural regions with traditional taste demand</li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-semibold text-orange-700">Global:</h3>
-                <ul className="list-disc pl-4 space-y-1 text-sm">
-                  <li>NRI markets (USA, UK, UAE, AUS)</li>
-                  <li>Growing demand for Indian ready-to-use spice blends</li>
-                  <li>Gifting & bulk demand in wedding/ethnic markets</li>
-                </ul>
-              </div>
+              <h3 className="font-semibold text-orange-700">India:</h3>
+              <ul className="list-disc pl-4 space-y-1 text-sm">
+                <li>Urban foodies & health-conscious consumers</li>
+                <li>Rural regions with traditional taste demand</li>
+              </ul>
+              <h3 className="font-semibold text-orange-700">Global:</h3>
+              <ul className="list-disc pl-4 space-y-1 text-sm">
+                <li>NRI markets (USA, UK, UAE, AUS)</li>
+                <li>Growing demand for Indian ready-to-use spice blends</li>
+                <li>Gifting & bulk demand in wedding/ethnic markets</li>
+              </ul>
             </CardContent>
           </Card>
 
@@ -179,35 +193,17 @@ const InvestorPitch = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="font-semibold text-orange-700">Monthly Production:</span>
-                  <p>300 kg</p>
-                </div>
-                <div>
-                  <span className="font-semibold text-orange-700">Avg Cost per kg:</span>
-                  <p>₹250–₹300</p>
-                </div>
-                <div>
-                  <span className="font-semibold text-orange-700">Avg Selling Price:</span>
-                  <p>₹500–₹600</p>
-                </div>
-                <div>
-                  <span className="font-semibold text-orange-700">Year 1 Revenue:</span>
-                  <p>₹18–20 Lakhs</p>
-                </div>
-                <div>
-                  <span className="font-semibold text-orange-700">Break-even:</span>
-                  <p>Year 2</p>
-                </div>
-                <div>
-                  <span className="font-semibold text-orange-700">5-Year Growth:</span>
-                  <p>₹1 Cr+ revenue</p>
-                </div>
+                <div><span className="font-semibold text-orange-700">Monthly Production:</span> <p>300 kg</p></div>
+                <div><span className="font-semibold text-orange-700">Avg Cost per kg:</span> <p>₹250–₹300</p></div>
+                <div><span className="font-semibold text-orange-700">Avg Selling Price:</span> <p>₹500–₹600</p></div>
+                <div><span className="font-semibold text-orange-700">Year 1 Revenue:</span> <p>₹18–20 Lakhs</p></div>
+                <div><span className="font-semibold text-orange-700">Break-even:</span> <p>Year 2</p></div>
+                <div><span className="font-semibold text-orange-700">5-Year Growth:</span> <p>₹1 Cr+ revenue</p></div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Growth & Export Strategy */}
+          {/* Growth Strategy */}
           <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -215,25 +211,11 @@ const InvestorPitch = () => {
                 Growth & Export Strategy
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
-                  <h3 className="font-semibold text-orange-700">Scale Up:</h3>
-                  <p className="text-sm">300 kg → 1 ton/month</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-orange-700">Export Compliance:</h3>
-                  <p className="text-sm">Multilingual labels, FSSAI + export-ready certifications</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-orange-700">Distribution Tie-ups:</h3>
-                  <p className="text-sm">Indian stores in US, UAE, UK</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-orange-700">Brand Building:</h3>
-                  <p className="text-sm">Food bloggers, influencers, chefs</p>
-                </div>
-              </div>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+              <div><h3 className="font-semibold text-orange-700">Scale Up:</h3><p>300 kg → 1 ton/month</p></div>
+              <div><h3 className="font-semibold text-orange-700">Export Compliance:</h3><p>Multilingual labels, FSSAI + export-ready certifications</p></div>
+              <div><h3 className="font-semibold text-orange-700">Distribution Tie-ups:</h3><p>Indian stores in US, UAE, UK</p></div>
+              <div><h3 className="font-semibold text-orange-700">Brand Building:</h3><p>Food bloggers, influencers, chefs</p></div>
             </CardContent>
           </Card>
 
@@ -247,7 +229,7 @@ const InvestorPitch = () => {
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
+                <table className="w-full border-collapse text-sm">
                   <thead>
                     <tr className="border-b">
                       <th className="text-left p-2 font-semibold text-orange-700">Category</th>
@@ -259,13 +241,13 @@ const InvestorPitch = () => {
                     {investmentBreakdown.map((item, index) => (
                       <tr key={index} className="border-b hover:bg-orange-50">
                         <td className="p-2 font-medium">{item.category}</td>
-                        <td className="p-2 text-sm">{item.details}</td>
+                        <td className="p-2">{item.details}</td>
                         <td className="p-2 text-right font-semibold">{item.cost}</td>
                       </tr>
                     ))}
                     <tr className="border-b-2 border-orange-200 bg-orange-100">
                       <td className="p-2 font-bold">Total Investment Required</td>
-                      <td className="p-2"></td>
+                      <td></td>
                       <td className="p-2 text-right font-bold text-lg">₹6,00,000</td>
                     </tr>
                   </tbody>
@@ -275,6 +257,8 @@ const InvestorPitch = () => {
           </Card>
         </div>
       </div>
+
+      <Footer showTopButton />
     </div>
   );
 };
