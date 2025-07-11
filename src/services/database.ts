@@ -109,12 +109,35 @@ export const calculateRecipeCost = (recipe: RecipeWithIngredients, masterIngredi
   return { totalCost, finalCost };
 };
 
-export const addMasterIngredient = async (name: string, pricePerKg: number): Promise<void> => {
+export const addMasterIngredient = async (name: string, pricePerKg: number, brand?: string): Promise<void> => {
   const { error } = await supabase
     .from('master_ingredients')
-    .insert({ name, price_per_kg: pricePerKg });
+    .insert({ name, price_per_kg: pricePerKg, brand });
   
   if (error) throw error;
+};
+
+export const updateMasterIngredient = async (id: string, pricePerKg: number, brand?: string): Promise<void> => {
+  const { error } = await supabase
+    .from('master_ingredients')
+    .update({ price_per_kg: pricePerKg, brand, updated_at: new Date().toISOString() })
+    .eq('id', id);
+  
+  if (error) throw error;
+};
+
+export const upsertMasterIngredient = async (name: string, pricePerKg: number, brand?: string): Promise<void> => {
+  const { data: existing } = await supabase
+    .from('master_ingredients')
+    .select('id')
+    .eq('name', name)
+    .single();
+  
+  if (existing) {
+    await updateMasterIngredient(existing.id, pricePerKg, brand);
+  } else {
+    await addMasterIngredient(name, pricePerKg, brand);
+  }
 };
 
 export const updateMasterIngredientPrice = async (id: string, pricePerKg: number): Promise<void> => {

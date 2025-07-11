@@ -7,8 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, Save, IndianRupee, AlertTriangle, Search, Leaf } from "lucide-react";
-import { addMasterIngredient, updateMasterIngredientPrice, deleteMasterIngredient, type MasterIngredient } from "@/services/database";
+import { addMasterIngredient, updateMasterIngredient, deleteMasterIngredient, upsertMasterIngredient, type MasterIngredient } from "@/services/database";
 import { useToast } from "@/hooks/use-toast";
+import BulkAddIngredients from "@/components/BulkAddIngredients";
 
 interface MasterIngredientListProps {
   masterIngredients: MasterIngredient[];
@@ -19,8 +20,10 @@ const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredient
   const [searchTerm, setSearchTerm] = useState("");
   const [newIngredientName, setNewIngredientName] = useState("");
   const [newIngredientPrice, setNewIngredientPrice] = useState<number>(0);
+  const [newIngredientBrand, setNewIngredientBrand] = useState("");
   const [editingIngredient, setEditingIngredient] = useState<MasterIngredient | null>(null);
   const [editPrice, setEditPrice] = useState<number>(0);
+  const [editBrand, setEditBrand] = useState("");
   const [deletingIngredient, setDeletingIngredient] = useState<MasterIngredient | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -42,9 +45,10 @@ const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredient
     }
 
     try {
-      await addMasterIngredient(newIngredientName, newIngredientPrice);
+      await addMasterIngredient(newIngredientName, newIngredientPrice, newIngredientBrand);
       setNewIngredientName("");
       setNewIngredientPrice(0);
+      setNewIngredientBrand("");
       setIsAddDialogOpen(false);
       onRefresh();
       
@@ -64,6 +68,7 @@ const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredient
   const handleEditIngredient = (ingredient: MasterIngredient) => {
     setEditingIngredient(ingredient);
     setEditPrice(ingredient.price_per_kg);
+    setEditBrand(ingredient.brand || "");
     setIsEditDialogOpen(true);
   };
 
@@ -78,20 +83,21 @@ const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredient
     }
 
     try {
-      await updateMasterIngredientPrice(editingIngredient.id, editPrice);
+      await updateMasterIngredient(editingIngredient.id, editPrice, editBrand);
       setEditingIngredient(null);
       setEditPrice(0);
+      setEditBrand("");
       setIsEditDialogOpen(false);
       onRefresh();
       
       toast({
-        title: "Price Updated",
-        description: `Price for ${editingIngredient.name} has been updated!`,
+        title: "Ingredient Updated",
+        description: `${editingIngredient.name} has been updated!`,
       });
     } catch (error) {
       toast({
-        title: "Error updating price",
-        description: "Failed to update price in database",
+        title: "Error updating ingredient",
+        description: "Failed to update ingredient in database",
         variant: "destructive"
       });
     }
@@ -129,18 +135,20 @@ const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredient
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-900">Master Ingredients List</h2>
         
-        <div className="flex gap-2 items-center">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-            <Input
-              placeholder="Search ingredients..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-64"
-            />
-          </div>
-          
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <div className="flex gap-2 items-center">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <Input
+                placeholder="Search ingredients..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 w-64"
+              />
+            </div>
+            
+            <BulkAddIngredients onRefresh={onRefresh} />
+            
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-orange-600 hover:bg-orange-700">
                 <Plus size={16} className="mr-2" />
@@ -162,6 +170,15 @@ const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredient
                     value={newIngredientName}
                     onChange={(e) => setNewIngredientName(e.target.value)}
                     placeholder="Enter ingredient name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="ingredientBrand">Brand (Optional)</Label>
+                  <Input
+                    id="ingredientBrand"
+                    value={newIngredientBrand}
+                    onChange={(e) => setNewIngredientBrand(e.target.value)}
+                    placeholder="Enter brand name"
                   />
                 </div>
                 <div>
@@ -189,7 +206,12 @@ const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredient
           <Card key={ingredient.id} className="hover:shadow-md transition-shadow duration-200">
             <CardHeader className="pb-2">
               <div className="flex justify-between items-center">
-                <CardTitle className="text-lg text-gray-900 flex-1">{ingredient.name}</CardTitle>
+                <div className="flex-1">
+                  <CardTitle className="text-lg text-gray-900">{ingredient.name}</CardTitle>
+                  {ingredient.brand && (
+                    <p className="text-sm text-gray-600 mt-1">Brand: {ingredient.brand}</p>
+                  )}
+                </div>
                 <Badge variant="secondary" className="bg-green-100 text-green-800 text-sm px-2 py-1 mr-2">
                   <IndianRupee size={14} className="mr-1" />
                   {ingredient.price_per_kg}/kg
@@ -237,6 +259,15 @@ const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredient
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
+            <div>
+              <Label htmlFor="editBrand">Brand (Optional)</Label>
+              <Input
+                id="editBrand"
+                value={editBrand}
+                onChange={(e) => setEditBrand(e.target.value)}
+                placeholder="Enter brand name"
+              />
+            </div>
             <div>
               <Label htmlFor="editPrice">Price per Kg (₹)</Label>
               <Input
