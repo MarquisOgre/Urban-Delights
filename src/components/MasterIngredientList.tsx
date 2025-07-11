@@ -10,6 +10,7 @@ import { Plus, Edit, Trash2, Save, IndianRupee, AlertTriangle, Search, Leaf } fr
 import { addMasterIngredient, updateMasterIngredient, deleteMasterIngredient, upsertMasterIngredient, type MasterIngredient } from "@/services/database";
 import { useToast } from "@/hooks/use-toast";
 import BulkAddIngredients from "@/components/BulkAddIngredients";
+import ExcelBulkIngredients from "@/components/ExcelBulkIngredients";
 
 interface MasterIngredientListProps {
   masterIngredients: MasterIngredient[];
@@ -22,6 +23,7 @@ const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredient
   const [newIngredientPrice, setNewIngredientPrice] = useState<number>(0);
   const [newIngredientBrand, setNewIngredientBrand] = useState("");
   const [editingIngredient, setEditingIngredient] = useState<MasterIngredient | null>(null);
+  const [editName, setEditName] = useState("");
   const [editPrice, setEditPrice] = useState<number>(0);
   const [editBrand, setEditBrand] = useState("");
   const [deletingIngredient, setDeletingIngredient] = useState<MasterIngredient | null>(null);
@@ -67,24 +69,33 @@ const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredient
 
   const handleEditIngredient = (ingredient: MasterIngredient) => {
     setEditingIngredient(ingredient);
+    setEditName(ingredient.name);
     setEditPrice(ingredient.price_per_kg);
     setEditBrand(ingredient.brand || "");
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdatePrice = async () => {
-    if (!editingIngredient || editPrice <= 0) {
+  const handleUpdateIngredient = async () => {
+    if (!editingIngredient || !editName.trim() || editPrice <= 0) {
       toast({
         title: "Validation Error",
-        description: "Please enter a valid price",
+        description: "Please enter a valid name and price",
         variant: "destructive"
       });
       return;
     }
 
     try {
-      await updateMasterIngredient(editingIngredient.id, editPrice, editBrand);
+      // If name changed, we need to delete old and create new due to database constraints
+      if (editName !== editingIngredient.name) {
+        await deleteMasterIngredient(editingIngredient.id);
+        await addMasterIngredient(editName, editPrice, editBrand);
+      } else {
+        await updateMasterIngredient(editingIngredient.id, editPrice, editBrand);
+      }
+      
       setEditingIngredient(null);
+      setEditName("");
       setEditPrice(0);
       setEditBrand("");
       setIsEditDialogOpen(false);
@@ -92,7 +103,7 @@ const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredient
       
       toast({
         title: "Ingredient Updated",
-        description: `${editingIngredient.name} has been updated!`,
+        description: `${editName} has been updated!`,
       });
     } catch (error) {
       toast({
@@ -147,6 +158,7 @@ const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredient
             </div>
             
             <BulkAddIngredients onRefresh={onRefresh} />
+            <ExcelBulkIngredients onRefresh={onRefresh} />
             
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
@@ -253,12 +265,21 @@ const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredient
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Ingredient Price</DialogTitle>
+            <DialogTitle>Edit Ingredient</DialogTitle>
             <DialogDescription>
-              Update the price per kg for {editingIngredient?.name}.
+              Update the ingredient details.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
+            <div>
+              <Label htmlFor="editName">Ingredient Name</Label>
+              <Input
+                id="editName"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Enter ingredient name"
+              />
+            </div>
             <div>
               <Label htmlFor="editBrand">Brand (Optional)</Label>
               <Input
@@ -275,13 +296,13 @@ const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredient
                 type="number"
                 value={editPrice || ""}
                 onChange={(e) => setEditPrice(Number(e.target.value))}
-                placeholder="Enter new price per kg"
+                placeholder="Enter price per kg"
               />
             </div>
             <div className="flex gap-2">
-              <Button onClick={handleUpdatePrice} className="flex-1 bg-orange-600 hover:bg-orange-700">
+              <Button onClick={handleUpdateIngredient} className="flex-1 bg-orange-600 hover:bg-orange-700">
                 <Save size={16} className="mr-2" />
-                Update Price
+                Update Ingredient
               </Button>
               <Button onClick={() => setIsEditDialogOpen(false)} variant="outline">
                 Cancel
