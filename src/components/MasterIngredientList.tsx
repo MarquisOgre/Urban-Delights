@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, Save, IndianRupee, AlertTriangle, Search, Leaf } from "lucide-react";
 import { addMasterIngredient, updateMasterIngredient, deleteMasterIngredient, upsertMasterIngredient, type MasterIngredient } from "@/services/database";
 import { useToast } from "@/hooks/use-toast";
-import BulkAddIngredients from "@/components/BulkAddIngredients";
+
 import ExcelBulkIngredients from "@/components/ExcelBulkIngredients";
 
 interface MasterIngredientListProps {
@@ -157,7 +157,7 @@ const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredient
               />
             </div>
             
-            <BulkAddIngredients onRefresh={onRefresh} />
+            
             <ExcelBulkIngredients onRefresh={onRefresh} />
             
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>

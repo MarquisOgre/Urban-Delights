@@ -37,11 +37,11 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
                 {link.label}
               </button>
             ))}
-            <a href="/investor-pitch" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-orange-600">
-              Investor Pitch
-            </a>
             <a href="/trial-batch" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-orange-600">
               Trial Batch
+            </a>
+            <a href="/indent" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-orange-600">
+              Indent
             </a>
           </div>
 

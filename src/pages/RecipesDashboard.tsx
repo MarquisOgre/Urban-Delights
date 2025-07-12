@@ -69,13 +69,6 @@ const Index = () => {
       'Status': recipe.is_hidden ? 'Hidden' : 'Visible',
     }));
 
-    const ingredientsData = masterIngredients.map(ingredient => ({
-      'Ingredient Name': ingredient.name,
-      'Price per Kg (₹)': ingredient.price_per_kg,
-      'Created Date': new Date(ingredient.created_at).toLocaleDateString(),
-      'Last Updated': new Date(ingredient.updated_at).toLocaleDateString(),
-    }));
-
     const wb = XLSX.utils.book_new();
     const recipesWs = XLSX.utils.json_to_sheet(recipesData);
     XLSX.utils.book_append_sheet(wb, recipesWs, 'All Recipes');
@@ -129,13 +122,11 @@ const Index = () => {
       XLSX.utils.book_append_sheet(wb, recipeWs, sheetName);
     });
 
-    const ingredientsWs = XLSX.utils.json_to_sheet(ingredientsData);
-    XLSX.utils.book_append_sheet(wb, ingredientsWs, 'Master Ingredients');
-    XLSX.writeFile(wb, 'artisan_delights_data.xlsx');
+    XLSX.writeFile(wb, 'artisan_delights_recipes.xlsx');
 
     toast({
       title: 'Export Successful',
-      description: `Exported ${recipes.length + 2} sheets: All recipes overview, ${recipes.length} individual recipe sheets, and master ingredients`,
+      description: `Exported ${recipes.length + 1} sheets: All recipes overview and ${recipes.length} individual recipe sheets`,
     });
   };
 
