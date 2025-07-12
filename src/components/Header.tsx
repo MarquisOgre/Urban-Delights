@@ -24,6 +24,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
               { label: 'Recipes', key: 'recipes' },
               { label: 'Ingredient List', key: 'ingredients' },
               { label: 'Add Recipe', key: 'add-recipe' },
+              { label: 'Indent', key: 'indent' },
             ].map(link => (
               <button
                 key={link.key}
@@ -37,12 +38,6 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
                 {link.label}
               </button>
             ))}
-            <a href="/trial-batch" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-orange-600">
-              Trial Batch
-            </a>
-            <a href="/indent" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-orange-600">
-              Indent
-            </a>
           </div>
 
           <div className="flex items-center space-x-2">
