@@ -7,7 +7,7 @@ import { CheckCircle, AlertCircle, Upload, Download, FileSpreadsheet } from "luc
 import { useToast } from "@/hooks/use-toast";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { upsertMasterIngredient } from "@/services/database";
+import { upsertMasterIngredient, getAllIngredients } from "@/services/database";
 
 interface ExcelBulkIngredientsProps {
   onRefresh: () => void;
@@ -27,32 +27,43 @@ const ExcelBulkIngredients = ({ onRefresh }: ExcelBulkIngredientsProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { toast } = useToast();
 
-  const downloadTemplate = () => {
-    const templateData = [
-      { Name: "Roasted Chana Dal", Brand: "Reliance", Price: 186 },
-      { Name: "Turmeric", Brand: "Good Life", Price: 285 },
-      { Name: "Salt", Brand: "Tata", Price: 30 }
-    ];
-    
-    const ws = XLSX.utils.json_to_sheet(templateData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Ingredients");
-    
-    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    saveAs(data, 'ingredients_template.xlsx');
-    
-    toast({
-      title: "Template Downloaded",
-      description: "Excel template has been downloaded successfully!",
-    });
+  // ✅ Download all ingredients from DB
+  const downloadTemplate = async () => {
+    try {
+      const allIngredients = await getAllIngredients();
+
+      const exportData = allIngredients.map((ingredient) => ({
+        Name: ingredient.name,
+        Brand: ingredient.brand || "",
+        Price: ingredient.price_per_kg,
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Ingredients");
+
+      const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(data, 'all_ingredients.xlsx');
+
+      toast({
+        title: "Export Complete",
+        description: `Downloaded ${allIngredients.length} ingredients from your database.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: error instanceof Error ? error.message : "Failed to fetch ingredients.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.type !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' && 
-          !file.name.endsWith('.xlsx')) {
+      if (file.type !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' &&
+        !file.name.endsWith('.xlsx')) {
         toast({
           title: "Invalid File Type",
           description: "Please select an Excel (.xlsx) file",
@@ -112,30 +123,28 @@ const ExcelBulkIngredients = ({ onRefresh }: ExcelBulkIngredientsProps) => {
         } catch (error) {
           allResults.push({ success: false, name: ingredient.name, error });
         }
-        
+
         const currentProgress = ((i + 1) / totalIngredients) * 100;
         setProgress(currentProgress);
       }
 
       setResults(allResults);
       setProgress(100);
-      
+
       const successCount = allResults.filter(r => r.success).length;
       const failureCount = allResults.filter(r => !r.success).length;
-      
+
       toast({
         title: "Excel Import Complete",
         description: `Successfully imported ${successCount} ingredients. ${failureCount} failed.`,
         variant: failureCount > 0 ? "destructive" : "default"
       });
-      
+
       onRefresh();
       setSelectedFile(null);
-      
-      // Reset file input
       const fileInput = document.getElementById('excel-file-input') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
-      
+
     } catch (error) {
       toast({
         title: "Error Processing File",
@@ -159,25 +168,25 @@ const ExcelBulkIngredients = ({ onRefresh }: ExcelBulkIngredientsProps) => {
         <DialogHeader>
           <DialogTitle>Excel Bulk Import</DialogTitle>
           <DialogDescription>
-            Import ingredients from an Excel file. Download the template first to see the correct format.
+            Import ingredients from an Excel file. Download the full ingredient list from your database or upload new ones.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Download size={20} />
-                Step 1: Download Template
+                Export Current Ingredients
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600 mb-4">
-                Download the Excel template with the correct format (Name, Brand, Price columns).
+                Download all ingredients currently stored in your database.
               </p>
               <Button onClick={downloadTemplate} variant="outline" className="w-full">
                 <Download size={16} className="mr-2" />
-                Download Template
+                Download All Ingredients
               </Button>
             </CardContent>
           </Card>
@@ -186,7 +195,7 @@ const ExcelBulkIngredients = ({ onRefresh }: ExcelBulkIngredientsProps) => {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Upload size={20} />
-                Step 2: Upload Your File
+                Upload Ingredients Excel
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -210,7 +219,7 @@ const ExcelBulkIngredients = ({ onRefresh }: ExcelBulkIngredientsProps) => {
                     </p>
                   )}
                 </div>
-                
+
                 <div className="bg-yellow-50 p-3 rounded border-l-4 border-yellow-400">
                   <h4 className="font-medium text-yellow-800">Required Format:</h4>
                   <ul className="text-sm text-yellow-700 mt-1 list-disc list-inside">
@@ -258,15 +267,15 @@ const ExcelBulkIngredients = ({ onRefresh }: ExcelBulkIngredientsProps) => {
           )}
 
           <div className="flex gap-2">
-            <Button 
-              onClick={processExcelFile} 
+            <Button
+              onClick={processExcelFile}
               disabled={isLoading || !selectedFile}
               className="flex-1 bg-blue-600 hover:bg-blue-700"
             >
               {isLoading ? "Processing..." : "Import Ingredients"}
             </Button>
-            <Button 
-              onClick={() => setIsDialogOpen(false)} 
+            <Button
+              onClick={() => setIsDialogOpen(false)}
               variant="outline"
               disabled={isLoading}
             >

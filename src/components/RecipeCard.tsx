@@ -175,14 +175,14 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
           <DialogHeader>
             <DialogTitle className="text-xl sm:text-2xl text-orange-700">{recipe.name}</DialogTitle>
             <DialogDescription>
-              Complete recipe details for {desiredQty}kg batch
+              Complete recipe details for {desiredQty}KG Batch
             </DialogDescription>
           </DialogHeader>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Ingredients & Costs */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Ingredients & Costs ({desiredQty}kg batch)</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Ingredients & Costs ({desiredQty}KG Batch)</h3>
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {scaledIngredients.map((ingredient, index) => {
                   const masterIngredient = masterIngredients.find(mi => mi.name === ingredient.ingredient_name);
