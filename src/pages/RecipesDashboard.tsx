@@ -146,7 +146,9 @@ const Index = () => {
     recipe.ingredients.some(ing => ing.ingredient_name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const visibleRecipes = filteredRecipes.filter(recipe => !recipe.is_hidden);
+  const visibleRecipes = filteredRecipes
+    .filter(recipe => !recipe.is_hidden)
+    .sort((a, b) => parseInt(a.id) - parseInt(b.id));
 
   const handleQuantityChange = (recipeId: string, quantity: string) => {
     const qty = parseInt(quantity) || 0;
@@ -255,7 +257,8 @@ const Index = () => {
       'Total Cost',
       ...visibleRecipes
         .filter(recipe => recipeQuantities[recipe.id] > 0)
-        .map(recipe => recipe.name)
+        .sort((a, b) => parseInt(a.id) - parseInt(b.id))
+        .map(recipe => `Recipe ${recipe.id}`)
     ];
 
     doc.autoTable({
@@ -368,7 +371,7 @@ const Index = () => {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {visibleRecipes.map(recipe => (
-                    <div key={recipe.id} className="flex items-center space-x-2">
+                    <div key={recipe.id} className="flex items-center space-x-4">
                       <label className="text-sm font-medium min-w-0 flex-1 truncate">
                         {recipe.name}
                       </label>
@@ -395,14 +398,15 @@ const Index = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Ingredient</TableHead>
-                      <TableHead>Total Weight (g)</TableHead>
-                      <TableHead>Total Cost (₹)</TableHead>
+                      <TableHead className="font-semibold">Ingredient</TableHead>
+                      <TableHead className="font-semibold">Total Weight</TableHead>
+                      <TableHead className="font-semibold">Total Cost</TableHead>
                       {visibleRecipes
                         .filter(recipe => recipeQuantities[recipe.id] > 0)
+                        .sort((a, b) => parseInt(a.id) - parseInt(b.id))
                         .map(recipe => (
-                          <TableHead key={recipe.id}>
-                            {recipe.name} ({recipeQuantities[recipe.id]} units)
+                          <TableHead key={recipe.id} className="font-semibold">
+                            Recipe {recipe.id}
                           </TableHead>
                         ))}
                     </TableRow>
@@ -415,6 +419,7 @@ const Index = () => {
                         <TableCell>₹{data.cost.toFixed(2)}</TableCell>
                         {visibleRecipes
                           .filter(recipe => recipeQuantities[recipe.id] > 0)
+                          .sort((a, b) => parseInt(a.id) - parseInt(b.id))
                           .map(recipe => (
                             <TableCell key={recipe.id}>
                               {data.recipes[recipe.name] ? `${data.recipes[recipe.name].toFixed(2)}g` : '-'}
@@ -427,6 +432,7 @@ const Index = () => {
                       <TableCell>₹{calculatedData.grandTotal.toFixed(2)}</TableCell>
                       {visibleRecipes
                         .filter(recipe => recipeQuantities[recipe.id] > 0)
+                        .sort((a, b) => parseInt(a.id) - parseInt(b.id))
                         .map(recipe => {
                           const recipeCost = Object.entries(calculatedData.ingredientTotals).reduce((sum, [_, data]) => {
                             return sum + (data.recipes[recipe.name] ? 

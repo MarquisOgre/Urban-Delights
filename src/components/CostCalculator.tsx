@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Calculator, Plus, Trash2, IndianRupee, TrendingUp } from "lucide-react";
-import { masterIngredients } from "@/data/recipes";
+import { masterIngredientsData } from "@/data/masterIngredients";
 
 interface CalculatorIngredient {
   name: string;
@@ -38,9 +38,9 @@ const CostCalculator = () => {
     // Auto-calculate cost when quantity or price changes
     if (field === 'quantity' || field === 'pricePerKg' || field === 'name') {
       if (field === 'name') {
-        const masterIngredient = masterIngredients.find(ing => ing.name === value);
+        const masterIngredient = masterIngredientsData.find(ing => ing.name === value);
         if (masterIngredient) {
-          updated[index].pricePerKg = masterIngredient.pricePerKg;
+          updated[index].pricePerKg = masterIngredient.price;
         }
       }
       const quantity = updated[index].quantity / 1000; // Convert g to kg
@@ -110,9 +110,9 @@ const CostCalculator = () => {
                         <SelectValue placeholder="Select ingredient" />
                       </SelectTrigger>
                       <SelectContent>
-                        {masterIngredients.map((ing) => (
+                        {masterIngredientsData.map((ing) => (
                           <SelectItem key={ing.name} value={ing.name}>
-                            {ing.name} (₹{ing.pricePerKg}/kg)
+                            {ing.name} (₹{ing.price}/kg)
                           </SelectItem>
                         ))}
                       </SelectContent>
