@@ -148,7 +148,7 @@ const Index = () => {
 
   const visibleRecipes = filteredRecipes
     .filter(recipe => !recipe.is_hidden)
-    .sort((a, b) => parseInt(a.id) - parseInt(b.id));
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   const handleQuantityChange = (recipeId: string, quantity: string) => {
     const qty = parseInt(quantity) || 0;
@@ -240,15 +240,22 @@ const Index = () => {
 
     const tableData = Object.entries(calculatedData.ingredientTotals).map(([ingredientName, data]) => [
       ingredientName,
-      `${data.totalWeight.toFixed(2)}g`,
+      data.totalWeight >= 1000 
+        ? `${(data.totalWeight / 1000).toFixed(2)} kg`
+        : `${Math.round(data.totalWeight)} g`,
       `₹${data.cost.toFixed(2)}`,
-      ...visibleRecipes.map(recipe => {
-        const recipeQuantity = recipeQuantities[recipe.id] || 0;
-        if (recipeQuantity > 0 && data.recipes[recipe.name]) {
-          return `${data.recipes[recipe.name].toFixed(2)}g`;
-        }
-        return '-';
-      })
+      ...visibleRecipes
+        .filter(recipe => recipeQuantities[recipe.id] > 0)
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map(recipe => {
+          if (data.recipes[recipe.name]) {
+            const weight = data.recipes[recipe.name];
+            return weight >= 1000 
+              ? `${(weight / 1000).toFixed(2)} kg`
+              : `${Math.round(weight)} g`;
+          }
+          return '-';
+        })
     ]);
 
     const tableHeaders = [
@@ -257,8 +264,8 @@ const Index = () => {
       'Total Cost',
       ...visibleRecipes
         .filter(recipe => recipeQuantities[recipe.id] > 0)
-        .sort((a, b) => parseInt(a.id) - parseInt(b.id))
-        .map(recipe => `Recipe ${recipe.id}`)
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map(recipe => recipe.name)
     ];
 
     doc.autoTable({
@@ -403,10 +410,10 @@ const Index = () => {
                       <TableHead className="font-semibold">Total Cost</TableHead>
                       {visibleRecipes
                         .filter(recipe => recipeQuantities[recipe.id] > 0)
-                        .sort((a, b) => parseInt(a.id) - parseInt(b.id))
+                        .sort((a, b) => a.name.localeCompare(b.name))
                         .map(recipe => (
                           <TableHead key={recipe.id} className="font-semibold">
-                            Recipe {recipe.id}
+                            {recipe.name}
                           </TableHead>
                         ))}
                     </TableRow>
@@ -415,14 +422,24 @@ const Index = () => {
                     {Object.entries(calculatedData.ingredientTotals).map(([ingredientName, data]) => (
                       <TableRow key={ingredientName}>
                         <TableCell className="font-medium">{ingredientName}</TableCell>
-                        <TableCell>{data.totalWeight.toFixed(2)}g</TableCell>
+                        <TableCell>
+                          {data.totalWeight >= 1000 
+                            ? `${(data.totalWeight / 1000).toFixed(2)} kg`
+                            : `${Math.round(data.totalWeight)} g`
+                          }
+                        </TableCell>
                         <TableCell>₹{data.cost.toFixed(2)}</TableCell>
                         {visibleRecipes
                           .filter(recipe => recipeQuantities[recipe.id] > 0)
-                          .sort((a, b) => parseInt(a.id) - parseInt(b.id))
+                          .sort((a, b) => a.name.localeCompare(b.name))
                           .map(recipe => (
                             <TableCell key={recipe.id}>
-                              {data.recipes[recipe.name] ? `${data.recipes[recipe.name].toFixed(2)}g` : '-'}
+                              {data.recipes[recipe.name] ? 
+                                (data.recipes[recipe.name] >= 1000 
+                                  ? `${(data.recipes[recipe.name] / 1000).toFixed(2)} kg`
+                                  : `${Math.round(data.recipes[recipe.name])} g`
+                                ) : '-'
+                              }
                             </TableCell>
                           ))}
                       </TableRow>
@@ -432,7 +449,7 @@ const Index = () => {
                       <TableCell>₹{calculatedData.grandTotal.toFixed(2)}</TableCell>
                       {visibleRecipes
                         .filter(recipe => recipeQuantities[recipe.id] > 0)
-                        .sort((a, b) => parseInt(a.id) - parseInt(b.id))
+                        .sort((a, b) => a.name.localeCompare(b.name))
                         .map(recipe => {
                           const recipeCost = Object.entries(calculatedData.ingredientTotals).reduce((sum, [_, data]) => {
                             return sum + (data.recipes[recipe.name] ? 
