@@ -19,17 +19,17 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
             <span className="text-xl font-bold text-orange-800">Artisan Delights</span>
           </div>
 
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
             {[
               { label: 'Recipes', key: 'recipes' },
-              { label: 'Ingredient List', key: 'ingredients' },
+              { label: 'Ingredients', key: 'ingredients' },
               { label: 'Add Recipe', key: 'add-recipe' },
               { label: 'Indent', key: 'indent' },
             ].map(link => (
               <button
                 key={link.key}
                 onClick={() => setCurrentView(link.key)}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-2 py-2 lg:px-3 rounded-md text-xs lg:text-sm font-medium transition-colors ${
                   currentView === link.key
                     ? 'bg-orange-100 text-orange-800'
                     : 'text-gray-600 hover:text-orange-600'
@@ -40,26 +40,50 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
             ))}
           </div>
 
-          <div className="flex items-center space-x-2">
+          {/* Mobile Navigation */}
+          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+            <div className="grid grid-cols-4 gap-1 p-2">
+              {[
+                { label: 'Recipes', key: 'recipes' },
+                { label: 'Items', key: 'ingredients' },
+                { label: 'Add', key: 'add-recipe' },
+                { label: 'Indent', key: 'indent' },
+              ].map(link => (
+                <button
+                  key={link.key}
+                  onClick={() => setCurrentView(link.key)}
+                  className={`px-2 py-3 rounded-md text-xs font-medium transition-colors text-center ${
+                    currentView === link.key
+                      ? 'bg-orange-100 text-orange-800'
+                      : 'text-gray-600 hover:text-orange-600'
+                  }`}
+                >
+                  {link.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-1 lg:space-x-2">
             <Button
               onClick={() => setCurrentView('manage-recipes')}
               size="sm"
-              className={`${
+              className={`hidden md:flex ${
                 currentView === 'manage-recipes'
                   ? 'bg-orange-100 text-orange-800'
                   : 'bg-blue-600 hover:bg-blue-700 text-white'
               }`}
             >
               <Settings size={16} className="mr-1" />
-              Manage
+              <span className="hidden lg:inline">Manage</span>
             </Button>
             <Button
               onClick={exportAllData}
               size="sm"
               className="bg-green-600 hover:bg-green-700 text-white"
             >
-              <Download size={16} className="mr-1" />
-              Export
+              <Download size={14} className="lg:mr-1" />
+              <span className="hidden lg:inline">Export</span>
             </Button>
           </div>
         </div>

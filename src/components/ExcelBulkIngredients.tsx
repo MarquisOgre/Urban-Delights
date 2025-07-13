@@ -161,7 +161,7 @@ const ExcelBulkIngredients = ({ onRefresh }: ExcelBulkIngredientsProps) => {
       <DialogTrigger asChild>
         <Button variant="outline" className="bg-blue-50 hover:bg-blue-100 border-blue-200">
           <FileSpreadsheet size={16} className="mr-2" />
-          Excel Import
+          Import / Export
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">

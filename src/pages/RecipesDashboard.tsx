@@ -4,12 +4,11 @@ import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Search, FileDown } from 'lucide-react';
+import { FileText, Search, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 import {
   fetchMasterIngredients,
   fetchRecipesWithIngredients,
@@ -21,15 +20,8 @@ import MasterIngredientList from '@/components/MasterIngredientList';
 import AddRecipe from '@/components/AddRecipe';
 import ManageRecipes from '@/components/ManageRecipes';
 import { useToast } from '@/hooks/use-toast';
-import * as XLSX from 'xlsx';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-  }
-}
 
 const Index = () => {
   const [currentView, setCurrentView] = useState('recipes');
@@ -206,114 +198,104 @@ const Index = () => {
     return { ingredientTotals, grandTotal };
   }, [recipeQuantities, visibleRecipes, masterIngredients]);
 
-  const exportIndentToPDF = () => {
-    const doc = new jsPDF();
+  const exportToExcel = () => {
+    if (Object.keys(recipeQuantities).length === 0) {
+      toast({
+        title: "No data to export",
+        description: "Please add some recipe quantities first",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Create workbook and worksheet
+    const workbook = XLSX.utils.book_new();
     
-    // Title
-    doc.setFontSize(20);
-    doc.text('Ingredient Indent Report', 20, 20);
-    
-    // Date
-    doc.setFontSize(12);
-    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 35);
-
-    // Recipe quantities summary
-    doc.setFontSize(14);
-    doc.text('Recipe Quantities:', 20, 50);
-    
-    let yPos = 60;
-    Object.entries(recipeQuantities).forEach(([recipeId, quantity]) => {
-      if (quantity > 0) {
-        const recipe = visibleRecipes.find(r => r.id === recipeId);
-        if (recipe) {
-          doc.setFontSize(10);
-          doc.text(`${recipe.name}: ${quantity} units`, 25, yPos);
-          yPos += 10;
-        }
-      }
-    });
-
-    // Ingredients table
-    yPos += 10;
-    doc.setFontSize(14);
-    doc.text('Ingredient Requirements:', 20, yPos);
-
-    const tableData = Object.entries(calculatedData.ingredientTotals).map(([ingredientName, data]) => [
-      ingredientName,
-      data.totalWeight >= 1000 
-        ? `${(data.totalWeight / 1000).toFixed(2)} kg`
-        : `${Math.round(data.totalWeight)} g`,
-      `₹${data.cost.toFixed(2)}`,
-      ...visibleRecipes
-        .filter(recipe => recipeQuantities[recipe.id] > 0)
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map(recipe => {
-          if (data.recipes[recipe.name]) {
-            const weight = data.recipes[recipe.name];
-            return weight >= 1000 
-              ? `${(weight / 1000).toFixed(2)} kg`
-              : `${Math.round(weight)} g`;
-          }
-          return '-';
-        })
-    ]);
-
-    const tableHeaders = [
-      'Ingredient',
-      'Total Weight',
-      'Total Cost',
-      ...visibleRecipes
-        .filter(recipe => recipeQuantities[recipe.id] > 0)
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map(recipe => recipe.name)
+    // Create data for ingredient requirements summary
+    const summaryData = [
+      ['Ingredient Requirements Summary'],
+      [''],
+      ['Ingredient', 'Total Weight', 'Total Cost', 
+       ...visibleRecipes
+         .filter(recipe => recipeQuantities[recipe.id] > 0)
+         .sort((a, b) => a.name.localeCompare(b.name))
+         .map(recipe => recipe.name)
+      ],
+      ...Object.entries(calculatedData.ingredientTotals).map(([ingredientName, data]) => [
+        ingredientName,
+        data.totalWeight >= 1000 
+          ? `${(data.totalWeight / 1000).toFixed(2)} kg`
+          : `${Math.round(data.totalWeight)} g`,
+        `₹${data.cost.toFixed(2)}`,
+        ...visibleRecipes
+          .filter(recipe => recipeQuantities[recipe.id] > 0)
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map(recipe => {
+            if (data.recipes[recipe.name]) {
+              const weight = data.recipes[recipe.name];
+              return weight >= 1000 
+                ? `${(weight / 1000).toFixed(2)} kg`
+                : `${Math.round(weight)} g`;
+            }
+            return '-';
+          })
+      ]),
+      [''],
+      ['Grand Total', '', `₹${calculatedData.grandTotal.toFixed(2)}`]
     ];
 
-    doc.autoTable({
-      startY: yPos + 10,
-      head: [tableHeaders],
-      body: tableData,
-      styles: { fontSize: 8 },
-      columnStyles: {
-        0: { cellWidth: 40 },
-        1: { cellWidth: 25 },
-        2: { cellWidth: 25 }
-      }
-    });
+    // Add recipe quantities summary
+    const recipeData = [
+      ['Recipe Quantities'],
+      [''],
+      ['Recipe Name', 'Quantity'],
+      ...Object.entries(recipeQuantities)
+        .filter(([_, qty]) => qty > 0)
+        .map(([recipeId, qty]) => {
+          const recipe = recipes.find(r => r.id === recipeId);
+          return [recipe?.name || 'Unknown Recipe', qty];
+        })
+    ];
 
-    // Grand total
-    doc.setFontSize(12);
-    const finalY = (doc as any).lastAutoTable?.finalY || yPos + 100;
-    doc.text(`Grand Total: ₹${calculatedData.grandTotal.toFixed(2)}`, 20, finalY + 20);
+    // Create worksheets
+    const summaryWorksheet = XLSX.utils.aoa_to_sheet(summaryData);
+    const recipeWorksheet = XLSX.utils.aoa_to_sheet(recipeData);
 
-    doc.save('ingredient-indent.pdf');
-    
+    // Add worksheets to workbook
+    XLSX.utils.book_append_sheet(workbook, summaryWorksheet, 'Ingredient Summary');
+    XLSX.utils.book_append_sheet(workbook, recipeWorksheet, 'Recipe Quantities');
+
+    // Save the file
+    const fileName = `ingredient-requirements-${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+
     toast({
-      title: 'PDF Exported',
-      description: 'Ingredient indent report has been downloaded successfully',
+      title: "Excel exported successfully!",
+      description: `File saved as ${fileName}`,
     });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100 pb-20 md:pb-8">
       <Header currentView={currentView} setCurrentView={setCurrentView} exportAllData={exportAllData} />
 
-      <div className="container mx-auto px-4 py-2">
+      <div className="container mx-auto px-2 md:px-4 py-2 max-w-full mb-16 md:mb-0">
         {currentView === 'recipes' && (
           <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <div className="w-1/5">
+            <div className="flex flex-col md:flex-row items-center gap-4">
+              <div className="w-full md:w-1/5">
                 <Badge className="bg-blue-100 text-blue-800 text-sm px-3 py-2 w-full justify-center">
                   <FileText size={16} className="mr-2" />
                   Total Recipes: {visibleRecipes.length}
                 </Badge>
               </div>
-              <div className="w-1/5">
+              <div className="w-full md:w-1/5">
                 <Badge className="bg-green-100 text-green-800 text-sm px-3 py-2 w-full justify-center">
                   <img src="/logo.png" className="h-4 w-4 mr-2" alt="icon" />
                   Ingredients: {masterIngredients.length}
                 </Badge>
               </div>
-              <div className="w-3/5">
+              <div className="w-full md:w-3/5">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <Input
@@ -359,14 +341,14 @@ const Index = () => {
 
         {currentView === 'indent' && (
           <div className="space-y-6">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-3xl font-bold text-gray-900">Ingredient Indent</h1>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Ingredient Indent</h1>
               <Button 
-                onClick={exportIndentToPDF}
-                className="bg-red-600 hover:bg-red-700 text-white"
+                onClick={exportToExcel}
+                className="bg-blue-600 hover:bg-blue-700 text-white w-full md:w-auto"
               >
-                <FileDown className="w-4 h-4 mr-2" />
-                Export PDF
+                <Download className="w-4 h-4 mr-2" />
+                Export
               </Button>
             </div>
 
@@ -388,7 +370,7 @@ const Index = () => {
                         placeholder="Qty"
                         value={recipeQuantities[recipe.id] || ''}
                         onChange={(e) => handleQuantityChange(recipe.id, e.target.value)}
-                        className="w-20"
+                        className="w-20 ml-4"
                       />
                     </div>
                   ))}
@@ -402,68 +384,70 @@ const Index = () => {
                 <CardTitle>Ingredient Requirements Summary</CardTitle>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="font-semibold">Ingredient</TableHead>
-                      <TableHead className="font-semibold">Total Weight</TableHead>
-                      <TableHead className="font-semibold">Total Cost</TableHead>
-                      {visibleRecipes
-                        .filter(recipe => recipeQuantities[recipe.id] > 0)
-                        .sort((a, b) => a.name.localeCompare(b.name))
-                        .map(recipe => (
-                          <TableHead key={recipe.id} className="font-semibold">
-                            {recipe.name}
-                          </TableHead>
-                        ))}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {Object.entries(calculatedData.ingredientTotals).map(([ingredientName, data]) => (
-                      <TableRow key={ingredientName}>
-                        <TableCell className="font-medium">{ingredientName}</TableCell>
-                        <TableCell>
-                          {data.totalWeight >= 1000 
-                            ? `${(data.totalWeight / 1000).toFixed(2)} kg`
-                            : `${Math.round(data.totalWeight)} g`
-                          }
-                        </TableCell>
-                        <TableCell>₹{data.cost.toFixed(2)}</TableCell>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="font-semibold">Ingredient</TableHead>
+                        <TableHead className="font-semibold">Total Weight</TableHead>
+                        <TableHead className="font-semibold">Total Cost</TableHead>
                         {visibleRecipes
                           .filter(recipe => recipeQuantities[recipe.id] > 0)
                           .sort((a, b) => a.name.localeCompare(b.name))
                           .map(recipe => (
-                            <TableCell key={recipe.id}>
-                              {data.recipes[recipe.name] ? 
-                                (data.recipes[recipe.name] >= 1000 
-                                  ? `${(data.recipes[recipe.name] / 1000).toFixed(2)} kg`
-                                  : `${Math.round(data.recipes[recipe.name])} g`
-                                ) : '-'
-                              }
-                            </TableCell>
+                            <TableHead key={recipe.id} className="font-semibold">
+                              {recipe.name}
+                            </TableHead>
                           ))}
                       </TableRow>
-                    ))}
-                    <TableRow className="font-bold bg-gray-50">
-                      <TableCell colSpan={2}>Grand Total</TableCell>
-                      <TableCell>₹{calculatedData.grandTotal.toFixed(2)}</TableCell>
-                      {visibleRecipes
-                        .filter(recipe => recipeQuantities[recipe.id] > 0)
-                        .sort((a, b) => a.name.localeCompare(b.name))
-                        .map(recipe => {
-                          const recipeCost = Object.entries(calculatedData.ingredientTotals).reduce((sum, [_, data]) => {
-                            return sum + (data.recipes[recipe.name] ? 
-                              (data.recipes[recipe.name] * (masterIngredients.find(mi => mi.name === _)?.price_per_kg || 0) / 1000) : 0);
-                          }, 0);
-                          const recipeObj = visibleRecipes.find(r => r.name === recipe.name);
-                          const totalRecipeCost = recipeCost + (recipeObj ? recipeObj.overheads * (recipeQuantities[recipeObj.id] || 0) : 0);
-                          return (
-                            <TableCell key={recipe.id}>₹{totalRecipeCost.toFixed(2)}</TableCell>
-                          );
-                        })}
-                    </TableRow>
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {Object.entries(calculatedData.ingredientTotals).map(([ingredientName, data]) => (
+                        <TableRow key={ingredientName}>
+                          <TableCell className="font-medium">{ingredientName}</TableCell>
+                          <TableCell>
+                            {data.totalWeight >= 1000 
+                              ? `${(data.totalWeight / 1000).toFixed(2)} kg`
+                              : `${Math.round(data.totalWeight)} g`
+                            }
+                          </TableCell>
+                          <TableCell>₹{data.cost.toFixed(2)}</TableCell>
+                          {visibleRecipes
+                            .filter(recipe => recipeQuantities[recipe.id] > 0)
+                            .sort((a, b) => a.name.localeCompare(b.name))
+                            .map(recipe => (
+                              <TableCell key={recipe.id}>
+                                {data.recipes[recipe.name] ? 
+                                  (data.recipes[recipe.name] >= 1000 
+                                    ? `${(data.recipes[recipe.name] / 1000).toFixed(2)} kg`
+                                    : `${Math.round(data.recipes[recipe.name])} g`
+                                  ) : '-'
+                                }
+                              </TableCell>
+                            ))}
+                        </TableRow>
+                      ))}
+                      <TableRow className="font-bold bg-gray-50">
+                        <TableCell colSpan={2}>Grand Total</TableCell>
+                        <TableCell>₹{calculatedData.grandTotal.toFixed(2)}</TableCell>
+                        {visibleRecipes
+                          .filter(recipe => recipeQuantities[recipe.id] > 0)
+                          .sort((a, b) => a.name.localeCompare(b.name))
+                          .map(recipe => {
+                            const recipeCost = Object.entries(calculatedData.ingredientTotals).reduce((sum, [_, data]) => {
+                              return sum + (data.recipes[recipe.name] ? 
+                                (data.recipes[recipe.name] * (masterIngredients.find(mi => mi.name === _)?.price_per_kg || 0) / 1000) : 0);
+                            }, 0);
+                            const recipeObj = visibleRecipes.find(r => r.name === recipe.name);
+                            const totalRecipeCost = recipeCost + (recipeObj ? recipeObj.overheads * (recipeQuantities[recipeObj.id] || 0) : 0);
+                            return (
+                              <TableCell key={recipe.id}>₹{totalRecipeCost.toFixed(2)}</TableCell>
+                            );
+                          })}
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           </div>

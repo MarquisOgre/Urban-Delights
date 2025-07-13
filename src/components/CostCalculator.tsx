@@ -1,14 +1,11 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Calculator, Plus, Trash2, IndianRupee, TrendingUp } from "lucide-react";
-import { masterIngredientsData } from "@/data/masterIngredients";
 
 interface CalculatorIngredient {
   name: string;
@@ -36,13 +33,7 @@ const CostCalculator = () => {
     updated[index] = { ...updated[index], [field]: value };
     
     // Auto-calculate cost when quantity or price changes
-    if (field === 'quantity' || field === 'pricePerKg' || field === 'name') {
-      if (field === 'name') {
-        const masterIngredient = masterIngredientsData.find(ing => ing.name === value);
-        if (masterIngredient) {
-          updated[index].pricePerKg = masterIngredient.price;
-        }
-      }
+    if (field === 'quantity' || field === 'pricePerKg') {
       const quantity = updated[index].quantity / 1000; // Convert g to kg
       updated[index].cost = Math.round(quantity * updated[index].pricePerKg * 100) / 100;
     }
@@ -99,28 +90,18 @@ const CostCalculator = () => {
 
             <div className="space-y-3">
               {ingredients.map((ingredient, index) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-6 gap-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="md:col-span-2">
-                    <Label className="text-xs">Ingredient</Label>
-                    <Select
+                <div key={index} className="grid grid-cols-1 md:grid-cols-5 gap-3 p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <Label className="text-xs">Ingredient Name</Label>
+                    <Input
                       value={ingredient.name}
-                      onValueChange={(value) => updateIngredient(index, 'name', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select ingredient" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {masterIngredientsData.map((ing) => (
-                          <SelectItem key={ing.name} value={ing.name}>
-                            {ing.name} (₹{ing.price}/kg)
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      onChange={(e) => updateIngredient(index, 'name', e.target.value)}
+                      placeholder="Enter ingredient name"
+                    />
                   </div>
 
                   <div>
-                    <Label className="text-xs">Quantity</Label>
+                    <Label className="text-xs">Quantity (g)</Label>
                     <Input
                       type="number"
                       value={ingredient.quantity || ""}
@@ -130,23 +111,7 @@ const CostCalculator = () => {
                   </div>
 
                   <div>
-                    <Label className="text-xs">Unit</Label>
-                    <Select
-                      value={ingredient.unit}
-                      onValueChange={(value) => updateIngredient(index, 'unit', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="g">grams</SelectItem>
-                        <SelectItem value="kg">kg</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-xs">Price/kg</Label>
+                    <Label className="text-xs">Price per Kg (₹)</Label>
                     <Input
                       type="number"
                       value={ingredient.pricePerKg || ""}
@@ -157,7 +122,7 @@ const CostCalculator = () => {
 
                   <div className="flex items-end gap-2">
                     <div className="flex-1">
-                      <Label className="text-xs">Cost</Label>
+                      <Label className="text-xs">Cost (₹)</Label>
                       <div className="flex items-center h-10 px-3 bg-white border rounded-md">
                         <IndianRupee size={14} className="text-gray-500 mr-1" />
                         <span className="font-semibold text-green-600">
