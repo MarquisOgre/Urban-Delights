@@ -358,7 +358,7 @@ const Index = () => {
                 <CardTitle>Recipe Quantities</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                   {visibleRecipes.map((recipe) => (
                     <Card key={recipe.id} className="flex items-center p-0 overflow-hidden">
                       {/* Left color stripe */}
@@ -367,7 +367,7 @@ const Index = () => {
                       {/* Content */}
                       <div className="flex items-center justify-between w-full px-4 py-2">
                         <label
-                          className="text-sm font-medium truncate max-w-[90px] mr-2"
+                          className="text-sm font-medium truncate max-w-[100px] mr-2"
                           title={recipe.name}
                         >
                           {recipe.name}
