@@ -359,24 +359,34 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {visibleRecipes.map(recipe => (
-                    <div key={recipe.id} className="flex items-center space-x-4">
-                      <label className="text-sm font-medium min-w-0 flex-1 truncate">
-                        {recipe.name}
-                      </label>
-                      <Input
-                        type="number"
-                        min="0"
-                        placeholder="Qty"
-                        value={recipeQuantities[recipe.id] || ''}
-                        onChange={(e) => handleQuantityChange(recipe.id, e.target.value)}
-                        className="w-20 ml-4"
-                      />
-                    </div>
+                  {visibleRecipes.map((recipe) => (
+                    <Card key={recipe.id} className="flex items-center p-0 overflow-hidden">
+                      {/* Left color stripe */}
+                      <div className="w-1 bg-orange-500 h-full" />
+
+                      {/* Content */}
+                      <div className="flex items-center justify-between w-full px-4 py-2">
+                        <label
+                          className="text-sm font-medium truncate max-w-[90px] mr-2"
+                          title={recipe.name}
+                        >
+                          {recipe.name}
+                        </label>
+                        <Input
+                          type="number"
+                          min="0"
+                          placeholder="Qty"
+                          value={recipeQuantities[recipe.id] || ''}
+                          onChange={(e) => handleQuantityChange(recipe.id, e.target.value)}
+                          className="w-20"
+                        />
+                      </div>
+                    </Card>
                   ))}
                 </div>
               </CardContent>
             </Card>
+
 
             {/* Ingredients Summary Table */}
             <Card>
@@ -427,8 +437,20 @@ const Index = () => {
                             ))}
                         </TableRow>
                       ))}
+                      
+                      {/* Grand Total Row */}
                       <TableRow className="font-bold bg-gray-50">
-                        <TableCell colSpan={2}>Grand Total</TableCell>
+                        <TableCell>Grand Total</TableCell>
+                        <TableCell>
+                          {
+                            (() => {
+                              const totalWeight = Object.values(calculatedData.ingredientTotals).reduce((sum, data) => sum + data.totalWeight, 0);
+                              return totalWeight >= 1000 
+                                ? `${(totalWeight / 1000).toFixed(2)} kg`
+                                : `${Math.round(totalWeight)} g`;
+                            })()
+                          }
+                        </TableCell>
                         <TableCell>₹{calculatedData.grandTotal.toFixed(2)}</TableCell>
                         {visibleRecipes
                           .filter(recipe => recipeQuantities[recipe.id] > 0)
@@ -450,6 +472,7 @@ const Index = () => {
                 </div>
               </CardContent>
             </Card>
+
           </div>
         )}
       </div>
