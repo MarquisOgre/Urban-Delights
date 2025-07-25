@@ -358,7 +358,7 @@ const Index = () => {
                 <CardTitle>Recipe Quantities</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                   {visibleRecipes.map((recipe) => (
                     <Card key={recipe.id} className="flex items-center p-0 overflow-hidden">
                       {/* Left color stripe */}
@@ -367,7 +367,7 @@ const Index = () => {
                       {/* Content */}
                       <div className="flex items-center justify-between w-full px-4 py-2">
                         <label
-                          className="text-sm font-medium truncate max-w-[100px] mr-2"
+                          className="text-sm font-medium truncate max-w-[80px] mr-1"
                           title={recipe.name}
                         >
                           {recipe.name}
@@ -391,7 +391,84 @@ const Index = () => {
             {/* Ingredients Summary Table */}
             <Card>
               <CardHeader>
-                <CardTitle>Ingredient Requirements Summary</CardTitle>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
+                  <CardTitle className="text-xl mb-4 sm:mb-0">Ingredient Requirements Summary</CardTitle>
+                  <div className="flex gap-2 w-full sm:w-auto">
+                    <Button onClick={exportToExcel} className="flex-1 sm:flex-none">
+                      Export
+                    </Button>
+                    <Button 
+                      onClick={() => {
+                        const printContent = `
+                          <html>
+                            <head>
+                              <title>Ingredient Requirements Summary</title>
+                              <style>
+                                body { font-family: Arial, sans-serif; margin: 20px; }
+                                h1 { text-align: center; color: #333; margin-bottom: 30px; }
+                                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                                th { background-color: #f5f5f5; font-weight: bold; }
+                                tr:nth-child(even) { background-color: #f9f9f9; }
+                                .total-row { font-weight: bold; background-color: #e8f4fd !important; }
+                              </style>
+                            </head>
+                            <body>
+                              <h1>Ingredient Requirements Summary</h1>
+                              <table>
+                                <thead>
+                                  <tr>
+                                    <th>Ingredient</th>
+                                    <th>Total Weight</th>
+                                    <th>Total Cost (₹)</th>
+                                    ${visibleRecipes
+                                      .filter(recipe => recipeQuantities[recipe.id] > 0)
+                                      .sort((a, b) => a.name.localeCompare(b.name))
+                                      .map(recipe => `<th>${recipe.name}</th>`).join('')}
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  ${Object.entries(calculatedData.ingredientTotals).map(([ingredientName, data]) => `
+                                    <tr>
+                                      <td>${ingredientName}</td>
+                                      <td>${data.totalWeight >= 1000 ? `${(data.totalWeight / 1000).toFixed(2)} kg` : `${Math.round(data.totalWeight)} g`}</td>
+                                      <td>₹${data.cost.toFixed(2)}</td>
+                                      ${visibleRecipes
+                                        .filter(recipe => recipeQuantities[recipe.id] > 0)
+                                        .sort((a, b) => a.name.localeCompare(b.name))
+                                        .map(recipe => {
+                                          const weight = data.recipes[recipe.name] || 0;
+                                          return `<td>${weight ? (weight >= 1000 ? `${(weight / 1000).toFixed(2)} kg` : `${Math.round(weight)} g`) : '-'}</td>`;
+                                        }).join('')}
+                                    </tr>
+                                  `).join('')}
+                                  <tr class="total-row">
+                                    <td><strong>Grand Total</strong></td>
+                                    <td>-</td>
+                                    <td><strong>₹${Object.values(calculatedData.ingredientTotals).reduce((sum, data) => sum + data.cost, 0).toFixed(2)}</strong></td>
+                                    ${visibleRecipes
+                                      .filter(recipe => recipeQuantities[recipe.id] > 0)
+                                      .map(() => '<td>-</td>').join('')}
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </body>
+                          </html>
+                        `;
+                        const printWindow = window.open('', '_blank');
+                        if (printWindow) {
+                          printWindow.document.write(printContent);
+                          printWindow.document.close();
+                          printWindow.print();
+                        }
+                      }}
+                      variant="outline"
+                      className="flex-1 sm:flex-none"
+                    >
+                      Print
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">

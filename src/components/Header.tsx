@@ -38,6 +38,12 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
                 {link.label}
               </button>
             ))}
+            <button
+              onClick={() => window.location.href = '/stock-register'}
+              className="px-2 py-2 lg:px-3 rounded-md text-xs lg:text-sm font-medium transition-colors text-gray-600 hover:text-orange-600"
+            >
+              Stock Register
+            </button>
           </div>
 
           {/* Mobile Navigation */}
