@@ -284,8 +284,9 @@ const StockRegister = () => {
                   <CardTitle>Add Podi Entry</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                    <div>
+                  <div className="flex flex-wrap gap-4 items-end w-full">
+                    {/* Date */}
+                    <div className="min-w-[180px]">
                       <Label htmlFor="date">Date</Label>
                       <Popover>
                         <PopoverTrigger asChild>
@@ -312,7 +313,8 @@ const StockRegister = () => {
                       </Popover>
                     </div>
 
-                    <div>
+                    {/* Podi Name (Wider) */}
+                    <div className="flex-1 min-w-[300px] max-w-[400px]">
                       <Label htmlFor="podiName">Podi Name</Label>
                       <Select value={podiName} onValueChange={setPodiName}>
                         <SelectTrigger>
@@ -328,19 +330,20 @@ const StockRegister = () => {
                       </Select>
                     </div>
 
-                    <div>
-                      <Label htmlFor="podiOpeningStock">Opening Stock</Label>
+                    {/* Opening Stock */}
+                    <div className="min-w-[100px]">
+                      <Label htmlFor="podiOpeningStock">Opening</Label>
                       <Input
                         id="podiOpeningStock"
                         type="number"
                         value={podiOpeningStock}
                         onChange={(e) => setPodiOpeningStock(e.target.value)}
                         placeholder="0"
-                        className="w-24"
                       />
                     </div>
 
-                    <div>
+                    {/* Production */}
+                    <div className="min-w-[100px]">
                       <Label htmlFor="podiProduction">Production</Label>
                       <Input
                         id="podiProduction"
@@ -348,11 +351,11 @@ const StockRegister = () => {
                         value={podiProduction}
                         onChange={(e) => setPodiProduction(e.target.value)}
                         placeholder="0"
-                        className="w-24"
                       />
                     </div>
 
-                    <div>
+                    {/* Sales */}
+                    <div className="min-w-[100px]">
                       <Label htmlFor="podiSales">Sales</Label>
                       <Input
                         id="podiSales"
@@ -360,12 +363,12 @@ const StockRegister = () => {
                         value={podiSales}
                         onChange={(e) => setPodiSales(e.target.value)}
                         placeholder="0"
-                        className="w-24"
                       />
                     </div>
 
-                    <div className="flex items-end">
-                      <Button onClick={handleAddPodiEntry} className="w-full">
+                    {/* Add Button (push to right end) */}
+                    <div className="ml-auto">
+                      <Button onClick={handleAddPodiEntry}>
                         <Plus className="h-4 w-4 mr-2" />
                         + Add
                       </Button>
@@ -374,7 +377,7 @@ const StockRegister = () => {
 
                   {/* Closing Stock Display */}
                   {(podiOpeningStock || podiProduction || podiSales) && (
-                    <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="p-4 bg-gray-50 rounded-lg mt-4">
                       <p className="text-sm font-medium text-gray-700">
                         Closing Stock: {calculatePodiClosingStock().toFixed(1)} kg
                       </p>
@@ -385,6 +388,7 @@ const StockRegister = () => {
                   )}
                 </CardContent>
               </Card>
+
 
               {/* Podi Entries Table */}
               {podiEntries.length > 0 && (
@@ -433,8 +437,9 @@ const StockRegister = () => {
                   <CardTitle>Add Raw Material Entry</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
-                    <div>
+                  <div className="flex flex-wrap gap-4 items-end w-full">
+                    {/* Date */}
+                    <div className="min-w-[180px]">
                       <Label htmlFor="rmDate">Date</Label>
                       <Popover>
                         <PopoverTrigger asChild>
@@ -461,7 +466,8 @@ const StockRegister = () => {
                       </Popover>
                     </div>
 
-                    <div>
+                    {/* Ingredient Name (Wider) */}
+                    <div className="flex-1 min-w-[300px] max-w-[400px]">
                       <Label htmlFor="ingredient">Ingredient</Label>
                       <Select value={ingredient} onValueChange={setIngredient}>
                         <SelectTrigger>
@@ -477,7 +483,8 @@ const StockRegister = () => {
                       </Select>
                     </div>
 
-                    <div>
+                    {/* Opening */}
+                    <div className="min-w-[100px]">
                       <Label htmlFor="rmOpening">Opening</Label>
                       <Input
                         id="rmOpening"
@@ -485,11 +492,11 @@ const StockRegister = () => {
                         value={rmOpening}
                         onChange={(e) => setRmOpening(e.target.value)}
                         placeholder="0"
-                        className="w-20"
                       />
                     </div>
 
-                    <div>
+                    {/* Purchased */}
+                    <div className="min-w-[100px]">
                       <Label htmlFor="rmPurchased">Purchase</Label>
                       <Input
                         id="rmPurchased"
@@ -497,11 +504,11 @@ const StockRegister = () => {
                         value={rmPurchased}
                         onChange={(e) => setRmPurchased(e.target.value)}
                         placeholder="0"
-                        className="w-20"
                       />
                     </div>
 
-                    <div>
+                    {/* Used */}
+                    <div className="min-w-[100px]">
                       <Label htmlFor="rmUsed">Used</Label>
                       <Input
                         id="rmUsed"
@@ -509,12 +516,12 @@ const StockRegister = () => {
                         value={rmUsed}
                         onChange={(e) => setRmUsed(e.target.value)}
                         placeholder="0"
-                        className="w-20"
                       />
                     </div>
 
-                    <div className="flex items-end col-span-full">
-                      <Button onClick={handleAddRawMaterialEntry} className="w-auto">
+                    {/* Add Button (aligned right) */}
+                    <div className="ml-auto">
+                      <Button onClick={handleAddRawMaterialEntry}>
                         <Plus className="h-4 w-4 mr-2" />
                         + Add
                       </Button>
@@ -523,7 +530,7 @@ const StockRegister = () => {
 
                   {/* Closing Stock Display */}
                   {(rmOpening || rmPurchased || rmUsed) && (
-                    <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="p-4 bg-gray-50 rounded-lg mt-4">
                       <p className="text-sm font-medium text-gray-700">
                         Closing Stock: {calculateRmClosing().toFixed(1)} kg
                       </p>
@@ -534,6 +541,7 @@ const StockRegister = () => {
                   )}
                 </CardContent>
               </Card>
+
 
               {/* Raw Material Entries Table */}
               {rawMaterialEntries.length > 0 && (
