@@ -283,19 +283,19 @@ const Index = () => {
         {currentView === 'recipes' && (
           <div className="space-y-6">
             <div className="flex flex-col md:flex-row items-center gap-4">
-              <div className="w-full md:w-1/5">
+              <div className="w-full md:w-1/6">
                 <Badge className="bg-blue-100 text-blue-800 text-sm px-3 py-2 w-full justify-center">
                   <FileText size={16} className="mr-2" />
                   Total Recipes: {visibleRecipes.length}
                 </Badge>
               </div>
-              <div className="w-full md:w-1/5">
+              <div className="w-full md:w-1/6">
                 <Badge className="bg-green-100 text-green-800 text-sm px-3 py-2 w-full justify-center">
                   <img src="/logo.png" className="h-4 w-4 mr-2" alt="icon" />
                   Ingredients: {masterIngredients.length}
                 </Badge>
               </div>
-              <div className="w-full md:w-3/5">
+              <div className="w-full md:w-2/6">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <Input

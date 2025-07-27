@@ -272,10 +272,20 @@ const StockRegister = () => {
           </Card>
 
           <Tabs defaultValue="podi" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="podi">Podi's Register</TabsTrigger>
-              <TabsTrigger value="raw-materials">Raw Material Inventory</TabsTrigger>
-            </TabsList>
+          <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger
+            value="podi"
+            className="bg-orange-100 text-orange-800 data-[state=active]:bg-orange-500 data-[state=active]:text-white rounded-md px-4 py-2"
+          >
+            Podi's Register
+          </TabsTrigger>
+          <TabsTrigger
+            value="raw-materials"
+            className="bg-orange-100 text-orange-800 data-[state=active]:bg-orange-500 data-[state=active]:text-white rounded-md px-4 py-2"
+          >
+            Raw Material Inventory
+          </TabsTrigger>
+        </TabsList>
 
             <TabsContent value="podi" className="space-y-6">
               {/* Podi Entry Form */}
@@ -284,8 +294,8 @@ const StockRegister = () => {
                   <CardTitle>Add Podi Entry</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap gap-4 items-end w-full">
-                    {/* Date */}
+              <div className="grid sm:grid-cols-[180px_1fr_100px_100px_100px_120px_auto] gap-4 items-end w-full">
+                      {/* Date */}
                     <div className="min-w-[180px]">
                       <Label htmlFor="date">Date</Label>
                       <Popover>
@@ -365,6 +375,16 @@ const StockRegister = () => {
                         placeholder="0"
                       />
                     </div>
+                    {/* Closing Stock (auto-calculated) */}
+                    <div className="min-w-[120px]">
+                      <Label htmlFor="podiClosingStock">Closing</Label>
+                      <Input
+                        id="podiClosingStock"
+                        type="number"
+                        value={Math.round(calculatePodiClosingStock())}
+                        disabled
+                      />
+                    </div>
 
                     {/* Add Button (push to right end) */}
                     <div className="ml-auto">
@@ -376,7 +396,7 @@ const StockRegister = () => {
                   </div>
 
                   {/* Closing Stock Display */}
-                  {(podiOpeningStock || podiProduction || podiSales) && (
+                  {/* {(podiOpeningStock || podiProduction || podiSales) && (
                     <div className="p-4 bg-gray-50 rounded-lg mt-4">
                       <p className="text-sm font-medium text-gray-700">
                         Closing Stock: {calculatePodiClosingStock().toFixed(1)} kg
@@ -385,7 +405,7 @@ const StockRegister = () => {
                         (Opening + Production - Sales)
                       </p>
                     </div>
-                  )}
+                  )} */}
                 </CardContent>
               </Card>
 
@@ -437,7 +457,7 @@ const StockRegister = () => {
                   <CardTitle>Add Raw Material Entry</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap gap-4 items-end w-full">
+                <div className="grid sm:grid-cols-[180px_1fr_100px_100px_100px_120px_auto] gap-4 items-end w-full">
                     {/* Date */}
                     <div className="min-w-[180px]">
                       <Label htmlFor="rmDate">Date</Label>
@@ -518,6 +538,16 @@ const StockRegister = () => {
                         placeholder="0"
                       />
                     </div>
+                    {/* Closing Stock (auto-calculated) */}
+                    <div className="min-w-[120px]">
+                      <Label htmlFor="rmClosing">Closing</Label>
+                      <Input
+                        id="rmClosing"
+                        type="number"
+                        value={Math.round(calculateRmClosing())}
+                        disabled
+                      />
+                    </div>
 
                     {/* Add Button (aligned right) */}
                     <div className="ml-auto">
@@ -529,7 +559,7 @@ const StockRegister = () => {
                   </div>
 
                   {/* Closing Stock Display */}
-                  {(rmOpening || rmPurchased || rmUsed) && (
+                  {/* {(rmOpening || rmPurchased || rmUsed) && (
                     <div className="p-4 bg-gray-50 rounded-lg mt-4">
                       <p className="text-sm font-medium text-gray-700">
                         Closing Stock: {calculateRmClosing().toFixed(1)} kg
@@ -538,7 +568,7 @@ const StockRegister = () => {
                         (Opening + Purchased - Used)
                       </p>
                     </div>
-                  )}
+                  )} */}
                 </CardContent>
               </Card>
 
