@@ -7,7 +7,7 @@ import { Link, useLocation } from 'react-router-dom';
 interface HeaderProps {
   currentView?: string;
   setCurrentView?: (view: string) => void;
-  exportAllData: () => void;
+  exportAllData?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ exportAllData }) => {
@@ -74,14 +74,16 @@ const Header: React.FC<HeaderProps> = ({ exportAllData }) => {
           </div>
 
           <div className="flex items-center space-x-1 lg:space-x-2">
-            <Button
-              onClick={exportAllData}
-              size="sm"
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              <Download size={14} className="lg:mr-1" />
-              <span className="hidden lg:inline">Export</span>
-            </Button>
+            {exportAllData && (
+              <Button
+                onClick={exportAllData}
+                size="sm"
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Download size={14} className="lg:mr-1" />
+                <span className="hidden lg:inline">Export</span>
+              </Button>
+            )}
           </div>
         </div>
       </div>
