@@ -67,12 +67,14 @@ const OrderForm: React.FC<OrderFormProps> = ({ onOrderCreated }) => {
     const priceEntry = pricing.find(
       p => p.recipe_name === recipeName && p.quantity_type === quantityType
     );
+    console.log('Looking for price:', { recipeName, quantityType, priceEntry, allPricing: pricing });
     return priceEntry?.price || 0;
   };
 
   const updateItemAmount = (index: number, recipeName: string, quantityType: string) => {
     if (recipeName && quantityType) {
       const price = getPrice(recipeName, quantityType);
+      console.log('Updating amount for item:', { index, recipeName, quantityType, price });
       setOrderItems(prev => prev.map((item, i) => 
         i === index ? { ...item, amount: price } : item
       ));
@@ -83,6 +85,11 @@ const OrderForm: React.FC<OrderFormProps> = ({ onOrderCreated }) => {
     setOrderItems(prev => prev.map((item, i) => 
       i === index ? { ...item, recipe_name: recipeName, amount: 0 } : item
     ));
+    // Check if quantity is already selected and update amount
+    const currentItem = orderItems[index];
+    if (currentItem.quantity_type) {
+      updateItemAmount(index, recipeName, currentItem.quantity_type);
+    }
   };
 
   const handleQuantityChange = (index: number, quantityType: string) => {
@@ -90,7 +97,10 @@ const OrderForm: React.FC<OrderFormProps> = ({ onOrderCreated }) => {
     setOrderItems(prev => prev.map((item, i) => 
       i === index ? { ...item, quantity_type: quantityType } : item
     ));
-    updateItemAmount(index, item.recipe_name, quantityType);
+    // Immediately update the amount when quantity changes
+    if (item.recipe_name) {
+      updateItemAmount(index, item.recipe_name, quantityType);
+    }
   };
 
   const addItem = () => {
