@@ -41,72 +41,6 @@ export type Database = {
         }
         Relationships: []
       }
-      order_items: {
-        Row: {
-          amount: number
-          created_at: string
-          id: string
-          order_id: string
-          quantity_type: string
-          recipe_name: string
-        }
-        Insert: {
-          amount: number
-          created_at?: string
-          id?: string
-          order_id: string
-          quantity_type: string
-          recipe_name: string
-        }
-        Update: {
-          amount?: number
-          created_at?: string
-          id?: string
-          order_id?: string
-          quantity_type?: string
-          recipe_name?: string
-        }
-        Relationships: []
-      }
-      orders: {
-        Row: {
-          address: string
-          created_at: string
-          customer_name: string
-          id: string
-          order_date: string | null
-          payment_status: string | null
-          phone_number: string
-          status: string
-          total_amount: number
-          updated_at: string
-        }
-        Insert: {
-          address: string
-          created_at?: string
-          customer_name: string
-          id?: string
-          order_date?: string | null
-          payment_status?: string | null
-          phone_number: string
-          status?: string
-          total_amount?: number
-          updated_at?: string
-        }
-        Update: {
-          address?: string
-          created_at?: string
-          customer_name?: string
-          id?: string
-          order_date?: string | null
-          payment_status?: string | null
-          phone_number?: string
-          status?: string
-          total_amount?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
       recipe_ingredients: {
         Row: {
           created_at: string
@@ -141,36 +75,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      recipe_pricing: {
-        Row: {
-          created_at: string
-          id: string
-          is_enabled: boolean
-          price: number
-          quantity_type: string
-          recipe_name: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_enabled?: boolean
-          price: number
-          quantity_type: string
-          recipe_name: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_enabled?: boolean
-          price?: number
-          quantity_type?: string
-          recipe_name?: string
-          updated_at?: string
-        }
-        Relationships: []
       }
       recipes: {
         Row: {

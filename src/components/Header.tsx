@@ -1,17 +1,16 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Settings, Download } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface HeaderProps {
-  currentView?: string;
-  setCurrentView?: (view: string) => void;
-  exportAllData?: () => void;
+  currentView: string;
+  setCurrentView: (view: string) => void;
+  exportAllData: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ exportAllData }) => {
-  const location = useLocation();
+const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllData }) => {
   return (
     <nav className="bg-white shadow-sm border-b border-orange-200 sticky top-0 z-50">
       <div className="container mx-auto px-4">
@@ -24,66 +23,78 @@ const Header: React.FC<HeaderProps> = ({ exportAllData }) => {
 
         </div>
 
-          <div className="hidden md:flex items-center space-x-6">
-            <Link 
-              to="/"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                location.pathname === '/'
-                  ? 'bg-orange-100 text-orange-800'
-                  : 'text-gray-600 hover:text-orange-600'
-              }`}
+          <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
+            {[
+              { label: 'Recipes', key: 'recipes' },
+              { label: 'Ingredients', key: 'ingredients' },
+              { label: 'Add Recipe', key: 'add-recipe' },
+              { label: 'Indent', key: 'indent' },
+            ].map(link => (
+              <button
+                key={link.key}
+                onClick={() => setCurrentView(link.key)}
+                className={`px-2 py-2 lg:px-3 rounded-md text-xs lg:text-sm font-medium transition-colors ${
+                  currentView === link.key
+                    ? 'bg-orange-100 text-orange-800'
+                    : 'text-gray-600 hover:text-orange-600'
+                }`}
+              >
+                {link.label}
+              </button>
+            ))}
+            <button
+              onClick={() => window.location.href = '/stock-register'}
+              className="px-2 py-2 lg:px-3 rounded-md text-xs lg:text-sm font-medium transition-colors text-gray-600 hover:text-orange-600"
             >
-              Dashboard
-            </Link>
-            <Link 
-              to="/backend"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                location.pathname === '/backend'
-                  ? 'bg-orange-100 text-orange-800'
-                  : 'text-gray-600 hover:text-orange-600'
-              }`}
-            >
-              Backend
-            </Link>
+              Stock Register
+            </button>
           </div>
 
           {/* Mobile Navigation */}
           <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
-            <div className="grid grid-cols-2 gap-1 p-2">
-              <Link 
-                to="/"
-                className={`px-2 py-3 rounded-md text-xs font-medium transition-colors text-center ${
-                  location.pathname === '/'
-                    ? 'bg-orange-100 text-orange-800'
-                    : 'text-gray-600 hover:text-orange-600'
-                }`}
-              >
-                Dashboard
-              </Link>
-              <Link 
-                to="/backend"
-                className={`px-2 py-3 rounded-md text-xs font-medium transition-colors text-center ${
-                  location.pathname === '/backend'
-                    ? 'bg-orange-100 text-orange-800'
-                    : 'text-gray-600 hover:text-orange-600'
-                }`}
-              >
-                Backend
-              </Link>
+            <div className="grid grid-cols-4 gap-1 p-2">
+              {[
+                { label: 'Recipes', key: 'recipes' },
+                { label: 'Items', key: 'ingredients' },
+                { label: 'Add', key: 'add-recipe' },
+                { label: 'Indent', key: 'indent' },
+              ].map(link => (
+                <button
+                  key={link.key}
+                  onClick={() => setCurrentView(link.key)}
+                  className={`px-2 py-3 rounded-md text-xs font-medium transition-colors text-center ${
+                    currentView === link.key
+                      ? 'bg-orange-100 text-orange-800'
+                      : 'text-gray-600 hover:text-orange-600'
+                  }`}
+                >
+                  {link.label}
+                </button>
+              ))}
             </div>
           </div>
 
           <div className="flex items-center space-x-1 lg:space-x-2">
-            {exportAllData && (
-              <Button
-                onClick={exportAllData}
-                size="sm"
-                className="bg-green-600 hover:bg-green-700 text-white"
-              >
-                <Download size={14} className="lg:mr-1" />
-                <span className="hidden lg:inline">Export</span>
-              </Button>
-            )}
+            <Button
+              onClick={() => setCurrentView('manage-recipes')}
+              size="sm"
+              className={`hidden md:flex ${
+                currentView === 'manage-recipes'
+                  ? 'bg-orange-100 text-orange-800'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
+            >
+              <Settings size={16} className="mr-1" />
+              <span className="hidden lg:inline">Manage</span>
+            </Button>
+            <Button
+              onClick={exportAllData}
+              size="sm"
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              <Download size={14} className="lg:mr-1" />
+              <span className="hidden lg:inline">Export</span>
+            </Button>
           </div>
         </div>
       </div>
