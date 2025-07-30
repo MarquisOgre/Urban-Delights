@@ -7,6 +7,7 @@ import { FileText, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { fetchOrders, fetchOrderItems, updateOrderStatus, updatePaymentStatus } from '@/services/orderService';
 import type { Order, OrderItem } from '@/services/orderService';
+import jsPDF from 'jspdf';
 
 interface OrdersListProps {
   refresh: boolean;
@@ -90,29 +91,106 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
   const generateInvoice = (order: Order) => {
     const items = orderItems[order.id] || [];
     
-    // Create a simple invoice content
-    const invoiceContent = `
-INVOICE
-
-Customer: ${order.customer_name}
-Phone: ${order.phone_number}
-Address: ${order.address}
-Date: ${new Date(order.created_at).toLocaleDateString()}
-
-Items:
-${items.map(item => `${item.recipe_name} - ${item.quantity_type} - ₹${item.amount}`).join('\n')}
-
-Total Amount: ₹${order.total_amount}
-    `;
-
-    // Create and download the invoice
-    const blob = new Blob([invoiceContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `invoice-${order.id}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+    // Create PDF document
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    
+    // Company Logo/Header
+    pdf.setFontSize(24);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('SPICE HOUSE', pageWidth / 2, 30, { align: 'center' });
+    
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text('Premium Quality Spices & Powders', pageWidth / 2, 38, { align: 'center' });
+    
+    // Invoice title and number
+    pdf.setFontSize(20);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('INVOICE', pageWidth / 2, 55, { align: 'center' });
+    
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Invoice #: INV-${order.id.substring(0, 8).toUpperCase()}`, 20, 70);
+    pdf.text(`Date: ${new Date(order.created_at).toLocaleDateString('en-IN')}`, 20, 78);
+    
+    // Customer details
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Bill To:', 20, 95);
+    
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(order.customer_name, 20, 105);
+    pdf.text(order.phone_number, 20, 113);
+    
+    // Split address into multiple lines if too long
+    const addressLines = pdf.splitTextToSize(order.address, 80);
+    let addressY = 121;
+    addressLines.forEach((line: string) => {
+      pdf.text(line, 20, addressY);
+      addressY += 8;
+    });
+    
+    // Table header
+    const tableTop = Math.max(140, addressY + 15);
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'bold');
+    
+    // Table headers
+    pdf.text('Item', 20, tableTop);
+    pdf.text('Quantity', 100, tableTop);
+    pdf.text('Amount (₹)', 150, tableTop);
+    
+    // Draw header line
+    pdf.line(20, tableTop + 2, pageWidth - 20, tableTop + 2);
+    
+    // Table content
+    pdf.setFont('helvetica', 'normal');
+    let yPosition = tableTop + 12;
+    let subtotal = 0;
+    
+    items.forEach((item) => {
+      if (yPosition > pageHeight - 50) {
+        pdf.addPage();
+        yPosition = 30;
+      }
+      
+      pdf.text(item.recipe_name, 20, yPosition);
+      pdf.text(item.quantity_type, 100, yPosition);
+      pdf.text(`₹${item.amount.toFixed(2)}`, 150, yPosition);
+      
+      subtotal += Number(item.amount);
+      yPosition += 10;
+    });
+    
+    // Draw line before totals
+    pdf.line(100, yPosition + 5, pageWidth - 20, yPosition + 5);
+    
+    // Total
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Total Amount:', 100, yPosition + 15);
+    pdf.text(`₹${order.total_amount}`, 150, yPosition + 15);
+    
+    // Payment status
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Payment Status: ${order.payment_status?.toUpperCase() || 'UNPAID'}`, 20, yPosition + 25);
+    pdf.text(`Order Status: ${order.status?.toUpperCase() || 'PENDING'}`, 20, yPosition + 33);
+    
+    // Company address at bottom
+    const footerY = pageHeight - 40;
+    pdf.setFontSize(9);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('SPICE HOUSE', pageWidth / 2, footerY, { align: 'center' });
+    
+    pdf.setFont('helvetica', 'normal');
+    pdf.text('123 Spice Market, Food Street', pageWidth / 2, footerY + 8, { align: 'center' });
+    pdf.text('Hyderabad, Telangana - 500001', pageWidth / 2, footerY + 16, { align: 'center' });
+    pdf.text('Phone: +91 9876543210 | Email: orders@spicehouse.com', pageWidth / 2, footerY + 24, { align: 'center' });
+    
+    // Save the PDF
+    pdf.save(`invoice-${order.id.substring(0, 8)}.pdf`);
   };
 
   const getStatusColor = (status: string) => {
