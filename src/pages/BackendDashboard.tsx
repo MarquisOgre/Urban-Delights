@@ -10,13 +10,13 @@ import AddRecipe from '@/components/AddRecipe';
 import MasterIngredientList from '@/components/MasterIngredientList';
 import CostCalculator from '@/components/CostCalculator';
 import PricingManager from '@/components/PricingManager';
-import StockRegisterComponent from '@/components/StockRegister';
-import RecipesDisplay from '@/components/RecipesDashboard';
+import StockRegister from '@/components/StockRegister';
+import Recipes from '@/components/Recipes';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { fetchMasterIngredients, fetchRecipesWithIngredients } from '@/services/database';
 
-const Backend: React.FC = () => {
+const BackendDashboard: React.FC = () => {
   const [currentView, setCurrentView] = useState('main');
 
   // Fetch data for backend components
@@ -91,18 +91,18 @@ const Backend: React.FC = () => {
 
   const backendButtons = [
     {
-      title: 'Recipe',
+      title: 'Recipes',
       description: 'View all recipes and their details',
       icon: ChefHat,
       color: 'bg-orange-500',
-      key: 'recipe-display'
+      key: 'recipes'
     },
     {
-      title: 'Manage Recipe',
+      title: 'Manage Recipes',
       description: 'Manage recipe visibility and settings',
       icon: ChefHat,
       color: 'bg-orange-600',
-      key: 'recipes'
+      key: 'manage-recipes'
     },
     {
       title: 'Ingredients',
@@ -119,7 +119,7 @@ const Backend: React.FC = () => {
       key: 'add-recipe'
     },
     {
-      title: 'Pricing',
+      title: 'Pricing Manager',
       description: 'Set selling prices for different quantities',
       icon: DollarSign,
       color: 'bg-purple-500',
@@ -181,16 +181,16 @@ const Backend: React.FC = () => {
 
     // Render specific backend components
     switch (currentView) {
-      case 'recipe-display':
+      case 'recipes':
         return (
           <div className="space-y-4">
             <Button onClick={() => setCurrentView('main')} variant="outline">
               ← Back to Backend
             </Button>
-            <RecipesDisplay recipes={recipes} onExport={exportAllData} />
+            <Recipes recipes={recipes} masterIngredients={masterIngredients} onRecipeUpdated={refreshData} />
           </div>
         );
-      case 'recipes':
+      case 'manage-recipes':
         return (
           <div className="space-y-4">
             <Button onClick={() => setCurrentView('main')} variant="outline">
@@ -241,7 +241,7 @@ const Backend: React.FC = () => {
             <Button onClick={() => setCurrentView('main')} variant="outline">
               ← Back to Backend
             </Button>
-            <StockRegisterComponent />
+            <StockRegister />
           </div>
         );
       default:
@@ -273,4 +273,4 @@ const Backend: React.FC = () => {
   );
 };
 
-export default Backend;
+export default BackendDashboard;

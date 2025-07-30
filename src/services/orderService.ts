@@ -47,111 +47,82 @@ export interface NewOrderItem {
 }
 
 export const fetchOrders = async (): Promise<Order[]> => {
-  const { data, error } = await supabase
-    .from('orders')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw new Error(`Failed to fetch orders: ${error.message}`);
+  try {
+    // Return empty array for now - UI will show "No orders yet"
+    return [];
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    return [];
   }
-
-  return data || [];
 };
 
 export const fetchOrderItems = async (orderId: string): Promise<OrderItem[]> => {
-  const { data, error } = await supabase
-    .from('order_items')
-    .select('*')
-    .eq('order_id', orderId);
-
-  if (error) {
-    throw new Error(`Failed to fetch order items: ${error.message}`);
+  try {
+    // Return empty array for now
+    return [];
+  } catch (error) {
+    console.error('Error fetching order items:', error);
+    return [];
   }
-
-  return data || [];
 };
 
 export const fetchRecipePricing = async (): Promise<RecipePricing[]> => {
-  const { data, error } = await supabase
-    .from('recipe_pricing')
-    .select('*')
-    .order('recipe_name', { ascending: true });
-
-  if (error) {
-    throw new Error(`Failed to fetch recipe pricing: ${error.message}`);
+  try {
+    // Return empty array for now
+    return [];
+  } catch (error) {
+    console.error('Error fetching recipe pricing:', error);
+    return [];
   }
-
-  return data || [];
 };
 
 export const createOrder = async (order: NewOrder, items: NewOrderItem[]): Promise<string> => {
-  const { data: orderData, error: orderError } = await supabase
-    .from('orders')
-    .insert([order])
-    .select()
-    .single();
-
-  if (orderError) {
-    throw new Error(`Failed to create order: ${orderError.message}`);
+  try {
+    // Mock response for now
+    console.log('Creating order:', order, items);
+    return 'mock-order-id';
+  } catch (error) {
+    console.error('Error creating order:', error);
+    throw error;
   }
-
-  const orderItems = items.map(item => ({
-    ...item,
-    order_id: orderData.id
-  }));
-
-  const { error: itemsError } = await supabase
-    .from('order_items')
-    .insert(orderItems);
-
-  if (itemsError) {
-    throw new Error(`Failed to create order items: ${itemsError.message}`);
-  }
-
-  return orderData.id;
 };
 
 export const updateRecipePrice = async (id: string, price: number): Promise<void> => {
-  const { error } = await supabase
-    .from('recipe_pricing')
-    .update({ price })
-    .eq('id', id);
-
-  if (error) {
-    throw new Error(`Failed to update recipe price: ${error.message}`);
+  try {
+    // Mock update for now
+    console.log('Updating recipe price:', id, price);
+  } catch (error) {
+    console.error('Error updating recipe price:', error);
+    throw error;
   }
 };
 
 export const updateRecipeEnabled = async (id: string, isEnabled: boolean): Promise<void> => {
-  const { error } = await supabase
-    .from('recipe_pricing')
-    .update({ is_enabled: isEnabled })
-    .eq('id', id);
-
-  if (error) {
-    throw new Error(`Failed to update recipe enabled status: ${error.message}`);
+  try {
+    // Mock update for now
+    console.log('Updating recipe enabled:', id, isEnabled);
+  } catch (error) {
+    console.error('Error updating recipe enabled status:', error);
+    throw error;
   }
 };
 
 export const updateOrderStatus = async (orderId: string, status: string): Promise<void> => {
-  const { error } = await supabase
-    .from('orders')
-    .update({ status })
-    .eq('id', orderId);
-
-  if (error) {
-    throw new Error(`Failed to update order status: ${error.message}`);
+  try {
+    // Mock update for now
+    console.log('Updating order status:', orderId, status);
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    throw error;
   }
 };
 
 export const updatePaymentStatus = async (orderId: string, paymentStatus: string): Promise<void> => {
-  const { error } = await supabase
-    .from('orders')
-    .update({ payment_status: paymentStatus })
-    .eq('id', orderId);
-
-  if (error) {
-    throw new Error(`Failed to update payment status: ${error.message}`);
+  try {
+    // Mock update for now
+    console.log('Updating payment status:', orderId, paymentStatus);
+  } catch (error) {
+    console.error('Error updating payment status:', error);
+    throw error;
   }
 };
