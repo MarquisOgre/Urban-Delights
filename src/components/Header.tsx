@@ -30,51 +30,17 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
             <Link to="/backend" className="px-2 py-2 lg:px-3 rounded-md text-xs lg:text-sm font-medium transition-colors text-gray-600 hover:text-orange-600">
               Backend Dashboard
             </Link>
-            {[
-              { label: 'Recipes', key: 'recipes' },
-              { label: 'Manage Recipes', key: 'manage-recipes' },              
-              { label: 'Ingredients', key: 'ingredients' },
-              { label: 'Add Recipe', key: 'add-recipe' },
-              { label: 'Indent', key: 'indent' },
-              { label: 'Stock Register', key: 'stock-register' },
-            ].map(link => (
-              <button
-                key={link.key}
-                onClick={() => setCurrentView(link.key)}
-                className={`px-2 py-2 lg:px-3 rounded-md text-xs lg:text-sm font-medium transition-colors ${
-                  currentView === link.key
-                    ? 'bg-orange-100 text-orange-800'
-                    : 'text-gray-600 hover:text-orange-600'
-                }`}
-              >
-                {link.label}
-              </button>
-            ))}
           </div>
 
           {/* Mobile Navigation */}
           <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
-            <div className="grid grid-cols-5 gap-1 p-2">
-              {[
-                { label: 'Recipes', key: 'recipes' },
-                { label: 'Manage Recipes', key: 'manage-recipes' },                
-                { label: 'Items', key: 'ingredients' },
-                { label: 'Add', key: 'add-recipe' },
-                { label: 'Indent', key: 'indent' },
-                { label: 'Stock', key: 'stock-register' },
-              ].map(link => (
-                <button
-                  key={link.key}
-                  onClick={() => setCurrentView(link.key)}
-                  className={`px-2 py-3 rounded-md text-xs font-medium transition-colors text-center ${
-                    currentView === link.key
-                      ? 'bg-orange-100 text-orange-800'
-                      : 'text-gray-600 hover:text-orange-600'
-                  }`}
-                >
-                  {link.label}
-                </button>
-              ))}
+            <div className="grid grid-cols-2 gap-1 p-2">
+              <Link to="/orders" className="px-2 py-3 rounded-md text-xs font-medium transition-colors text-center text-gray-600 hover:text-orange-600">
+                Order Dashboard
+              </Link>
+              <Link to="/backend" className="px-2 py-3 rounded-md text-xs font-medium transition-colors text-center text-gray-600 hover:text-orange-600">
+                Backend Dashboard
+              </Link>
             </div>
           </div>
 
