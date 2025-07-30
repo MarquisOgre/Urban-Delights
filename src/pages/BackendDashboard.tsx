@@ -8,7 +8,7 @@ import { ChefHat, Package, Plus, DollarSign, FileText, Archive } from 'lucide-re
 import ManageRecipes from '@/components/ManageRecipes';
 import AddRecipe from '@/components/AddRecipe';
 import MasterIngredientList from '@/components/MasterIngredientList';
-import CostCalculator from '@/components/CostCalculator';
+import Indent from '@/components/Indent';
 import PricingManager from '@/components/PricingManager';
 import StockRegister from '@/components/StockRegister';
 import Recipes from '@/components/Recipes';
@@ -232,7 +232,7 @@ const BackendDashboard: React.FC = () => {
             <Button onClick={() => setCurrentView('main')} variant="outline">
               ← Back to Backend
             </Button>
-            <CostCalculator />
+            <Indent recipes={recipes} masterIngredients={masterIngredients} />
           </div>
         );
       case 'stock-register':

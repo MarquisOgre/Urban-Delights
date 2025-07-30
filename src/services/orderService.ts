@@ -48,8 +48,13 @@ export interface NewOrderItem {
 
 export const fetchOrders = async (): Promise<Order[]> => {
   try {
-    // Return empty array for now - UI will show "No orders yet"
-    return [];
+    const { data, error } = await (supabase as any)
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return (data || []) as Order[];
   } catch (error) {
     console.error('Error fetching orders:', error);
     return [];
@@ -58,8 +63,14 @@ export const fetchOrders = async (): Promise<Order[]> => {
 
 export const fetchOrderItems = async (orderId: string): Promise<OrderItem[]> => {
   try {
-    // Return empty array for now
-    return [];
+    const { data, error } = await (supabase as any)
+      .from('order_items')
+      .select('*')
+      .eq('order_id', orderId)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return (data || []) as OrderItem[];
   } catch (error) {
     console.error('Error fetching order items:', error);
     return [];
@@ -68,8 +79,13 @@ export const fetchOrderItems = async (orderId: string): Promise<OrderItem[]> => 
 
 export const fetchRecipePricing = async (): Promise<RecipePricing[]> => {
   try {
-    // Return empty array for now
-    return [];
+    const { data, error } = await (supabase as any)
+      .from('recipe_pricing')
+      .select('*')
+      .order('recipe_name', { ascending: true });
+    
+    if (error) throw error;
+    return (data || []) as RecipePricing[];
   } catch (error) {
     console.error('Error fetching recipe pricing:', error);
     return [];
@@ -78,9 +94,35 @@ export const fetchRecipePricing = async (): Promise<RecipePricing[]> => {
 
 export const createOrder = async (order: NewOrder, items: NewOrderItem[]): Promise<string> => {
   try {
-    // Mock response for now
-    console.log('Creating order:', order, items);
-    return 'mock-order-id';
+    const { data: orderData, error: orderError } = await (supabase as any)
+      .from('orders')
+      .insert([{
+        customer_name: order.customer_name,
+        phone_number: order.phone_number,
+        address: order.address,
+        total_amount: order.total_amount,
+        status: order.status || 'pending',
+        payment_status: 'unpaid'
+      }])
+      .select()
+      .single();
+
+    if (orderError) throw orderError;
+
+    const orderItems = items.map(item => ({
+      order_id: orderData.id,
+      recipe_name: item.recipe_name,
+      quantity_type: item.quantity_type,
+      amount: item.amount
+    }));
+
+    const { error: itemsError } = await (supabase as any)
+      .from('order_items')
+      .insert(orderItems);
+
+    if (itemsError) throw itemsError;
+
+    return orderData.id;
   } catch (error) {
     console.error('Error creating order:', error);
     throw error;
@@ -89,8 +131,12 @@ export const createOrder = async (order: NewOrder, items: NewOrderItem[]): Promi
 
 export const updateRecipePrice = async (id: string, price: number): Promise<void> => {
   try {
-    // Mock update for now
-    console.log('Updating recipe price:', id, price);
+    const { error } = await (supabase as any)
+      .from('recipe_pricing')
+      .update({ price, updated_at: new Date().toISOString() })
+      .eq('id', id);
+
+    if (error) throw error;
   } catch (error) {
     console.error('Error updating recipe price:', error);
     throw error;
@@ -99,8 +145,12 @@ export const updateRecipePrice = async (id: string, price: number): Promise<void
 
 export const updateRecipeEnabled = async (id: string, isEnabled: boolean): Promise<void> => {
   try {
-    // Mock update for now
-    console.log('Updating recipe enabled:', id, isEnabled);
+    const { error } = await (supabase as any)
+      .from('recipe_pricing')
+      .update({ is_enabled: isEnabled, updated_at: new Date().toISOString() })
+      .eq('id', id);
+
+    if (error) throw error;
   } catch (error) {
     console.error('Error updating recipe enabled status:', error);
     throw error;
@@ -109,8 +159,12 @@ export const updateRecipeEnabled = async (id: string, isEnabled: boolean): Promi
 
 export const updateOrderStatus = async (orderId: string, status: string): Promise<void> => {
   try {
-    // Mock update for now
-    console.log('Updating order status:', orderId, status);
+    const { error } = await (supabase as any)
+      .from('orders')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', orderId);
+
+    if (error) throw error;
   } catch (error) {
     console.error('Error updating order status:', error);
     throw error;
@@ -119,8 +173,12 @@ export const updateOrderStatus = async (orderId: string, status: string): Promis
 
 export const updatePaymentStatus = async (orderId: string, paymentStatus: string): Promise<void> => {
   try {
-    // Mock update for now
-    console.log('Updating payment status:', orderId, paymentStatus);
+    const { error } = await (supabase as any)
+      .from('orders')
+      .update({ payment_status: paymentStatus, updated_at: new Date().toISOString() })
+      .eq('id', orderId);
+
+    if (error) throw error;
   } catch (error) {
     console.error('Error updating payment status:', error);
     throw error;
