@@ -7,6 +7,8 @@ export interface Order {
   address: string;
   total_amount: number;
   status: string;
+  payment_status?: string;
+  order_date?: string;
   created_at: string;
   updated_at: string;
 }
@@ -128,5 +130,16 @@ export const updateOrderStatus = async (orderId: string, status: string): Promis
 
   if (error) {
     throw new Error(`Failed to update order status: ${error.message}`);
+  }
+};
+
+export const updatePaymentStatus = async (orderId: string, paymentStatus: string): Promise<void> => {
+  const { error } = await supabase
+    .from('orders')
+    .update({ payment_status: paymentStatus })
+    .eq('id', orderId);
+
+  if (error) {
+    throw new Error(`Failed to update payment status: ${error.message}`);
   }
 };

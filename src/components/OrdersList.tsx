@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileText, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { fetchOrders, fetchOrderItems, updateOrderStatus } from '@/services/orderService';
+import { fetchOrders, fetchOrderItems, updateOrderStatus, updatePaymentStatus } from '@/services/orderService';
 import type { Order, OrderItem } from '@/services/orderService';
 
 interface OrdersListProps {
@@ -53,18 +54,35 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
     }
   };
 
-  const convertToInvoice = async (orderId: string) => {
+  const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
-      await updateOrderStatus(orderId, 'invoiced');
+      await updateOrderStatus(orderId, newStatus);
       toast({
         title: 'Success',
-        description: 'Order converted to invoice',
+        description: 'Order status updated',
       });
       loadOrders();
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to convert order to invoice',
+        description: 'Failed to update order status',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handlePaymentStatusChange = async (orderId: string, paymentStatus: string) => {
+    try {
+      await updatePaymentStatus(orderId, paymentStatus);
+      toast({
+        title: 'Success',
+        description: 'Payment status updated',
+      });
+      loadOrders();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update payment status',
         variant: 'destructive',
       });
     }
@@ -100,9 +118,21 @@ Total Amount: ₹${order.total_amount}
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'received': return 'bg-blue-100 text-blue-800';
+      case 'order_sent': return 'bg-purple-100 text-purple-800';
+      case 'paid': return 'bg-green-100 text-green-800';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
       case 'invoiced': return 'bg-green-100 text-green-800';
-      case 'completed': return 'bg-blue-100 text-blue-800';
+      case 'completed': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getPaymentStatusColor = (status: string) => {
+    switch (status) {
+      case 'paid': return 'bg-green-100 text-green-800';
+      case 'unpaid': return 'bg-red-100 text-red-800';
+      case 'partial': return 'bg-yellow-100 text-yellow-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -132,10 +162,17 @@ Total Amount: ₹${order.total_amount}
                   <p className="text-sm text-gray-600">{order.address}</p>
                 </div>
                 <div className="text-right">
-                  <Badge className={getStatusColor(order.status)}>
-                    {order.status}
-                  </Badge>
-                  <p className="text-lg font-bold mt-2">₹{order.total_amount}</p>
+                  <div className="flex flex-col gap-1 mb-2">
+                    <Badge className={getStatusColor(order.status)}>
+                      {order.status}
+                    </Badge>
+                    {order.payment_status && (
+                      <Badge className={getPaymentStatusColor(order.payment_status)}>
+                        {order.payment_status}
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-lg font-bold">₹{order.total_amount}</p>
                   <p className="text-xs text-gray-500">
                     {new Date(order.created_at).toLocaleDateString()}
                   </p>
@@ -153,26 +190,49 @@ Total Amount: ₹${order.total_amount}
                 ))}
               </div>
               
-              <div className="flex gap-2">
-                {order.status === 'pending' && (
-                  <Button
-                    onClick={() => convertToInvoice(order.id)}
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    <FileText size={16} className="mr-1" />
-                    Convert to Invoice
-                  </Button>
-                )}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 block mb-1">Order Status</label>
+                  <Select value={order.status} onValueChange={(value) => handleStatusChange(order.id, value)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="received">Received</SelectItem>
+                      <SelectItem value="order_sent">Order Sent</SelectItem>
+                      <SelectItem value="paid">Paid</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 
-                <Button
-                  onClick={() => generateInvoice(order)}
-                  size="sm"
-                  variant="outline"
-                >
-                  <Download size={16} className="mr-1" />
-                  Download Invoice
-                </Button>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 block mb-1">Payment Status</label>
+                  <Select 
+                    value={order.payment_status || 'unpaid'} 
+                    onValueChange={(value) => handlePaymentStatusChange(order.id, value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="unpaid">Unpaid</SelectItem>
+                      <SelectItem value="paid">Paid</SelectItem>
+                      <SelectItem value="partial">Partial</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex items-end">
+                  <Button
+                    onClick={() => generateInvoice(order)}
+                    size="sm"
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <Download size={16} className="mr-1" />
+                    Download Invoice
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

@@ -15,9 +15,11 @@ const OrderDashboard: React.FC<OrderDashboardProps> = ({ onCreateOrder, onViewOr
   const [orders, setOrders] = useState<Order[]>([]);
   const [stats, setStats] = useState({
     totalOrders: 0,
+    totalSales: 0,
     totalRevenue: 0,
     pendingOrders: 0,
-    activeCustomers: 0
+    activeCustomers: 0,
+    paidOrders: 0
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -28,19 +30,39 @@ const OrderDashboard: React.FC<OrderDashboardProps> = ({ onCreateOrder, onViewOr
   const loadDashboardData = async () => {
     try {
       setIsLoading(true);
+      console.log('Loading dashboard data...');
       const ordersData = await fetchOrders();
+      console.log('Fetched orders:', ordersData);
       setOrders(ordersData);
 
       // Calculate statistics
       const totalOrders = ordersData.length;
+      const totalSales = ordersData.filter(order => 
+        order.status === 'order_sent' || order.status === 'paid' || order.payment_status === 'paid'
+      ).length;
       const totalRevenue = ordersData.reduce((sum, order) => sum + order.total_amount, 0);
-      const pendingOrders = ordersData.filter(order => order.status === 'pending').length;
+      const pendingOrders = ordersData.filter(order => 
+        order.status === 'received' || order.status === 'pending'
+      ).length;
+      const paidOrders = ordersData.filter(order => 
+        order.payment_status === 'paid' || order.status === 'paid'
+      ).length;
       const uniqueCustomers = new Set(ordersData.map(order => order.customer_name)).size;
 
       setStats({
         totalOrders,
+        totalSales,
         totalRevenue,
         pendingOrders,
+        paidOrders,
+        activeCustomers: uniqueCustomers
+      });
+      console.log('Calculated stats:', {
+        totalOrders,
+        totalSales,
+        totalRevenue,
+        pendingOrders,
+        paidOrders,
         activeCustomers: uniqueCustomers
       });
     } catch (error) {
@@ -61,7 +83,7 @@ const OrderDashboard: React.FC<OrderDashboardProps> = ({ onCreateOrder, onViewOr
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <Card className="bg-blue-50 border-blue-200">
           <CardContent className="p-6 text-center">
             <div className="flex justify-center mb-4">
@@ -73,6 +95,20 @@ const OrderDashboard: React.FC<OrderDashboardProps> = ({ onCreateOrder, onViewOr
               {isLoading ? '-' : stats.totalOrders}
             </div>
             <div className="text-sm text-gray-600">Total Orders</div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-purple-50 border-purple-200">
+          <CardContent className="p-6 text-center">
+            <div className="flex justify-center mb-4">
+              <div className="p-3 bg-purple-100 rounded-full">
+                <ShoppingCart className="h-6 w-6 text-purple-600" />
+              </div>
+            </div>
+            <div className="text-2xl font-bold text-purple-600 mb-1">
+              {isLoading ? '-' : stats.totalSales}
+            </div>
+            <div className="text-sm text-gray-600">Total Sales</div>
           </CardContent>
         </Card>
 
@@ -104,14 +140,14 @@ const OrderDashboard: React.FC<OrderDashboardProps> = ({ onCreateOrder, onViewOr
           </CardContent>
         </Card>
 
-        <Card className="bg-purple-50 border-purple-200">
+        <Card className="bg-teal-50 border-teal-200">
           <CardContent className="p-6 text-center">
             <div className="flex justify-center mb-4">
-              <div className="p-3 bg-purple-100 rounded-full">
-                <Users className="h-6 w-6 text-purple-600" />
+              <div className="p-3 bg-teal-100 rounded-full">
+                <Users className="h-6 w-6 text-teal-600" />
               </div>
             </div>
-            <div className="text-2xl font-bold text-purple-600 mb-1">
+            <div className="text-2xl font-bold text-teal-600 mb-1">
               {isLoading ? '-' : stats.activeCustomers}
             </div>
             <div className="text-sm text-gray-600">Active Customers</div>
