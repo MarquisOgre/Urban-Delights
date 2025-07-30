@@ -26,6 +26,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
           <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
             {[
               { label: 'Recipes', key: 'recipes' },
+              { label: 'Manage Recipes', key: 'manage-recipes' },              
               { label: 'Ingredients', key: 'ingredients' },
               { label: 'Add Recipe', key: 'add-recipe' },
               { label: 'Indent', key: 'indent' },
@@ -50,6 +51,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
             <div className="grid grid-cols-5 gap-1 p-2">
               {[
                 { label: 'Recipes', key: 'recipes' },
+                { label: 'Manage Recipes', key: 'manage-recipes' },                
                 { label: 'Items', key: 'ingredients' },
                 { label: 'Add', key: 'add-recipe' },
                 { label: 'Indent', key: 'indent' },
@@ -71,7 +73,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
           </div>
 
           <div className="flex items-center space-x-1 lg:space-x-2">
-            <Button
+            {/* <Button
               onClick={() => setCurrentView('manage-recipes')}
               size="sm"
               className={`hidden md:flex ${
@@ -82,7 +84,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
             >
               <Settings size={16} className="mr-1" />
               <span className="hidden lg:inline">Manage</span>
-            </Button>
+            </Button> */}
             <Button
               onClick={exportAllData}
               size="sm"
