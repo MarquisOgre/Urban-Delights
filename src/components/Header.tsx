@@ -25,10 +25,9 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
 
           <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
             {[
-              { label: 'Recipes', key: 'recipes' },
-              { label: 'Ingredients', key: 'ingredients' },
-              { label: 'Add Recipe', key: 'add-recipe' },
-              { label: 'Indent', key: 'indent' },
+              { label: 'Orders', key: 'orders' },
+              { label: 'Create Order', key: 'create-order' },
+              { label: 'Pricing', key: 'pricing' }
             ].map(link => (
               <button
                 key={link.key}
@@ -42,22 +41,40 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
                 {link.label}
               </button>
             ))}
-            <button
-              onClick={() => window.location.href = '/stock-register'}
-              className="px-2 py-2 lg:px-3 rounded-md text-xs lg:text-sm font-medium transition-colors text-gray-600 hover:text-orange-600"
-            >
-              Stock Register
-            </button>
+            
+            <div className="border-l border-gray-300 pl-4 ml-4">
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Backend</span>
+              <div className="flex space-x-2 mt-1">
+                {[
+                  { label: 'Recipes', key: 'recipes' },
+                  { label: 'Ingredients', key: 'ingredients' },
+                  { label: 'Add Recipe', key: 'add-recipe' },
+                  { label: 'Indent', key: 'indent' },
+                  { label: 'Stock Register', key: 'stock-register' },
+                ].map(link => (
+                  <button
+                    key={link.key}
+                    onClick={() => setCurrentView(link.key)}
+                    className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${
+                      currentView === link.key
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'text-gray-600 hover:text-blue-600'
+                    }`}
+                  >
+                    {link.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Mobile Navigation */}
           <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
-            <div className="grid grid-cols-4 gap-1 p-2">
+            <div className="grid grid-cols-3 gap-1 p-2">
               {[
-                { label: 'Recipes', key: 'recipes' },
-                { label: 'Items', key: 'ingredients' },
-                { label: 'Add', key: 'add-recipe' },
-                { label: 'Indent', key: 'indent' },
+                { label: 'Orders', key: 'orders' },
+                { label: 'Create', key: 'create-order' },
+                { label: 'Backend', key: 'recipes' },
               ].map(link => (
                 <button
                   key={link.key}
