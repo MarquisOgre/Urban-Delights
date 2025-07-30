@@ -1,16 +1,17 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Settings, Download } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Download } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 
 interface HeaderProps {
-  currentView: string;
-  setCurrentView: (view: string) => void;
+  currentView?: string;
+  setCurrentView?: (view: string) => void;
   exportAllData: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllData }) => {
+const Header: React.FC<HeaderProps> = ({ exportAllData }) => {
+  const location = useLocation();
   return (
     <nav className="bg-white shadow-sm border-b border-orange-200 sticky top-0 z-50">
       <div className="container mx-auto px-4">
@@ -27,7 +28,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
             <Link 
               to="/"
               className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                window.location.pathname === '/'
+                location.pathname === '/'
                   ? 'bg-orange-100 text-orange-800'
                   : 'text-gray-600 hover:text-orange-600'
               }`}
@@ -37,7 +38,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
             <Link 
               to="/backend"
               className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                window.location.pathname === '/backend'
+                location.pathname === '/backend'
                   ? 'bg-orange-100 text-orange-800'
                   : 'text-gray-600 hover:text-orange-600'
               }`}
@@ -52,7 +53,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
               <Link 
                 to="/"
                 className={`px-2 py-3 rounded-md text-xs font-medium transition-colors text-center ${
-                  window.location.pathname === '/'
+                  location.pathname === '/'
                     ? 'bg-orange-100 text-orange-800'
                     : 'text-gray-600 hover:text-orange-600'
                 }`}
@@ -62,7 +63,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
               <Link 
                 to="/backend"
                 className={`px-2 py-3 rounded-md text-xs font-medium transition-colors text-center ${
-                  window.location.pathname === '/backend'
+                  location.pathname === '/backend'
                     ? 'bg-orange-100 text-orange-800'
                     : 'text-gray-600 hover:text-orange-600'
                 }`}
