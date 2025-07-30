@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +10,7 @@ import { fetchOrders } from '@/services/orderService';
 import type { Order } from '@/services/orderService';
 
 const OrderDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [stats, setStats] = useState({
     totalOrders: 0,
@@ -62,13 +64,11 @@ const OrderDashboard: React.FC = () => {
   };
 
   const handleCreateOrder = () => {
-    console.log('Create Order clicked');
-    // TODO: Navigate to create order page
+    navigate('/create-order');
   };
 
   const handleViewOrders = () => {
-    console.log('View Orders clicked');
-    // TODO: Navigate to orders list page
+    navigate('/orders-list');
   };
 
   const recentOrders = orders.slice(0, 5);
