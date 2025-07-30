@@ -42,7 +42,6 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
       }, {} as { [key: string]: OrderItem[] });
 
       setOrderItems(itemsMap);
-      onRefresh();
     } catch (error) {
       toast({
         title: 'Error',
@@ -61,7 +60,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
         title: 'Success',
         description: 'Order status updated',
       });
-      loadOrders();
+      onRefresh();
     } catch (error) {
       toast({
         title: 'Error',
@@ -78,7 +77,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
         title: 'Success',
         description: 'Payment status updated',
       });
-      loadOrders();
+      onRefresh();
     } catch (error) {
       toast({
         title: 'Error',
