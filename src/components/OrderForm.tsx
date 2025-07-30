@@ -52,7 +52,17 @@ const OrderForm: React.FC<OrderFormProps> = ({ onOrderCreated }) => {
         fetchRecipesWithIngredients(),
         fetchRecipePricing()
       ]);
-      setRecipes(recipesData.filter(recipe => !recipe.is_hidden));
+      
+      // Filter recipes that are not hidden and have at least one enabled pricing
+      const enabledRecipeNames = new Set(
+        pricingData.filter(p => p.is_enabled).map(p => p.recipe_name)
+      );
+      
+      const filteredRecipes = recipesData.filter(recipe => 
+        !recipe.is_hidden && enabledRecipeNames.has(recipe.name)
+      );
+      
+      setRecipes(filteredRecipes);
       setPricing(pricingData);
     } catch (error) {
       toast({

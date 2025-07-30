@@ -27,6 +27,7 @@ export interface RecipePricing {
   recipe_name: string;
   quantity_type: string;
   price: number;
+  is_enabled: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -119,6 +120,17 @@ export const updateRecipePrice = async (id: string, price: number): Promise<void
 
   if (error) {
     throw new Error(`Failed to update recipe price: ${error.message}`);
+  }
+};
+
+export const updateRecipeEnabled = async (id: string, isEnabled: boolean): Promise<void> => {
+  const { error } = await supabase
+    .from('recipe_pricing')
+    .update({ is_enabled: isEnabled })
+    .eq('id', id);
+
+  if (error) {
+    throw new Error(`Failed to update recipe enabled status: ${error.message}`);
   }
 };
 
