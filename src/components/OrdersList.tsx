@@ -199,7 +199,6 @@ Total Amount: ₹${order.total_amount}
                     <SelectContent>
                       <SelectItem value="received">Received</SelectItem>
                       <SelectItem value="order_sent">Order Sent</SelectItem>
-                      <SelectItem value="paid">Paid</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
