@@ -25,9 +25,9 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
 
           <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
             {[
-              { label: 'Orders', key: 'orders' },
+              { label: 'Dashboard', key: 'dashboard' },
               { label: 'Create Order', key: 'create-order' },
-              { label: 'Pricing', key: 'pricing' }
+              { label: 'Orders', key: 'orders' }
             ].map(link => (
               <button
                 key={link.key}
@@ -49,6 +49,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
                   { label: 'Recipes', key: 'recipes' },
                   { label: 'Ingredients', key: 'ingredients' },
                   { label: 'Add Recipe', key: 'add-recipe' },
+                  { label: 'Pricing', key: 'pricing' },
                   { label: 'Indent', key: 'indent' },
                   { label: 'Stock Register', key: 'stock-register' },
                 ].map(link => (
@@ -72,8 +73,8 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
           <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
             <div className="grid grid-cols-3 gap-1 p-2">
               {[
+                { label: 'Dashboard', key: 'dashboard' },
                 { label: 'Orders', key: 'orders' },
-                { label: 'Create', key: 'create-order' },
                 { label: 'Backend', key: 'recipes' },
               ].map(link => (
                 <button

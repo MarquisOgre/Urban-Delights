@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import OrderDashboard from '@/components/OrderDashboard';
 import ManageRecipes from '@/components/ManageRecipes';
 import AddRecipe from '@/components/AddRecipe';
 import MasterIngredientList from '@/components/MasterIngredientList';
@@ -15,7 +16,7 @@ import { saveAs } from 'file-saver';
 import { fetchMasterIngredients, fetchRecipesWithIngredients } from '@/services/database';
 
 const RecipesDashboard: React.FC = () => {
-  const [currentView, setCurrentView] = useState('orders');
+  const [currentView, setCurrentView] = useState('dashboard');
   const [refreshOrders, setRefreshOrders] = useState(false);
 
   // Fetch data for backend components
@@ -93,8 +94,18 @@ const RecipesDashboard: React.FC = () => {
     setCurrentView('orders');
   };
 
+  const handleCreateOrder = () => {
+    setCurrentView('create-order');
+  };
+
+  const handleViewOrders = () => {
+    setCurrentView('orders');
+  };
+
   const renderContent = () => {
     switch (currentView) {
+      case 'dashboard':
+        return <OrderDashboard onCreateOrder={handleCreateOrder} onViewOrders={handleViewOrders} />;
       case 'orders':
         return <OrdersList refresh={refreshOrders} onRefresh={() => setRefreshOrders(false)} />;
       case 'create-order':
@@ -114,7 +125,7 @@ const RecipesDashboard: React.FC = () => {
       case 'manage-recipes':
         return <ManageRecipes recipes={recipes} onRecipeUpdated={refreshData} />;
       default:
-        return <OrdersList refresh={refreshOrders} onRefresh={() => setRefreshOrders(false)} />;
+        return <OrderDashboard onCreateOrder={handleCreateOrder} onViewOrders={handleViewOrders} />;
     }
   };
 
