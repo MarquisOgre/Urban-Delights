@@ -197,7 +197,8 @@ Total Amount: ₹${order.total_amount}
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="received">Received</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="received">Order Received</SelectItem>
                       <SelectItem value="order_sent">Order Sent</SelectItem>
                     </SelectContent>
                   </Select>

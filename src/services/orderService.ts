@@ -101,7 +101,7 @@ export const createOrder = async (order: NewOrder, items: NewOrderItem[]): Promi
         phone_number: order.phone_number,
         address: order.address,
         total_amount: order.total_amount,
-        status: order.status || 'pending',
+        status: order.status || 'received',
         payment_status: 'unpaid'
       }])
       .select()

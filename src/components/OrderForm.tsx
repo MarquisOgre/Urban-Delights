@@ -166,9 +166,11 @@ const OrderForm: React.FC<OrderFormProps> = ({ onOrderCreated }) => {
         validItems as NewOrderItem[]
       );
 
+      // Show thank you popup and redirect after 5 seconds
       toast({
-        title: 'Success',
-        description: 'Order created successfully',
+        title: 'Thank you for your Order!',
+        description: 'Your order has been received successfully',
+        duration: 5000,
       });
 
       // Reset form
@@ -177,6 +179,11 @@ const OrderForm: React.FC<OrderFormProps> = ({ onOrderCreated }) => {
       setAddress('');
       setOrderItems([{ recipe_name: '', quantity_type: '', amount: 0 }]);
       onOrderCreated();
+      
+      // Redirect to main page after 5 seconds
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 5000);
     } catch (error) {
       toast({
         title: 'Error',
