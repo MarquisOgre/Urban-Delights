@@ -90,7 +90,7 @@ const Backend: React.FC = () => {
 
   const backendButtons = [
     {
-      title: 'Recipes',
+      title: 'Manage Recipe',
       description: 'Manage recipe visibility and settings',
       icon: ChefHat,
       color: 'bg-orange-500',
