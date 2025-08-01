@@ -3,12 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Printer, Edit3, Trash2 } from 'lucide-react';
+import { Printer, Edit3, Trash2, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { fetchOrders, fetchOrderItems, updateOrderStatus, updatePaymentStatus, deleteOrder } from '@/services/orderService';
 import type { Order, OrderItem } from '@/services/orderService';
 import { useNavigate } from 'react-router-dom';
-import jsPDF from 'jspdf';
+import { usePrintInvoice } from '@/components/PrintInvoice';
+import EditOrderDialog from '@/components/EditOrderDialog';
+import ViewOrderDialog from '@/components/ViewOrderDialog';
 
 interface OrdersListProps {
   refresh: boolean;
@@ -22,6 +24,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrd
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { handlePrint } = usePrintInvoice();
 
   useEffect(() => {
     loadOrders();
@@ -123,130 +126,6 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrd
     }
   };
 
-  const generateInvoice = (order: Order) => {
-    const items = orderItems[order.id] || [];
-    
-    // Create PDF document
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    
-    // Company Logo/Header
-    pdf.setFontSize(24);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('SPICE HOUSE', pageWidth / 2, 30, { align: 'center' });
-    
-    // Draw line under header
-    pdf.line(20, 40, pageWidth - 20, 40);
-    
-    // Two-column layout for Bill To and Invoice Details
-    const leftColumnX = 20;
-    const rightColumnX = pageWidth / 2 + 10;
-    
-    // Bill To section
-    pdf.setFontSize(14);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('Bill To:', leftColumnX, 60);
-    
-    pdf.setFontSize(11);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text(order.customer_name, leftColumnX, 70);
-    pdf.text(order.phone_number, leftColumnX, 78);
-    pdf.text(order.address, leftColumnX, 86);
-    
-    // Invoice Details section
-    pdf.setFontSize(11);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text(`Invoice #: ${getInvoiceNumber(order)}`, rightColumnX, 60);
-    pdf.text(`Date: ${new Date(order.created_at).toLocaleDateString('en-IN')}`, rightColumnX, 68);
-    pdf.text(`Payment Status: ${(order.payment_status || 'unpaid').toUpperCase()}`, rightColumnX, 76);
-    pdf.text(`Order Status: ${order.status.toUpperCase()}`, rightColumnX, 84);
-    
-    // Table section
-    const tableTop = 110;
-    
-    // Table background for header
-    pdf.setFillColor(240, 240, 240);
-    pdf.rect(20, tableTop - 8, pageWidth - 40, 16, 'F');
-    
-    // Table headers
-    pdf.setFontSize(11);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('Description', 25, tableTop);
-    pdf.text('Quantity', 100, tableTop);
-    pdf.text('Rate (₹)', 130, tableTop);
-    pdf.text('Amount (₹)', 160, tableTop);
-    
-    // Table content
-    pdf.setFont('helvetica', 'normal');
-    let yPosition = tableTop + 15;
-    let subtotal = 0;
-    
-    items.forEach((item, index) => {
-      if (yPosition > pageHeight - 80) {
-        pdf.addPage();
-        yPosition = 30;
-      }
-      
-      // Alternate row background
-      if (index % 2 === 0) {
-        pdf.setFillColor(250, 250, 250);
-        pdf.rect(20, yPosition - 6, pageWidth - 40, 12, 'F');
-      }
-      
-      pdf.text(item.recipe_name, 25, yPosition);
-      pdf.text(item.quantity_type, 100, yPosition);
-      pdf.text(`₹${Number(item.amount).toFixed(2)}`, 130, yPosition);
-      pdf.text(`₹${Number(item.amount).toFixed(2)}`, 160, yPosition);
-      
-      subtotal += Number(item.amount);
-      yPosition += 12;
-    });
-    
-    // Totals section
-    const totalsStartY = yPosition + 10;
-    
-    // Subtotal
-    pdf.setFont('helvetica', 'normal');
-    pdf.text('Subtotal:', 130, totalsStartY);
-    pdf.text(`₹${subtotal.toFixed(2)}`, 160, totalsStartY);
-    
-    // Tax (5%)
-    const tax = subtotal * 0.05;
-    pdf.text('Tax (5%):', 130, totalsStartY + 10);
-    pdf.text(`₹${tax.toFixed(2)}`, 160, totalsStartY + 10);
-    
-    // Draw line above total
-    pdf.line(130, totalsStartY + 18, pageWidth - 20, totalsStartY + 18);
-    
-    // Total
-    pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(12);
-    pdf.text('Total:', 130, totalsStartY + 25);
-    pdf.text(`₹${order.total_amount}`, 160, totalsStartY + 25);
-    
-    // Footer with company details
-    const footerY = pageHeight - 30;
-    
-    // Company logo/name in footer
-    pdf.setFontSize(12);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('SPICE HOUSE', pageWidth / 2, footerY - 10, { align: 'center' });
-    
-    // Contact details in single line
-    pdf.setFontSize(9);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text('123 Spice Market, Food Street, Hyderabad - 500001 | +91 9876543210 | orders@spicehouse.com', pageWidth / 2, footerY, { align: 'center' });
-    
-    // Computer generated invoice disclaimer
-    pdf.setFontSize(8);
-    pdf.setFont('helvetica', 'italic');
-    pdf.text('This is a computer-generated invoice and does not require a signature.', pageWidth / 2, footerY + 8, { align: 'center' });
-    
-    // Save the PDF
-    pdf.save(`${getInvoiceNumber(order)}.pdf`);
-  };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'received': return 'bg-blue-100 text-blue-800';
@@ -306,8 +185,30 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrd
                       </Badge>
                     </div>
                     <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                      <ViewOrderDialog order={order} items={orderItems[order.id] || []}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="p-2"
+                          title="View Order"
+                        >
+                          <Eye size={16} />
+                        </Button>
+                      </ViewOrderDialog>
+
+                      <EditOrderDialog order={order} onOrderUpdated={onRefresh}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="p-2"
+                          title="Edit Order"
+                        >
+                          <Edit3 size={16} />
+                        </Button>
+                      </EditOrderDialog>
+
                       <Button
-                        onClick={() => generateInvoice(order)}
+                        onClick={() => handlePrint(order, orderItems[order.id] || [])}
                         size="sm"
                         variant="outline"
                         className="p-2"
@@ -315,14 +216,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrd
                       >
                         <Printer size={16} />
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="p-2"
-                        title="Edit Order"
-                      >
-                        <Edit3 size={16} />
-                      </Button>
+
                       <Button
                         onClick={() => handleDeleteOrder(order.id)}
                         size="sm"
@@ -372,8 +266,30 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrd
                     </Badge>
                   </div>
                   <div className="flex gap-2">
+                    <ViewOrderDialog order={order} items={orderItems[order.id] || []}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="p-2"
+                        title="View Order"
+                      >
+                        <Eye size={16} />
+                      </Button>
+                    </ViewOrderDialog>
+
+                    <EditOrderDialog order={order} onOrderUpdated={onRefresh}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="p-2"
+                        title="Edit Order"
+                      >
+                        <Edit3 size={16} />
+                      </Button>
+                    </EditOrderDialog>
+
                     <Button
-                      onClick={() => generateInvoice(order)}
+                      onClick={() => handlePrint(order, orderItems[order.id] || [])}
                       size="sm"
                       variant="outline"
                       className="p-2"
@@ -381,14 +297,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrd
                     >
                       <Printer size={16} />
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="p-2"
-                      title="Edit Order"
-                    >
-                      <Edit3 size={16} />
-                    </Button>
+
                     <Button
                       onClick={() => handleDeleteOrder(order.id)}
                       size="sm"
@@ -446,7 +355,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrd
                 
                 <div className="flex items-end">
                   <Button
-                    onClick={() => generateInvoice(order)}
+                    onClick={() => handlePrint(order, orderItems[order.id] || [])}
                     size="sm"
                     variant="outline"
                     className="w-full"
