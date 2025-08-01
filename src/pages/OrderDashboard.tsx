@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import OrdersList from '@/components/OrdersList';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { FileText, Users, CreditCard, ShoppingCart, Plus, Eye } from 'lucide-react';
 import { fetchOrders } from '@/services/orderService';
 import type { Order } from '@/services/orderService';
@@ -193,59 +193,24 @@ const OrderDashboard: React.FC = () => {
           </div>
 
           {/* Recent Orders */}
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle>Recent Orders</CardTitle>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleViewOrders}
-                  className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                >
-                  View All
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="text-center py-8 text-gray-500">Loading recent orders...</div>
-              ) : recentOrders.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <ShoppingCart className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                  <p>No orders yet. Create your first order!</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {recentOrders.map((order) => (
-                    <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <h4 className="font-medium text-gray-900">{order.customer_name}</h4>
-                        <p className="text-sm text-gray-600">{order.phone_number}</p>
-                        <p className="text-xs text-gray-500">
-                          {new Date(order.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-gray-900">₹{order.total_amount}</div>
-                        <Badge 
-                          className={
-                            order.status === 'pending' 
-                              ? 'bg-yellow-100 text-yellow-800' 
-                              : order.status === 'invoiced'
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-blue-100 text-blue-800'
-                          }
-                        >
-                          {order.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <div className="relative">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Recent Orders</h2>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleViewOrders}
+                className="text-blue-600 border-blue-200 hover:bg-blue-50"
+              >
+                View All
+              </Button>
+            </div>
+            <OrdersList 
+              refresh={false} 
+              onRefresh={loadDashboardData} 
+              isRecentOrders={true}
+            />
+          </div>
         </div>
       </main>
       

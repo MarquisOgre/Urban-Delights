@@ -11,6 +11,7 @@ export interface Order {
   order_date?: string;
   created_at: string;
   updated_at: string;
+  invoice_number?: number;
 }
 
 export interface OrderItem {
@@ -181,6 +182,29 @@ export const updatePaymentStatus = async (orderId: string, paymentStatus: string
     if (error) throw error;
   } catch (error) {
     console.error('Error updating payment status:', error);
+    throw error;
+  }
+};
+
+export const deleteOrder = async (orderId: string): Promise<void> => {
+  try {
+    // First delete order items
+    const { error: itemsError } = await (supabase as any)
+      .from('order_items')
+      .delete()
+      .eq('order_id', orderId);
+
+    if (itemsError) throw itemsError;
+
+    // Then delete the order
+    const { error: orderError } = await (supabase as any)
+      .from('orders')
+      .delete()
+      .eq('id', orderId);
+
+    if (orderError) throw orderError;
+  } catch (error) {
+    console.error('Error deleting order:', error);
     throw error;
   }
 };

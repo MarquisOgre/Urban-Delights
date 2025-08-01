@@ -5,20 +5,23 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Printer, Edit3, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { fetchOrders, fetchOrderItems, updateOrderStatus, updatePaymentStatus } from '@/services/orderService';
+import { fetchOrders, fetchOrderItems, updateOrderStatus, updatePaymentStatus, deleteOrder } from '@/services/orderService';
 import type { Order, OrderItem } from '@/services/orderService';
+import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
 
 interface OrdersListProps {
   refresh: boolean;
   onRefresh: () => void;
+  isRecentOrders?: boolean;
 }
 
-const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
+const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrders = false }) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [orderItems, setOrderItems] = useState<{ [key: string]: OrderItem[] }>({});
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadOrders();
@@ -28,10 +31,13 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
     try {
       setIsLoading(true);
       const ordersData = await fetchOrders();
-      setOrders(ordersData);
+      
+      // If this is for recent orders, only show last 5
+      const displayOrders = isRecentOrders ? ordersData.slice(0, 5) : ordersData;
+      setOrders(displayOrders);
 
       // Load items for each order
-      const itemsPromises = ordersData.map(async (order) => {
+      const itemsPromises = displayOrders.map(async (order) => {
         const items = await fetchOrderItems(order.id);
         return { orderId: order.id, items };
       });
@@ -88,6 +94,35 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
     }
   };
 
+  const handleDeleteOrder = async (orderId: string) => {
+    if (window.confirm('Are you sure you want to delete this order?')) {
+      try {
+        await deleteOrder(orderId);
+        toast({
+          title: 'Success',
+          description: 'Order deleted successfully',
+        });
+        onRefresh();
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to delete order',
+          variant: 'destructive',
+        });
+      }
+    }
+  };
+
+  const getInvoiceNumber = (order: Order) => {
+    return order.invoice_number ? `INV-${String(order.invoice_number).padStart(3, '0')}` : `INV-${order.id.substring(0, 3).toUpperCase()}`;
+  };
+
+  const handleOrderClick = (orderId: string) => {
+    if (isRecentOrders) {
+      navigate(`/orders/${orderId}`);
+    }
+  };
+
   const generateInvoice = (order: Order) => {
     const items = orderItems[order.id] || [];
     
@@ -96,7 +131,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
     
-    // Company Logo/Header with border
+    // Company Logo/Header
     pdf.setFontSize(24);
     pdf.setFont('helvetica', 'bold');
     pdf.text('SPICE HOUSE', pageWidth / 2, 30, { align: 'center' });
@@ -117,31 +152,18 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
     pdf.setFont('helvetica', 'normal');
     pdf.text(order.customer_name, leftColumnX, 70);
     pdf.text(order.phone_number, leftColumnX, 78);
-    
-    // Split address into multiple lines
-    const addressLines = pdf.splitTextToSize(order.address, 80);
-    let addressY = 86;
-    addressLines.forEach((line: string) => {
-      pdf.text(line, leftColumnX, addressY);
-      addressY += 8;
-    });
+    pdf.text(order.address, leftColumnX, 86);
     
     // Invoice Details section
-    pdf.setFontSize(14);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('Invoice Details:', rightColumnX, 60);
-    
     pdf.setFontSize(11);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(`Invoice #: INV-${order.id.substring(0, 3).toUpperCase()}`, rightColumnX, 70);
-    pdf.text(`Date: ${new Date(order.created_at).toLocaleDateString('en-IN')}`, rightColumnX, 78);
-    
-    const dueDate = new Date(order.created_at);
-    dueDate.setDate(dueDate.getDate() + 30);
-    pdf.text(`Due Date: ${dueDate.toLocaleDateString('en-IN')}`, rightColumnX, 86);
+    pdf.text(`Invoice #: ${getInvoiceNumber(order)}`, rightColumnX, 60);
+    pdf.text(`Date: ${new Date(order.created_at).toLocaleDateString('en-IN')}`, rightColumnX, 68);
+    pdf.text(`Payment Status: ${(order.payment_status || 'unpaid').toUpperCase()}`, rightColumnX, 76);
+    pdf.text(`Order Status: ${order.status.toUpperCase()}`, rightColumnX, 84);
     
     // Table section
-    const tableTop = Math.max(120, addressY + 20);
+    const tableTop = 110;
     
     // Table background for header
     pdf.setFillColor(240, 240, 240);
@@ -174,7 +196,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
       
       pdf.text(item.recipe_name, 25, yPosition);
       pdf.text(item.quantity_type, 100, yPosition);
-      pdf.text(`₹${(Number(item.amount) / 1).toFixed(2)}`, 130, yPosition);
+      pdf.text(`₹${Number(item.amount).toFixed(2)}`, 130, yPosition);
       pdf.text(`₹${Number(item.amount).toFixed(2)}`, 160, yPosition);
       
       subtotal += Number(item.amount);
@@ -222,7 +244,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
     pdf.text('This is a computer-generated invoice and does not require a signature.', pageWidth / 2, footerY + 8, { align: 'center' });
     
     // Save the PDF
-    pdf.save(`INV-${order.id.substring(0, 3)}.pdf`);
+    pdf.save(`${getInvoiceNumber(order)}.pdf`);
   };
 
   const getStatusColor = (status: string) => {
@@ -250,9 +272,81 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
     return <div className="text-center py-8">Loading orders...</div>;
   }
 
+  // Recent Orders Layout
+  if (isRecentOrders) {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold">Recent Orders</h2>
+        
+        {orders.length === 0 ? (
+          <Card>
+            <CardContent className="py-8 text-center">
+              <p className="text-gray-500">No orders found</p>
+            </CardContent>
+          </Card>
+        ) : (
+          orders.map((order) => (
+            <Card 
+              key={order.id} 
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => handleOrderClick(order.id)}
+            >
+              <CardContent className="p-6">
+                <div className="flex justify-between items-center">
+                  <div className="flex-1">
+                    <div className="text-lg font-semibold">{getInvoiceNumber(order)}</div>
+                    <div className="text-sm text-gray-600">Customer: {order.customer_name}</div>
+                    <div className="text-sm text-gray-600">Date: {new Date(order.created_at).toLocaleDateString('en-IN')}</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="text-right mr-4">
+                      <div className="text-xl font-bold">₹{order.total_amount}</div>
+                      <Badge className={getStatusColor(order.status)}>
+                        {order.status === 'received' ? 'Order Received' : order.status === 'order_sent' ? 'Order Sent' : order.status}
+                      </Badge>
+                    </div>
+                    <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        onClick={() => generateInvoice(order)}
+                        size="sm"
+                        variant="outline"
+                        className="p-2"
+                        title="Print Invoice"
+                      >
+                        <Printer size={16} />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="p-2"
+                        title="Edit Order"
+                      >
+                        <Edit3 size={16} />
+                      </Button>
+                      <Button
+                        onClick={() => handleDeleteOrder(order.id)}
+                        size="sm"
+                        variant="outline"
+                        className="p-2 text-red-600 hover:text-red-700"
+                        title="Delete Order"
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+    );
+  }
+
+  // Full Orders Management Layout
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Orders</h2>
+      <h2 className="text-2xl font-bold">Orders Management</h2>
       
       {orders.length === 0 ? (
         <Card>
@@ -264,9 +358,9 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
         orders.map((order) => (
           <Card key={order.id}>
             <CardContent className="p-6">
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center mb-4">
                 <div className="flex-1">
-                  <div className="text-lg font-semibold">INV-{order.id.substring(0, 3).toUpperCase()}</div>
+                  <div className="text-lg font-semibold">{getInvoiceNumber(order)}</div>
                   <div className="text-sm text-gray-600">Customer: {order.customer_name}</div>
                   <div className="text-sm text-gray-600">Date: {new Date(order.created_at).toLocaleDateString('en-IN')}</div>
                 </div>
@@ -274,7 +368,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
                   <div className="text-right mr-4">
                     <div className="text-xl font-bold">₹{order.total_amount}</div>
                     <Badge className={getStatusColor(order.status)}>
-                      {order.status === 'received' ? 'Pending' : order.status}
+                      {order.status === 'received' ? 'Order Received' : order.status === 'order_sent' ? 'Order Sent' : order.status}
                     </Badge>
                   </div>
                   <div className="flex gap-2">
@@ -283,6 +377,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
                       size="sm"
                       variant="outline"
                       className="p-2"
+                      title="Print Invoice"
                     >
                       <Printer size={16} />
                     </Button>
@@ -290,21 +385,23 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
                       size="sm"
                       variant="outline"
                       className="p-2"
+                      title="Edit Order"
                     >
                       <Edit3 size={16} />
                     </Button>
                     <Button
+                      onClick={() => handleDeleteOrder(order.id)}
                       size="sm"
                       variant="outline"
                       className="p-2 text-red-600 hover:text-red-700"
+                      title="Delete Order"
                     >
                       <Trash2 size={16} />
                     </Button>
                   </div>
                 </div>
               </div>
-            </CardContent>
-            <CardContent>
+
               <div className="space-y-2 mb-4">
                 <h4 className="font-semibold">Items:</h4>
                 {(orderItems[order.id] || []).map((item) => (
@@ -315,7 +412,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
                 ))}
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-700 block mb-1">Order Status</label>
                   <Select value={order.status} onValueChange={(value) => handleStatusChange(order.id, value)}>
