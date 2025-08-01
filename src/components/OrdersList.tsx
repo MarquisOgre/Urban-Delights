@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, Download } from 'lucide-react';
+import { Printer, Edit3, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { fetchOrders, fetchOrderItems, updateOrderStatus, updatePaymentStatus } from '@/services/orderService';
 import type { Order, OrderItem } from '@/services/orderService';
@@ -96,101 +96,133 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
     
-    // Company Logo/Header
+    // Company Logo/Header with border
     pdf.setFontSize(24);
     pdf.setFont('helvetica', 'bold');
     pdf.text('SPICE HOUSE', pageWidth / 2, 30, { align: 'center' });
     
-    pdf.setFontSize(12);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text('Premium Quality Spices & Powders', pageWidth / 2, 38, { align: 'center' });
+    // Draw line under header
+    pdf.line(20, 40, pageWidth - 20, 40);
     
-    // Invoice title and number
-    pdf.setFontSize(20);
+    // Two-column layout for Bill To and Invoice Details
+    const leftColumnX = 20;
+    const rightColumnX = pageWidth / 2 + 10;
+    
+    // Bill To section
+    pdf.setFontSize(14);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('INVOICE', pageWidth / 2, 55, { align: 'center' });
+    pdf.text('Bill To:', leftColumnX, 60);
     
-    pdf.setFontSize(10);
+    pdf.setFontSize(11);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(`Invoice #: INV-${order.id.substring(0, 8).toUpperCase()}`, 20, 70);
-    pdf.text(`Date: ${new Date(order.created_at).toLocaleDateString('en-IN')}`, 20, 78);
+    pdf.text(order.customer_name, leftColumnX, 70);
+    pdf.text(order.phone_number, leftColumnX, 78);
     
-    // Customer details
-    pdf.setFontSize(12);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('Bill To:', 20, 95);
-    
-    pdf.setFontSize(10);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text(order.customer_name, 20, 105);
-    pdf.text(order.phone_number, 20, 113);
-    
-    // Split address into multiple lines if too long
+    // Split address into multiple lines
     const addressLines = pdf.splitTextToSize(order.address, 80);
-    let addressY = 121;
+    let addressY = 86;
     addressLines.forEach((line: string) => {
-      pdf.text(line, 20, addressY);
+      pdf.text(line, leftColumnX, addressY);
       addressY += 8;
     });
     
-    // Table header
-    const tableTop = Math.max(140, addressY + 15);
-    pdf.setFontSize(10);
+    // Invoice Details section
+    pdf.setFontSize(14);
     pdf.setFont('helvetica', 'bold');
+    pdf.text('Invoice Details:', rightColumnX, 60);
+    
+    pdf.setFontSize(11);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Invoice #: INV-${order.id.substring(0, 3).toUpperCase()}`, rightColumnX, 70);
+    pdf.text(`Date: ${new Date(order.created_at).toLocaleDateString('en-IN')}`, rightColumnX, 78);
+    
+    const dueDate = new Date(order.created_at);
+    dueDate.setDate(dueDate.getDate() + 30);
+    pdf.text(`Due Date: ${dueDate.toLocaleDateString('en-IN')}`, rightColumnX, 86);
+    
+    // Table section
+    const tableTop = Math.max(120, addressY + 20);
+    
+    // Table background for header
+    pdf.setFillColor(240, 240, 240);
+    pdf.rect(20, tableTop - 8, pageWidth - 40, 16, 'F');
     
     // Table headers
-    pdf.text('Item', 20, tableTop);
+    pdf.setFontSize(11);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Description', 25, tableTop);
     pdf.text('Quantity', 100, tableTop);
-    pdf.text('Amount (₹)', 150, tableTop);
-    
-    // Draw header line
-    pdf.line(20, tableTop + 2, pageWidth - 20, tableTop + 2);
+    pdf.text('Rate (₹)', 130, tableTop);
+    pdf.text('Amount (₹)', 160, tableTop);
     
     // Table content
     pdf.setFont('helvetica', 'normal');
-    let yPosition = tableTop + 12;
+    let yPosition = tableTop + 15;
     let subtotal = 0;
     
-    items.forEach((item) => {
-      if (yPosition > pageHeight - 50) {
+    items.forEach((item, index) => {
+      if (yPosition > pageHeight - 80) {
         pdf.addPage();
         yPosition = 30;
       }
       
-      pdf.text(item.recipe_name, 20, yPosition);
+      // Alternate row background
+      if (index % 2 === 0) {
+        pdf.setFillColor(250, 250, 250);
+        pdf.rect(20, yPosition - 6, pageWidth - 40, 12, 'F');
+      }
+      
+      pdf.text(item.recipe_name, 25, yPosition);
       pdf.text(item.quantity_type, 100, yPosition);
-      pdf.text(`₹${item.amount.toFixed(2)}`, 150, yPosition);
+      pdf.text(`₹${(Number(item.amount) / 1).toFixed(2)}`, 130, yPosition);
+      pdf.text(`₹${Number(item.amount).toFixed(2)}`, 160, yPosition);
       
       subtotal += Number(item.amount);
-      yPosition += 10;
+      yPosition += 12;
     });
     
-    // Draw line before totals
-    pdf.line(100, yPosition + 5, pageWidth - 20, yPosition + 5);
+    // Totals section
+    const totalsStartY = yPosition + 10;
+    
+    // Subtotal
+    pdf.setFont('helvetica', 'normal');
+    pdf.text('Subtotal:', 130, totalsStartY);
+    pdf.text(`₹${subtotal.toFixed(2)}`, 160, totalsStartY);
+    
+    // Tax (5%)
+    const tax = subtotal * 0.05;
+    pdf.text('Tax (5%):', 130, totalsStartY + 10);
+    pdf.text(`₹${tax.toFixed(2)}`, 160, totalsStartY + 10);
+    
+    // Draw line above total
+    pdf.line(130, totalsStartY + 18, pageWidth - 20, totalsStartY + 18);
     
     // Total
     pdf.setFont('helvetica', 'bold');
-    pdf.text('Total Amount:', 100, yPosition + 15);
-    pdf.text(`₹${order.total_amount}`, 150, yPosition + 15);
+    pdf.setFontSize(12);
+    pdf.text('Total:', 130, totalsStartY + 25);
+    pdf.text(`₹${order.total_amount}`, 160, totalsStartY + 25);
     
-    // Payment status
-    pdf.setFont('helvetica', 'normal');
-    pdf.text(`Payment Status: ${order.payment_status?.toUpperCase() || 'UNPAID'}`, 20, yPosition + 25);
-    pdf.text(`Order Status: ${order.status?.toUpperCase() || 'PENDING'}`, 20, yPosition + 33);
+    // Footer with company details
+    const footerY = pageHeight - 30;
     
-    // Company address at bottom
-    const footerY = pageHeight - 40;
-    pdf.setFontSize(9);
+    // Company logo/name in footer
+    pdf.setFontSize(12);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('SPICE HOUSE', pageWidth / 2, footerY, { align: 'center' });
+    pdf.text('SPICE HOUSE', pageWidth / 2, footerY - 10, { align: 'center' });
     
+    // Contact details in single line
+    pdf.setFontSize(9);
     pdf.setFont('helvetica', 'normal');
-    pdf.text('123 Spice Market, Food Street', pageWidth / 2, footerY + 8, { align: 'center' });
-    pdf.text('Hyderabad, Telangana - 500001', pageWidth / 2, footerY + 16, { align: 'center' });
-    pdf.text('Phone: +91 9876543210 | Email: orders@spicehouse.com', pageWidth / 2, footerY + 24, { align: 'center' });
+    pdf.text('123 Spice Market, Food Street, Hyderabad - 500001 | +91 9876543210 | orders@spicehouse.com', pageWidth / 2, footerY, { align: 'center' });
+    
+    // Computer generated invoice disclaimer
+    pdf.setFontSize(8);
+    pdf.setFont('helvetica', 'italic');
+    pdf.text('This is a computer-generated invoice and does not require a signature.', pageWidth / 2, footerY + 8, { align: 'center' });
     
     // Save the PDF
-    pdf.save(`invoice-${order.id.substring(0, 8)}.pdf`);
+    pdf.save(`INV-${order.id.substring(0, 3)}.pdf`);
   };
 
   const getStatusColor = (status: string) => {
@@ -231,31 +263,47 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
       ) : (
         orders.map((order) => (
           <Card key={order.id}>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-lg">{order.customer_name}</CardTitle>
-                  <p className="text-sm text-gray-600">{order.phone_number}</p>
-                  <p className="text-sm text-gray-600">{order.address}</p>
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center">
+                <div className="flex-1">
+                  <div className="text-lg font-semibold">INV-{order.id.substring(0, 3).toUpperCase()}</div>
+                  <div className="text-sm text-gray-600">Customer: {order.customer_name}</div>
+                  <div className="text-sm text-gray-600">Date: {new Date(order.created_at).toLocaleDateString('en-IN')}</div>
                 </div>
-                <div className="text-right">
-                  <div className="flex flex-col gap-1 mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="text-right mr-4">
+                    <div className="text-xl font-bold">₹{order.total_amount}</div>
                     <Badge className={getStatusColor(order.status)}>
-                      {order.status}
+                      {order.status === 'received' ? 'Pending' : order.status}
                     </Badge>
-                    {order.payment_status && (
-                      <Badge className={getPaymentStatusColor(order.payment_status)}>
-                        {order.payment_status}
-                      </Badge>
-                    )}
                   </div>
-                  <p className="text-lg font-bold">₹{order.total_amount}</p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(order.created_at).toLocaleDateString()}
-                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => generateInvoice(order)}
+                      size="sm"
+                      variant="outline"
+                      className="p-2"
+                    >
+                      <Printer size={16} />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="p-2"
+                    >
+                      <Edit3 size={16} />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="p-2 text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 size={16} />
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </CardHeader>
+            </CardContent>
             <CardContent>
               <div className="space-y-2 mb-4">
                 <h4 className="font-semibold">Items:</h4>
@@ -306,7 +354,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh }) => {
                     variant="outline"
                     className="w-full"
                   >
-                    <Download size={16} className="mr-1" />
+                    <Printer size={16} className="mr-1" />
                     Download Invoice
                   </Button>
                 </div>
