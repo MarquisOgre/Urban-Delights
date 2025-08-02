@@ -155,7 +155,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrd
   if (isRecentOrders) {
     return (
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Recent Orders</h2>
+        {/*<h2 className="text-2xl font-bold">Recent Orders</h2>*/}
         
         {orders.length === 0 ? (
           <Card>
@@ -180,9 +180,15 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrd
                   <div className="flex items-center gap-2">
                     <div className="text-right mr-4">
                       <div className="text-xl font-bold">₹{order.total_amount}</div>
-                      <Badge className={getStatusColor(order.status)}>
-                        {order.status === 'received' ? 'Order Received' : order.status === 'order_sent' ? 'Order Sent' : order.status}
-                      </Badge>
+                      <div className="flex gap-2">
+                        <Badge className={getStatusColor(order.status)}>
+                          {order.status === 'received' ? 'Order Received' : order.status === 'order_sent' ? 'Order Sent' : order.status}
+                        </Badge>
+                        <Badge className={getPaymentStatusColor(order.payment_status || 'unpaid')}>
+                          {(order.payment_status || 'unpaid').toUpperCase()}
+                        </Badge>
+                      </div>
+
                     </div>
                     <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                       <ViewOrderDialog order={order} items={orderItems[order.id] || []}>
@@ -353,7 +359,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrd
                   </Select>
                 </div>
                 
-                <div className="flex items-end">
+                {/*<div className="flex items-end">
                   <Button
                     onClick={() => handlePrint(order, orderItems[order.id] || [])}
                     size="sm"
@@ -363,7 +369,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrd
                     <Printer size={16} className="mr-1" />
                     Download Invoice
                   </Button>
-                </div>
+                </div>*/}
               </div>
             </CardContent>
           </Card>

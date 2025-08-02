@@ -39,7 +39,7 @@ const OrderDashboard: React.FC = () => {
       const totalSales = ordersData.filter(order => 
         order.status === 'order_sent' || order.status === 'paid' || order.payment_status === 'paid'
       ).length;
-      const totalRevenue = ordersData.reduce((sum, order) => sum + order.total_amount, 0);
+      const totalRevenue = ordersData.reduce((sum, order) => order.payment_status === 'paid' ? sum + order.total_amount : sum, 0);
       const pendingOrders = ordersData.filter(order => 
         order.status === 'received' || order.status === 'pending'
       ).length;
@@ -195,7 +195,7 @@ const OrderDashboard: React.FC = () => {
           {/* Recent Orders */}
           <div className="relative">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-900">Recent Orders</h2>
+              <h1 className="text-xl font-bold text-gray-900">Recent Orders</h1>
               <Button 
                 variant="outline" 
                 size="sm" 
