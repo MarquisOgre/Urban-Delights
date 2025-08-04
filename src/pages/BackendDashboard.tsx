@@ -182,68 +182,19 @@ const BackendDashboard: React.FC = () => {
     // Render specific backend components
     switch (currentView) {
       case 'recipes':
-        return (
-          <div className="space-y-4">
-            <Button onClick={() => setCurrentView('main')} variant="outline">
-              ← Back to Backend
-            </Button>
-            <Recipes recipes={recipes} masterIngredients={masterIngredients} onRecipeUpdated={refreshData} />
-          </div>
-        );
+        return <Recipes recipes={recipes} masterIngredients={masterIngredients} onRecipeUpdated={refreshData} />;
       case 'manage-recipes':
-        return (
-          <div className="space-y-4">
-            <Button onClick={() => setCurrentView('main')} variant="outline">
-              ← Back to Backend
-            </Button>
-            <ManageRecipes recipes={recipes} onRecipeUpdated={refreshData} />
-          </div>
-        );
+        return <ManageRecipes recipes={recipes} onRecipeUpdated={refreshData} />;
       case 'ingredients':
-        return (
-          <div className="space-y-4">
-            <Button onClick={() => setCurrentView('main')} variant="outline">
-              ← Back to Backend
-            </Button>
-            <MasterIngredientList masterIngredients={masterIngredients} onRefresh={refetchIngredients} />
-          </div>
-        );
+        return <MasterIngredientList masterIngredients={masterIngredients} onRefresh={refetchIngredients} />;
       case 'add-recipe':
-        return (
-          <div className="space-y-4">
-            <Button onClick={() => setCurrentView('main')} variant="outline">
-              ← Back to Backend
-            </Button>
-            <AddRecipe masterIngredients={masterIngredients} onRecipeAdded={refreshData} />
-          </div>
-        );
+        return <AddRecipe masterIngredients={masterIngredients} onRecipeAdded={refreshData} />;
       case 'pricing':
-        return (
-          <div className="space-y-4">
-            <Button onClick={() => setCurrentView('main')} variant="outline">
-              ← Back to Backend
-            </Button>
-            <PricingManager />
-          </div>
-        );
+        return <PricingManager />;
       case 'indent':
-        return (
-          <div className="space-y-4">
-            <Button onClick={() => setCurrentView('main')} variant="outline">
-              ← Back to Backend
-            </Button>
-            <Indent recipes={recipes} masterIngredients={masterIngredients} />
-          </div>
-        );
+        return <Indent recipes={recipes} masterIngredients={masterIngredients} />;
       case 'stock-register':
-        return (
-          <div className="space-y-4">
-            <Button onClick={() => setCurrentView('main')} variant="outline">
-              ← Back to Backend
-            </Button>
-            <StockRegister />
-          </div>
-        );
+        return <StockRegister />;
       default:
         return (
           <div className="space-y-6">

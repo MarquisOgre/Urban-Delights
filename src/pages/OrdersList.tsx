@@ -25,28 +25,9 @@ const OrdersListPage: React.FC = () => {
       <main className="container mx-auto px-4 py-6 pb-24">
         <div className="space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="outline" 
-                onClick={() => navigate('/orders')}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Dashboard
-              </Button>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Orders Management</h1>
-                <p className="text-gray-600">View and manage all customer orders</p>
-              </div>
-            </div>
-            <Button 
-              onClick={() => navigate('/create-order')}
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Create Order
-            </Button>
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-900">Orders Management</h1>
+            <p className="text-gray-600">View and manage all customer orders</p>
           </div>
 
           {/* Orders List */}
