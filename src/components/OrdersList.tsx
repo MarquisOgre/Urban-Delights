@@ -247,7 +247,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrd
   // Full Orders Management Layout
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Orders Management</h2>
+      {/*<h2 className="text-2xl font-bold">Orders Management</h2>*/}
       
       {orders.length === 0 ? (
         <Card>
@@ -267,10 +267,22 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrd
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="text-right mr-4">
-                    <div className="text-xl font-bold">₹{order.total_amount}</div>
-                    <Badge className={getStatusColor(order.status)} style={{ pointerEvents: 'none' }}>
-                      {order.status === 'received' ? 'Order Received' : order.status === 'order_sent' ? 'Order Sent' : order.status}
-                    </Badge>
+                    <div className="text-xl font-bold">₹{order.total_amount}</div>                   
+                      <div className="flex items-center space-x-2">
+                        <Badge
+                          className={`px-3 py-1 ${getStatusColor(order.status || 'pending')}`}
+                          style={{ pointerEvents: 'none' }}
+                        >
+                          {(order.status || 'pending').toUpperCase()}
+                        </Badge>
+
+                        <Badge
+                          className={`px-3 py-1 ${getPaymentStatusColor(order.payment_status || 'unpaid')}`}
+                          style={{ pointerEvents: 'none' }}
+                        >
+                          {(order.payment_status || 'unpaid').toUpperCase()}
+                        </Badge>
+                      </div>
                   </div>
                   <div className="flex gap-2">
                     <ViewOrderDialog order={order} items={orderItems[order.id] || []}>
@@ -317,60 +329,54 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrd
                   </div>
                 </div>
               </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
+                {/* Left: Items */}
+                <div className="space-y-2">
+                  <h4 className="font-semibold">Items:</h4>
+                  {(orderItems[order.id] || []).map((item) => (
+                    <div key={item.id} className="flex justify-between text-sm">
+                      <span>{item.recipe_name} - {item.quantity_type}</span>
+                      <span>₹{item.amount}</span>
+                    </div>
+                  ))}
+                </div>
 
-              <div className="space-y-2 mb-4">
-                <h4 className="font-semibold">Items:</h4>
-                {(orderItems[order.id] || []).map((item) => (
-                  <div key={item.id} className="flex justify-between text-sm">
-                    <span>{item.recipe_name} - {item.quantity_type}</span>
-                    <span>₹{item.amount}</span>
+                {/* Center Column: Empty */}
+                <div></div>
+
+                {/* Right: Order & Payment Status */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 block mb-1">Order Status</label>
+                    <Select value={order.status || 'pending'} onValueChange={(value) => handleStatusChange(order.id, value)}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="received">Order Received</SelectItem>
+                        <SelectItem value="order_sent">Order Sent</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                ))}
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-1">Order Status</label>
-                  <Select value={order.status} onValueChange={(value) => handleStatusChange(order.id, value)}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="received">Order Received</SelectItem>
-                      <SelectItem value="order_sent">Order Sent</SelectItem>
-                    </SelectContent>
-                  </Select>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 block mb-1">Payment Status</label>
+                    <Select
+                      value={order.payment_status || 'unpaid'}
+                      onValueChange={(value) => handlePaymentStatusChange(order.id, value)}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="unpaid">Unpaid</SelectItem>
+                        <SelectItem value="paid">Paid</SelectItem>
+                        <SelectItem value="partial">Partial</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                
-                <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-1">Payment Status</label>
-                  <Select 
-                    value={order.payment_status || 'unpaid'} 
-                    onValueChange={(value) => handlePaymentStatusChange(order.id, value)}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="unpaid">Unpaid</SelectItem>
-                      <SelectItem value="paid">Paid</SelectItem>
-                      <SelectItem value="partial">Partial</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                {/*<div className="flex items-end">
-                  <Button
-                    onClick={() => handlePrint(order, orderItems[order.id] || [])}
-                    size="sm"
-                    variant="outline"
-                    className="w-full"
-                  >
-                    <Printer size={16} className="mr-1" />
-                    Download Invoice
-                  </Button>
-                </div>*/}
               </div>
             </CardContent>
           </Card>
