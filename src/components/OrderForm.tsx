@@ -199,9 +199,10 @@ const OrderForm: React.FC<OrderFormProps> = ({ onOrderCreated }) => {
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader>
+      <div className="h-12" /> {/* Spacer where CardHeader was */}
+     {/* <CardHeader>
         <CardTitle>Create New Order</CardTitle>
-      </CardHeader>
+      </CardHeader> */}
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Customer Details */}

@@ -34,14 +34,15 @@ const CreateOrder: React.FC = () => {
           </div>
 
           {/* Right-Aligned Button */}
-          <Button 
+          <div className="h-12" /> {/* Spacer where CardHeader was */}
+          {/* <Button 
             variant="outline" 
             onClick={() => navigate('/orders')}
             className="ml-auto flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Orders
-          </Button>
+          </Button> */}
         </div>
 
         {/* Order Form */}
