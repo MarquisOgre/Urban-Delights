@@ -22,29 +22,33 @@ const CreateOrder: React.FC = () => {
         exportAllData={() => {}}
       />
       
-      <main className="container mx-auto px-4 py-6 pb-24">
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/orders')}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Orders
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Create New Order</h1>
-              <p className="text-gray-600">Fill in the details to create a new customer order</p>
-            </div>
+    <main className="container mx-auto px-4 py-6 pb-24">
+      <div className="space-y-6">
+
+        {/* Header Row with Padding-Top */}
+        <div className="relative flex items-center justify-between pt-6">
+          {/* Centered Heading */}
+          <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
+            <h1 className="text-3xl font-bold text-gray-900">Create New Order</h1>
+            <p className="text-gray-600">Fill in the details to create a new customer order</p>
           </div>
 
-          {/* Order Form */}
-          <OrderForm onOrderCreated={handleOrderCreated} />
+          {/* Right-Aligned Button */}
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/orders')}
+            className="ml-auto flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Orders
+          </Button>
         </div>
-      </main>
-      
+
+        {/* Order Form */}
+        <OrderForm onOrderCreated={handleOrderCreated} />
+
+      </div>
+    </main>    
       <Footer showTopButton={true} />
     </div>
   );
