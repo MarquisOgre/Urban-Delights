@@ -121,8 +121,9 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrd
   };
 
   const handleOrderClick = (orderId: string) => {
+    // Navigate to orders list page instead of individual order page
     if (isRecentOrders) {
-      navigate(`/orders/${orderId}`);
+      navigate('/orders-list');
     }
   };
 
@@ -180,7 +181,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrd
                   <div className="flex items-center gap-2">
                     <div className="text-right mr-4">
                       <div className="text-xl font-bold">₹{order.total_amount}</div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 pointer-events-none">
                         <Badge className={getStatusColor(order.status)}>
                           {order.status === 'received' ? 'Order Received' : order.status === 'order_sent' ? 'Order Sent' : order.status}
                         </Badge>
@@ -267,7 +268,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrd
                 <div className="flex items-center gap-2">
                   <div className="text-right mr-4">
                     <div className="text-xl font-bold">₹{order.total_amount}</div>
-                    <Badge className={getStatusColor(order.status)}>
+                    <Badge className={getStatusColor(order.status)} style={{ pointerEvents: 'none' }}>
                       {order.status === 'received' ? 'Order Received' : order.status === 'order_sent' ? 'Order Sent' : order.status}
                     </Badge>
                   </div>
