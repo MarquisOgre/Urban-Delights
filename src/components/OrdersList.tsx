@@ -247,8 +247,6 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrd
   // Full Orders Management Layout
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Orders Management</h2>
-      
       {orders.length === 0 ? (
         <Card>
           <CardContent className="py-8 text-center">
@@ -259,76 +257,88 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrd
         orders.map((order) => (
           <Card key={order.id}>
             <CardContent className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <div className="flex-1">
+              {/* Single row layout with INV number, Items, Status badges, and Actions */}
+              <div className="flex items-center justify-between gap-4">
+                {/* Invoice Number */}
+                <div className="flex-shrink-0">
                   <div className="text-lg font-semibold">{getInvoiceNumber(order)}</div>
-                  <div className="text-sm text-gray-600">Customer: {order.customer_name}</div>
-                  <div className="text-sm text-gray-600">Date: {new Date(order.created_at).toLocaleDateString('en-IN')}</div>
+                  <div className="text-sm text-gray-600">{order.customer_name}</div>
+                  <div className="text-sm text-gray-600">{new Date(order.created_at).toLocaleDateString('en-IN')}</div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="text-right mr-4">
-                    <div className="text-xl font-bold">₹{order.total_amount}</div>
+                
+                {/* Items */}
+                <div className="flex-1 mx-4">
+                  <div className="space-y-1">
+                    {(orderItems[order.id] || []).map((item) => (
+                      <div key={item.id} className="flex justify-between text-sm">
+                        <span>{item.recipe_name} - {item.quantity_type}</span>
+                        <span>₹{item.amount}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Total Amount and Status Badges */}
+                <div className="flex-shrink-0 text-center">
+                  <div className="text-xl font-bold mb-2">₹{order.total_amount}</div>
+                  <div className="flex flex-col gap-2">
                     <Badge className={getStatusColor(order.status)} style={{ pointerEvents: 'none' }}>
                       {order.status === 'received' ? 'Order Received' : order.status === 'order_sent' ? 'Order Sent' : order.status}
                     </Badge>
+                    <Badge className={getPaymentStatusColor(order.payment_status || 'unpaid')} style={{ pointerEvents: 'none' }}>
+                      {(order.payment_status || 'unpaid').toUpperCase()}
+                    </Badge>
                   </div>
-                  <div className="flex gap-2">
-                    <ViewOrderDialog order={order} items={orderItems[order.id] || []}>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="p-2"
-                        title="View Order"
-                      >
-                        <Eye size={16} />
-                      </Button>
-                    </ViewOrderDialog>
-
-                    <EditOrderDialog order={order} onOrderUpdated={onRefresh}>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="p-2"
-                        title="Edit Order"
-                      >
-                        <Edit3 size={16} />
-                      </Button>
-                    </EditOrderDialog>
-
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex gap-2 flex-shrink-0">
+                  <ViewOrderDialog order={order} items={orderItems[order.id] || []}>
                     <Button
-                      onClick={() => handlePrint(order, orderItems[order.id] || [])}
                       size="sm"
                       variant="outline"
                       className="p-2"
-                      title="Print Invoice"
+                      title="View Order"
                     >
-                      <Printer size={16} />
+                      <Eye size={16} />
                     </Button>
+                  </ViewOrderDialog>
 
+                  <EditOrderDialog order={order} onOrderUpdated={onRefresh}>
                     <Button
-                      onClick={() => handleDeleteOrder(order.id)}
                       size="sm"
                       variant="outline"
-                      className="p-2 text-red-600 hover:text-red-700"
-                      title="Delete Order"
+                      className="p-2"
+                      title="Edit Order"
                     >
-                      <Trash2 size={16} />
+                      <Edit3 size={16} />
                     </Button>
-                  </div>
+                  </EditOrderDialog>
+
+                  <Button
+                    onClick={() => handlePrint(order, orderItems[order.id] || [])}
+                    size="sm"
+                    variant="outline"
+                    className="p-2"
+                    title="Print Invoice"
+                  >
+                    <Printer size={16} />
+                  </Button>
+
+                  <Button
+                    onClick={() => handleDeleteOrder(order.id)}
+                    size="sm"
+                    variant="outline"
+                    className="p-2 text-red-600 hover:text-red-700"
+                    title="Delete Order"
+                  >
+                    <Trash2 size={16} />
+                  </Button>
                 </div>
               </div>
-
-              <div className="space-y-2 mb-4">
-                <h4 className="font-semibold">Items:</h4>
-                {(orderItems[order.id] || []).map((item) => (
-                  <div key={item.id} className="flex justify-between text-sm">
-                    <span>{item.recipe_name} - {item.quantity_type}</span>
-                    <span>₹{item.amount}</span>
-                  </div>
-                ))}
-              </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Status Update Dropdowns */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t">
                 <div>
                   <label className="text-sm font-medium text-gray-700 block mb-1">Order Status</label>
                   <Select value={order.status} onValueChange={(value) => handleStatusChange(order.id, value)}>
@@ -359,18 +369,6 @@ const OrdersList: React.FC<OrdersListProps> = ({ refresh, onRefresh, isRecentOrd
                     </SelectContent>
                   </Select>
                 </div>
-                
-                {/*<div className="flex items-end">
-                  <Button
-                    onClick={() => handlePrint(order, orderItems[order.id] || [])}
-                    size="sm"
-                    variant="outline"
-                    className="w-full"
-                  >
-                    <Printer size={16} className="mr-1" />
-                    Download Invoice
-                  </Button>
-                </div>*/}
               </div>
             </CardContent>
           </Card>
