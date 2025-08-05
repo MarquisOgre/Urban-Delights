@@ -40,8 +40,6 @@ const Indent = ({ recipes, masterIngredients }: IndentProps) => {
       const recipe = visibleRecipes.find(r => r.id === recipeId);
       if (!recipe) return;
 
-      let recipeCost = 0;
-
       recipe.ingredients.forEach(ingredient => {
         const masterIngredient = masterIngredients.find(mi => mi.name === ingredient.ingredient_name);
         if (!masterIngredient) return;
@@ -50,7 +48,7 @@ const Indent = ({ recipes, masterIngredients }: IndentProps) => {
         const costPerGram = masterIngredient.price_per_kg / 1000;
         const totalCost = totalWeight * costPerGram;
 
-        recipeCost += totalCost;
+        grandTotal += totalCost;
 
         if (!ingredientTotals[ingredient.ingredient_name]) {
           ingredientTotals[ingredient.ingredient_name] = {
@@ -64,9 +62,6 @@ const Indent = ({ recipes, masterIngredients }: IndentProps) => {
         ingredientTotals[ingredient.ingredient_name].cost += totalCost;
         ingredientTotals[ingredient.ingredient_name].recipes[recipe.name] = totalWeight;
       });
-
-      recipeCost += recipe.overheads * quantity;
-      grandTotal += recipeCost;
     });
 
     return { ingredientTotals, grandTotal };
@@ -339,14 +334,12 @@ const Indent = ({ recipes, masterIngredients }: IndentProps) => {
                     .filter(recipe => recipeQuantities[recipe.id] > 0)
                     .sort((a, b) => a.name.localeCompare(b.name))
                     .map(recipe => {
-                      const recipeCost = Object.entries(calculatedData.ingredientTotals).reduce((sum, [_, data]) => {
+                      const recipeCost = Object.entries(calculatedData.ingredientTotals).reduce((sum, [ingredientName, data]) => {
                         return sum + (data.recipes[recipe.name] ? 
-                          (data.recipes[recipe.name] * (masterIngredients.find(mi => mi.name === _)?.price_per_kg || 0) / 1000) : 0);
+                          (data.recipes[recipe.name] * (masterIngredients.find(mi => mi.name === ingredientName)?.price_per_kg || 0) / 1000) : 0);
                       }, 0);
-                      const recipeObj = visibleRecipes.find(r => r.name === recipe.name);
-                      const totalRecipeCost = recipeCost + (recipeObj ? recipeObj.overheads * (recipeQuantities[recipeObj.id] || 0) : 0);
                       return (
-                        <TableCell key={recipe.id}>₹{totalRecipeCost.toFixed(2)}</TableCell>
+                        <TableCell key={recipe.id}>₹{recipeCost.toFixed(2)}</TableCell>
                       );
                     })}
                 </TableRow>
