@@ -93,7 +93,9 @@ const Indent = ({ recipes, masterIngredients }: IndentProps) => {
          .sort((a, b) => a.name.localeCompare(b.name))
          .map(recipe => recipe.name)
       ],
-      ...Object.entries(calculatedData.ingredientTotals).map(([ingredientName, data]) => [
+      ...Object.entries(calculatedData.ingredientTotals)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([ingredientName, data]) => [
         ingredientName,
         data.totalWeight >= 1000 
           ? `${(data.totalWeight / 1000).toFixed(2)} kg`
@@ -228,7 +230,9 @@ const Indent = ({ recipes, masterIngredients }: IndentProps) => {
                             </tr>
                           </thead>
                           <tbody>
-                            ${Object.entries(calculatedData.ingredientTotals).map(([ingredientName, data]) => `
+                            ${Object.entries(calculatedData.ingredientTotals)
+                              .sort(([a], [b]) => a.localeCompare(b))
+                              .map(([ingredientName, data]) => `
                               <tr>
                                 <td>${ingredientName}</td>
                                 <td>${data.totalWeight >= 1000 ? `${(data.totalWeight / 1000).toFixed(2)} kg` : `${Math.round(data.totalWeight)} g`}</td>
@@ -289,7 +293,9 @@ const Indent = ({ recipes, masterIngredients }: IndentProps) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {Object.entries(calculatedData.ingredientTotals).map(([ingredientName, data]) => (
+                {Object.entries(calculatedData.ingredientTotals)
+                  .sort(([a], [b]) => a.localeCompare(b))
+                  .map(([ingredientName, data]) => (
                   <TableRow key={ingredientName}>
                     <TableCell className="font-medium">{ingredientName}</TableCell>
                     <TableCell>
