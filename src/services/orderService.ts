@@ -39,6 +39,7 @@ export interface NewOrder {
   address: string;
   total_amount: number;
   status?: string;
+  user_id?: string;
 }
 
 export interface NewOrderItem {
@@ -103,7 +104,8 @@ export const createOrder = async (order: NewOrder, items: NewOrderItem[]): Promi
         address: order.address,
         total_amount: order.total_amount,
         status: order.status || 'pending',
-        payment_status: 'unpaid'
+        payment_status: 'unpaid',
+        user_id: order.user_id
       }])
       .select()
       .single();

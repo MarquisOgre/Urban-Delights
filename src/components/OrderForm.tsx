@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Trash2, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { fetchRecipesWithIngredients } from '@/services/database';
 import { fetchRecipePricing, createOrder, NewOrderItem } from '@/services/orderService';
 import type { RecipeWithIngredients } from '@/services/database';
@@ -41,6 +42,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onOrderCreated }) => {
   const [pricing, setPricing] = useState<RecipePricing[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     loadData();
@@ -161,7 +163,8 @@ const OrderForm: React.FC<OrderFormProps> = ({ onOrderCreated }) => {
           customer_name: customerName,
           phone_number: phoneNumber,
           address: address,
-          total_amount: totalAmount
+          total_amount: totalAmount,
+          user_id: user?.id
         },
         validItems as NewOrderItem[]
       );
