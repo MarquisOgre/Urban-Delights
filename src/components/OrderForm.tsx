@@ -132,6 +132,13 @@ const OrderForm: React.FC<OrderFormProps> = ({ onOrderCreated }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Check if user is authenticated
+    if (!user) {
+      // Redirect to auth page
+      window.location.href = '/auth';
+      return;
+    }
+    
     if (!customerName || !phoneNumber || !address) {
       toast({
         title: 'Error',
