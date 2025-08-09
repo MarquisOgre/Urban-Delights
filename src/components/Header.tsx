@@ -1,22 +1,43 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Settings, Download } from 'lucide-react';
+import { Download, LogOut, UserCircle2 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface HeaderProps {
-  currentView: string;
-  setCurrentView: (view: string) => void;
-  exportAllData: () => void;
+  currentView?: string;
+  setCurrentView?: (view: string) => void;
+  exportAllData?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllData }) => {
   const location = useLocation();
-  
+  const { user, isAdmin, signOut } = useAuth();
+
   const handleBackendNavigation = () => {
     if (typeof setCurrentView === 'function') {
       setCurrentView('main');
     }
+  };
+
+  const onAdminRoute = ['/orders', '/orders-list', '/backend'].some((p) =>
+    location.pathname.startsWith(p)
+  );
+
+  const initials = user?.email?.[0]?.toUpperCase() || 'U';
+
+  const handleLogout = async () => {
+    await signOut();
   };
   
   return (
@@ -32,6 +53,14 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
         </div>
 
           <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
+            {isAdmin && onAdminRoute && (
+              <Link
+                to="/"
+                className="px-2 py-2 lg:px-3 rounded-md text-xs lg:text-sm font-medium transition-colors text-gray-600 hover:text-orange-600"
+              >
+                ← Back to Website
+              </Link>
+            )}
             <Link 
               to="/orders" 
               className={`px-2 py-2 lg:px-3 rounded-md text-xs lg:text-sm font-medium transition-colors ${
@@ -82,27 +111,48 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
             </div>
           </div>
 
-          <div className="flex items-center space-x-1 lg:space-x-2">
-            {/* <Button
-              onClick={() => setCurrentView('manage-recipes')}
-              size="sm"
-              className={`hidden md:flex ${
-                currentView === 'manage-recipes'
-                  ? 'bg-orange-100 text-orange-800'
-                  : 'bg-blue-600 hover:bg-blue-700 text-white'
-              }`}
-            >
-              <Settings size={16} className="mr-1" />
-              <span className="hidden lg:inline">Manage</span>
-            </Button> */}
-            <Button
-              onClick={exportAllData}
-              size="sm"
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              <Download size={14} className="lg:mr-1" />
-              <span className="hidden lg:inline">Export</span>
-            </Button>
+          <div className="flex items-center space-x-2 lg:space-x-3">
+            {exportAllData && (
+              <Button
+                onClick={exportAllData}
+                size="sm"
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Download size={14} className="lg:mr-1" />
+                <span className="hidden lg:inline">Export</span>
+              </Button>
+            )}
+
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 focus:outline-none">
+                    <Avatar>
+                      <AvatarImage src={""} alt={user.email || "User"} />
+                      <AvatarFallback>
+                        <UserCircle2 className="h-5 w-5" />
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard">Dashboard</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile">Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                    <LogOut className="mr-2 h-4 w-4" /> Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/auth" className="text-sm text-gray-700 hover:text-orange-600">Sign in</Link>
+            )}
           </div>
         </div>
       </div>

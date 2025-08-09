@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import Header from '@/components/Header';
+
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -209,11 +209,6 @@ const BackendDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header 
-        currentView={currentView} 
-        setCurrentView={setCurrentView}
-        exportAllData={exportAllData}
-      />
       
       <main className="container mx-auto px-4 py-6 pb-24">
         {renderContent()}

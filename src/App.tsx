@@ -14,6 +14,9 @@ import BackendDashboard from "./pages/BackendDashboard";
 import CreateOrder from "./pages/CreateOrder";
 import OrdersListPage from "./pages/OrdersList";
 import NotFound from "./pages/NotFound";
+import Header from "./components/Header";
+import UserDashboard from "./pages/UserDashboard";
+import ProfilePage from "./pages/ProfilePage";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +48,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <Header />
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/auth" element={<AuthPage />} />
@@ -52,6 +56,16 @@ const App = () => (
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/create-order" element={<CreateOrder />} />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <UserDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            } />
             <Route path="/orders" element={
               <AdminRoute>
                 <OrderDashboard />

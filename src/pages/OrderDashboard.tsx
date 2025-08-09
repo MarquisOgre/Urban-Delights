@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '@/components/Header';
+
 import Footer from '@/components/Footer';
 import OrdersList from '@/components/OrdersList';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -75,11 +75,6 @@ const OrderDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header 
-        currentView="orders" 
-        setCurrentView={() => {}}
-        exportAllData={() => {}}
-      />
       
       <main className="container mx-auto px-4 py-6 pb-24">
         <div className="space-y-6">
