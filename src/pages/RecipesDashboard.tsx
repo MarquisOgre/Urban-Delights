@@ -16,7 +16,7 @@ import Indent from '@/components/Indent';
 import StockRegister from '@/components/StockRegister';
 import ManageRecipes from '@/components/ManageRecipes';
 import { useToast } from '@/hooks/use-toast';
-import Header from '@/components/Header';
+
 import Footer from '@/components/Footer';
 
 const Index = () => {
@@ -122,7 +122,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100 pb-20 md:pb-8">
-      <Header currentView={currentView} setCurrentView={setCurrentView} exportAllData={exportAllData} />
 
       <div className="container mx-auto px-2 md:px-4 py-2 max-w-full mb-16 md:mb-0">
         {currentView === 'recipes' && (

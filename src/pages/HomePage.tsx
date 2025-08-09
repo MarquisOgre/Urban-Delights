@@ -7,7 +7,7 @@ import heroImage from "@/assets/hero-spices.jpg";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { fetchRecipesWithIngredients, RecipeWithIngredients } from "@/services/database";
-import Header from "@/components/Header";
+
 import Footer from "@/components/Footer";
 
 // Import all podi images
@@ -51,17 +51,9 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-red-50">
-      {/* Header for admin users */}
-      {user && isAdmin && (
-        <Header 
-          currentView="home" 
-          setCurrentView={() => {}}
-          exportAllData={() => {}}
-        />
-      )}
       
       {/* Navigation */}
-      <nav className={`border-b border-orange-200 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60 ${user && isAdmin ? 'sticky top-16' : 'sticky top-0'} z-40`}>
+      <nav className={"border-b border-orange-200 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-16 z-40"}>
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">

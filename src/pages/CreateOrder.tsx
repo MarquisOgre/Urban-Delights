@@ -1,5 +1,5 @@
 import React from 'react';
-import Header from '@/components/Header';
+
 import Footer from '@/components/Footer';
 import OrderForm from '@/components/OrderForm';
 import { Button } from '@/components/ui/button';
@@ -16,11 +16,6 @@ const CreateOrder: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header 
-        currentView="create-order" 
-        setCurrentView={() => {}}
-        exportAllData={() => {}}
-      />
       
     <main className="container mx-auto px-4 py-6 pb-24">
       <div className="space-y-6">

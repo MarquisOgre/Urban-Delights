@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Header from '@/components/Header';
+
 import Footer from '@/components/Footer';
 import OrdersList from '@/components/OrdersList';
 import { Button } from '@/components/ui/button';
@@ -16,11 +16,6 @@ const OrdersListPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header 
-        currentView="orders-list" 
-        setCurrentView={() => {}}
-        exportAllData={() => {}}
-      />
       
       <main className="container mx-auto px-4 py-6 pb-24">
         <div className="max-w-6xl mx-auto">

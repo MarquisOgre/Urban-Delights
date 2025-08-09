@@ -52,44 +52,19 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
 
         </div>
 
-          <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
-            {isAdmin && onAdminRoute && (
-              <Link
-                to="/"
-                className="px-2 py-2 lg:px-3 rounded-md text-xs lg:text-sm font-medium transition-colors text-gray-600 hover:text-orange-600"
-              >
-                ← Back to Website
-              </Link>
-            )}
-            <Link 
-              to="/orders" 
-              className={`px-2 py-2 lg:px-3 rounded-md text-xs lg:text-sm font-medium transition-colors ${
-                location.pathname === '/orders' || location.pathname === '/' 
-                  ? 'text-orange-600 bg-orange-50' 
-                  : 'text-gray-600 hover:text-orange-600'
-              }`}
-            >
-              Order Dashboard
-            </Link>
-            <Link 
-              to="/backend" 
-              onClick={handleBackendNavigation}
-              className={`px-2 py-2 lg:px-3 rounded-md text-xs lg:text-sm font-medium transition-colors ${
-                location.pathname.startsWith('/backend') 
-                  ? 'text-orange-600 bg-orange-50' 
-                  : 'text-gray-600 hover:text-orange-600'
-              }`}
-            >
-              Backend Dashboard
-            </Link>
-          </div>
-
-          {/* Mobile Navigation */}
-          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
-            <div className="grid grid-cols-2 gap-1 p-2">
+          {isAdmin && (
+            <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
+              {onAdminRoute && (
+                <Link
+                  to="/"
+                  className="px-2 py-2 lg:px-3 rounded-md text-xs lg:text-sm font-medium transition-colors text-gray-600 hover:text-orange-600"
+                >
+                  ← Back to Website
+                </Link>
+              )}
               <Link 
                 to="/orders" 
-                className={`px-2 py-3 rounded-md text-xs font-medium transition-colors text-center ${
+                className={`px-2 py-2 lg:px-3 rounded-md text-xs lg:text-sm font-medium transition-colors ${
                   location.pathname === '/orders' || location.pathname === '/' 
                     ? 'text-orange-600 bg-orange-50' 
                     : 'text-gray-600 hover:text-orange-600'
@@ -100,7 +75,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
               <Link 
                 to="/backend" 
                 onClick={handleBackendNavigation}
-                className={`px-2 py-3 rounded-md text-xs font-medium transition-colors text-center ${
+                className={`px-2 py-2 lg:px-3 rounded-md text-xs lg:text-sm font-medium transition-colors ${
                   location.pathname.startsWith('/backend') 
                     ? 'text-orange-600 bg-orange-50' 
                     : 'text-gray-600 hover:text-orange-600'
@@ -109,10 +84,39 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
                 Backend Dashboard
               </Link>
             </div>
-          </div>
+          )}
+
+          {/* Mobile Navigation */}
+          {isAdmin && (
+            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+              <div className="grid grid-cols-2 gap-1 p-2">
+                <Link 
+                  to="/orders" 
+                  className={`px-2 py-3 rounded-md text-xs font-medium transition-colors text-center ${
+                    location.pathname === '/orders' || location.pathname === '/' 
+                      ? 'text-orange-600 bg-orange-50' 
+                      : 'text-gray-600 hover:text-orange-600'
+                  }`}
+                >
+                  Order Dashboard
+                </Link>
+                <Link 
+                  to="/backend" 
+                  onClick={handleBackendNavigation}
+                  className={`px-2 py-3 rounded-md text-xs font-medium transition-colors text-center ${
+                    location.pathname.startsWith('/backend') 
+                      ? 'text-orange-600 bg-orange-50' 
+                      : 'text-gray-600 hover:text-orange-600'
+                  }`}
+                >
+                  Backend Dashboard
+                </Link>
+              </div>
+            </div>
+          )}
 
           <div className="flex items-center space-x-2 lg:space-x-3">
-            {exportAllData && (
+            {isAdmin && exportAllData && (
               <Button
                 onClick={exportAllData}
                 size="sm"
