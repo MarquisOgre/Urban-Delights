@@ -22,7 +22,10 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, exportAllD
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-4">
+            <div 
+              className="flex items-center space-x-4 cursor-pointer hover:opacity-80 transition-opacity" 
+              onClick={() => setCurrentView && setCurrentView('main')}
+            >
               <img src="/logo.png" alt="Logo" className="h-8 w-8" />
               <span className="text-xl font-bold text-orange-800">Artisan Delights</span>
             </div>

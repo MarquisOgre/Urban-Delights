@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Save, IndianRupee, AlertTriangle, Search, Leaf } from "lucide-react";
+import { Plus, Edit, Trash2, Save, IndianRupee, AlertTriangle, Search, Leaf, ArrowLeft } from "lucide-react";
 import { addMasterIngredient, updateMasterIngredient, deleteMasterIngredient, upsertMasterIngredient, type MasterIngredient } from "@/services/database";
 import { useToast } from "@/hooks/use-toast";
 
@@ -15,9 +15,10 @@ import ExcelBulkIngredients from "@/components/ExcelBulkIngredients";
 interface MasterIngredientListProps {
   masterIngredients: MasterIngredient[];
   onRefresh: () => void;
+  onBackToDashboard: () => void;
 }
 
-const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredientListProps) => {
+const MasterIngredientList = ({ masterIngredients, onRefresh, onBackToDashboard }: MasterIngredientListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [newIngredientName, setNewIngredientName] = useState("");
   const [newIngredientPrice, setNewIngredientPrice] = useState<number>(0);
@@ -143,8 +144,19 @@ const MasterIngredientList = ({ masterIngredients, onRefresh }: MasterIngredient
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+      <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Master Ingredients List</h2>
+        <Button 
+          onClick={onBackToDashboard} 
+          variant="outline" 
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Dashboard
+        </Button>
+      </div>
+      
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         
           <div className="flex gap-2 items-center">
             <div className="relative">

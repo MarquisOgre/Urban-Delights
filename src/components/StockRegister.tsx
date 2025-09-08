@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { CalendarIcon, Printer, Plus } from "lucide-react";
+import { CalendarIcon, Printer, Plus, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,7 +32,7 @@ interface RawMaterialEntry {
   closing: number;
 }
 
-const StockRegisterComponent = () => {
+const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () => void }) => {
   const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   
@@ -215,14 +215,24 @@ const StockRegisterComponent = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-4 sm:mb-0">Stock Register</h1>
-          <Button 
-            onClick={handlePrint}
-            className="flex items-center gap-2"
-            disabled={podiEntries.length === 0 && rawMaterialEntries.length === 0}
-          >
-            <Printer className="h-4 w-4" />
-            Print Monthly Report
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={handlePrint}
+              className="flex items-center gap-2"
+              disabled={podiEntries.length === 0 && rawMaterialEntries.length === 0}
+            >
+              <Printer className="h-4 w-4" />
+              Print Monthly Report
+            </Button>
+            <Button 
+              onClick={onBackToDashboard} 
+              variant="outline" 
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Button>
+          </div>
         </div>
 
         {/* Month Picker */}

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { FileText, Search, ArrowLeft } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import RecipeCard from '@/components/RecipeCard';
 import { type MasterIngredient, type RecipeWithIngredients } from '@/services/database';
@@ -9,9 +10,10 @@ interface RecipesProps {
   recipes: RecipeWithIngredients[];
   masterIngredients: MasterIngredient[];
   onRecipeUpdated: () => void;
+  onBackToDashboard: () => void;
 }
 
-const Recipes = ({ recipes, masterIngredients, onRecipeUpdated }: RecipesProps) => {
+const Recipes = ({ recipes, masterIngredients, onRecipeUpdated, onBackToDashboard }: RecipesProps) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredRecipes = recipes.filter(recipe =>
@@ -25,6 +27,20 @@ const Recipes = ({ recipes, masterIngredients, onRecipeUpdated }: RecipesProps) 
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex-1">
+          <h2 className="text-2xl font-bold text-orange-800 mb-2">All Recipes</h2>
+        </div>
+        <Button 
+          onClick={onBackToDashboard} 
+          variant="outline" 
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Dashboard
+        </Button>
+      </div>
+      
       <div className="flex flex-col md:flex-row items-center gap-4">
         <div className="w-full md:w-1/6">
           <Badge className="bg-blue-100 text-blue-800 text-sm px-3 py-2 w-full justify-center">

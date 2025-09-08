@@ -183,19 +183,19 @@ const BackendDashboard: React.FC = () => {
     // Render specific backend components
     switch (currentView) {
       case 'recipes':
-        return <Recipes recipes={recipes} masterIngredients={masterIngredients} onRecipeUpdated={refreshData} />;
+        return <Recipes recipes={recipes} masterIngredients={masterIngredients} onRecipeUpdated={refreshData} onBackToDashboard={() => setCurrentView('main')} />;
       case 'manage-recipes':
-        return <ManageRecipes recipes={recipes} onRecipeUpdated={refreshData} />;
+        return <ManageRecipes recipes={recipes} onRecipeUpdated={refreshData} onBackToDashboard={() => setCurrentView('main')} />;
       case 'ingredients':
-        return <MasterIngredientList masterIngredients={masterIngredients} onRefresh={refetchIngredients} />;
+        return <MasterIngredientList masterIngredients={masterIngredients} onRefresh={refetchIngredients} onBackToDashboard={() => setCurrentView('main')} />;
       case 'add-recipe':
-        return <AddRecipe masterIngredients={masterIngredients} onRecipeAdded={refreshData} />;
+        return <AddRecipe masterIngredients={masterIngredients} onRecipeAdded={refreshData} onBackToDashboard={() => setCurrentView('main')} />;
       case 'pricing':
-        return <PricingManager />;
+        return <PricingManager onBackToDashboard={() => setCurrentView('main')} />;
       case 'indent':
-        return <Indent recipes={recipes} masterIngredients={masterIngredients} />;
+        return <Indent recipes={recipes} masterIngredients={masterIngredients} onBackToDashboard={() => setCurrentView('main')} />;
       case 'stock-register':
-        return <StockRegister />;
+        return <StockRegister onBackToDashboard={() => setCurrentView('main')} />;
       default:
         return (
           <div className="space-y-6">

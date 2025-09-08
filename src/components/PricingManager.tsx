@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Save, Eye, EyeOff } from 'lucide-react';
+import { Save, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { fetchRecipePricing, updateRecipePrice, updateRecipeEnabled } from '@/services/pricingService';
 import { fetchRecipesWithIngredients } from '@/services/database';
@@ -18,7 +18,7 @@ const QUANTITY_OPTIONS = [
   '1 Kg'
 ];
 
-const PricingManager: React.FC = () => {
+const PricingManager: React.FC<{ onBackToDashboard: () => void }> = ({ onBackToDashboard }) => {
   const [pricing, setPricing] = useState<RecipePricing[]>([]);
   const [recipes, setRecipes] = useState<RecipeWithIngredients[]>([]);
   const [editingPrice, setEditingPrice] = useState<{ [key: string]: number }>({});
@@ -118,11 +118,21 @@ const PricingManager: React.FC = () => {
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Recipe Pricing Management</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">Recipe Pricing Management</h2>
+        <Button 
+          onClick={onBackToDashboard} 
+          variant="outline" 
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Dashboard
+        </Button>
+      </div>
+      
+      <Card className="w-full">
+        <CardContent>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -194,7 +204,8 @@ const PricingManager: React.FC = () => {
           </div>
         )}
       </CardContent>
-    </Card>
+      </Card>
+    </div>
   );
 };
 

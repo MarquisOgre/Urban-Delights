@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Download } from 'lucide-react';
+import { Download, ArrowLeft } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useToast } from '@/hooks/use-toast';
 import { type MasterIngredient, type RecipeWithIngredients } from '@/services/database';
@@ -11,9 +11,10 @@ import { type MasterIngredient, type RecipeWithIngredients } from '@/services/da
 interface IndentProps {
   recipes: RecipeWithIngredients[];
   masterIngredients: MasterIngredient[];
+  onBackToDashboard: () => void;
 }
 
-const Indent = ({ recipes, masterIngredients }: IndentProps) => {
+const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) => {
   const [recipeQuantities, setRecipeQuantities] = useState<Record<string, number>>({});
   const { toast } = useToast();
 
@@ -142,15 +143,25 @@ const Indent = ({ recipes, masterIngredients }: IndentProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+      <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Ingredient Indent</h1>
-        <Button 
-          onClick={exportToExcel}
-          className="bg-blue-600 hover:bg-blue-700 text-white w-full md:w-auto"
-        >
-          <Download className="w-4 h-4 mr-2" />
-          Export
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={exportToExcel}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Export
+          </Button>
+          <Button 
+            onClick={onBackToDashboard} 
+            variant="outline" 
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+        </div>
       </div>
 
       {/* Recipe Quantities Input */}

@@ -1,16 +1,17 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { updateRecipeVisibility, type RecipeWithIngredients } from "@/services/database";
 import { useToast } from "@/hooks/use-toast";
 
 interface ManageRecipesProps {
   recipes: RecipeWithIngredients[];
   onRecipeUpdated: () => void;
+  onBackToDashboard: () => void;
 }
 
-const ManageRecipes = ({ recipes, onRecipeUpdated }: ManageRecipesProps) => {
+const ManageRecipes = ({ recipes, onRecipeUpdated, onBackToDashboard }: ManageRecipesProps) => {
   const { toast } = useToast();
 
   const handleToggleVisibility = async (recipe: RecipeWithIngredients) => {
@@ -33,9 +34,18 @@ const ManageRecipes = ({ recipes, onRecipeUpdated }: ManageRecipesProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-orange-800 mb-2">Manage All Recipes</h2>
-        {/*<p className="text-gray-600">Enable or disable recipe visibility</p>*/}
+      <div className="flex items-center justify-between mb-6">
+        <div className="text-center flex-1">
+          <h2 className="text-2xl font-bold text-orange-800 mb-2">Manage All Recipes</h2>
+        </div>
+        <Button 
+          onClick={onBackToDashboard} 
+          variant="outline" 
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Dashboard
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

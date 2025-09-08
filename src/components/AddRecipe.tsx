@@ -5,16 +5,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Trash2, Save } from "lucide-react";
+import { Plus, Trash2, Save, ArrowLeft } from "lucide-react";
 import { addRecipeWithIngredients, calculateIngredientCostFromPartial, calculateSellingPrice, type MasterIngredient, type NewIngredient } from "@/services/database";
 import { useToast } from "@/hooks/use-toast";
 
 interface AddRecipeProps {
   masterIngredients: MasterIngredient[];
   onRecipeAdded: () => void;
+  onBackToDashboard: () => void;
 }
 
-const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
+const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddRecipeProps) => {
   const [recipeName, setRecipeName] = useState("");
   const [preparation, setPreparation] = useState("");
   const [overheads, setOverheads] = useState<number>(100);
@@ -169,6 +170,16 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded }: AddRecipeProps) => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      <div className="flex justify-end mb-4">
+        <Button 
+          onClick={onBackToDashboard} 
+          variant="outline" 
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Dashboard
+        </Button>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-center gap-2">
