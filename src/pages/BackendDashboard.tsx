@@ -14,6 +14,7 @@ import StockRegister from '@/components/StockRegister';
 import Recipes from '@/components/Recipes';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import Header from '@/components/Header';
 import { fetchMasterIngredients, fetchRecipesWithIngredients } from '@/services/database';
 
 const BackendDashboard: React.FC = () => {
@@ -146,7 +147,7 @@ const BackendDashboard: React.FC = () => {
       return (
         <div className="space-y-6">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Backend Management</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
             <p className="text-gray-600">Manage your recipes, ingredients, pricing and inventory</p>
           </div>
           
@@ -199,7 +200,7 @@ const BackendDashboard: React.FC = () => {
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Backend Management</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
               <p className="text-gray-600">Manage your recipes, ingredients, pricing and inventory</p>
             </div>
           </div>
@@ -209,11 +210,14 @@ const BackendDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      
+      <Header 
+        currentView={currentView} 
+        setCurrentView={setCurrentView} 
+        exportAllData={exportAllData} 
+      />
       <main className="container mx-auto px-4 py-6 pb-24">
         {renderContent()}
       </main>
-      
       <Footer showTopButton={true} />
     </div>
   );

@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Save, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { fetchRecipePricing, updateRecipePrice, updateRecipeEnabled } from '@/services/orderService';
+import { fetchRecipePricing, updateRecipePrice, updateRecipeEnabled } from '@/services/pricingService';
 import { fetchRecipesWithIngredients } from '@/services/database';
-import type { RecipePricing } from '@/services/orderService';
+import type { RecipePricing } from '@/services/pricingService';
 import type { RecipeWithIngredients } from '@/services/database';
 
 const QUANTITY_OPTIONS = [
