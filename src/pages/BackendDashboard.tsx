@@ -210,11 +210,10 @@ const BackendDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header 
-        currentView={currentView} 
-        setCurrentView={setCurrentView} 
-        exportAllData={exportAllData} 
-      />
+        <Header 
+          currentView={currentView} 
+          setCurrentView={setCurrentView}
+        />
       <main className="container mx-auto px-4 py-6 pb-24">
         {renderContent()}
       </main>

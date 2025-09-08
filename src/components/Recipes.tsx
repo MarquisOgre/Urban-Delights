@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { FileText, Search, ArrowLeft } from 'lucide-react';
+import { FileText, Search, ArrowLeft, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { Input } from '@/components/ui/input';
 import RecipeCard from '@/components/RecipeCard';
 import { type MasterIngredient, type RecipeWithIngredients } from '@/services/database';
@@ -15,6 +16,57 @@ interface RecipesProps {
 
 const Recipes = ({ recipes, masterIngredients, onRecipeUpdated, onBackToDashboard }: RecipesProps) => {
   const [searchTerm, setSearchTerm] = useState('');
+
+  const exportRecipesToExcel = () => {
+    const workbook = XLSX.utils.book_new();
+
+    visibleRecipes.forEach((recipe) => {
+      // Create recipe data for the sheet
+      const recipeData = [
+        ['Recipe Name', recipe.name],
+        ['Selling Price', `₹${recipe.selling_price.toFixed(2)}`],
+        ['Overheads', `${recipe.overheads}%`],
+        ['Preparation', recipe.preparation || 'N/A'],
+        ['Shelf Life', recipe.shelf_life || 'N/A'],
+        ['Storage', recipe.storage || 'N/A'],
+        [''],
+        ['Ingredients', 'Quantity', 'Unit'],
+      ];
+
+      // Add ingredients data
+      recipe.ingredients.forEach((ingredient) => {
+        recipeData.push([
+          ingredient.ingredient_name,
+          ingredient.quantity.toString(),
+          ingredient.unit
+        ]);
+      });
+
+      // Add nutritional info if available
+      if (recipe.calories || recipe.protein || recipe.fat || recipe.carbs) {
+        recipeData.push(['']);
+        recipeData.push(['Nutritional Information']);
+        if (recipe.calories) recipeData.push(['Calories', recipe.calories.toString()]);
+        if (recipe.protein) recipeData.push(['Protein (g)', recipe.protein.toString()]);
+        if (recipe.fat) recipeData.push(['Fat (g)', recipe.fat.toString()]);
+        if (recipe.carbs) recipeData.push(['Carbs (g)', recipe.carbs.toString()]);
+      }
+
+      // Create worksheet
+      const worksheet = XLSX.utils.aoa_to_sheet(recipeData);
+      
+      // Add worksheet to workbook with recipe name as sheet name
+      const sheetName = recipe.name.replace(/[\\/:*?"<>|]/g, '_').substring(0, 31);
+      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+    });
+
+    // Generate file name with timestamp
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+    const fileName = `Recipes_Export_${timestamp}.xlsx`;
+
+    // Save the file
+    XLSX.writeFile(workbook, fileName);
+  };
 
   const filteredRecipes = recipes.filter(recipe =>
     recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -31,14 +83,24 @@ const Recipes = ({ recipes, masterIngredients, onRecipeUpdated, onBackToDashboar
         <div className="flex-1">
           <h2 className="text-2xl font-bold text-orange-800 mb-2">All Recipes</h2>
         </div>
-        <Button 
-          onClick={onBackToDashboard} 
-          variant="outline" 
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Dashboard
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button 
+            onClick={exportRecipesToExcel} 
+            size="sm"
+            className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Export Recipes
+          </Button>
+          <Button 
+            onClick={onBackToDashboard} 
+            variant="outline" 
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+        </div>
       </div>
       
       <div className="flex flex-col md:flex-row items-center gap-4">
