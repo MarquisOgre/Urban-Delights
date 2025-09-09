@@ -5,7 +5,7 @@ import { FileText, Search, ArrowLeft, Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { Input } from '@/components/ui/input';
 import RecipeCard from '@/components/RecipeCard';
-import { type MasterIngredient, type RecipeWithIngredients } from '@/services/database';
+import { type MasterIngredient, type RecipeWithIngredients, calculateRecipeCost } from '@/services/database';
 
 interface RecipesProps {
   recipes: RecipeWithIngredients[];
@@ -21,10 +21,15 @@ const Recipes = ({ recipes, masterIngredients, onRecipeUpdated, onBackToDashboar
     const workbook = XLSX.utils.book_new();
 
     visibleRecipes.forEach((recipe) => {
+      // Calculate costs
+      const { totalCost, finalCost } = calculateRecipeCost(recipe, masterIngredients);
+      
       // Create recipe data for the sheet
       const recipeData = [
         ['Recipe Name', recipe.name],
         ['Selling Price', `₹${recipe.selling_price.toFixed(2)}`],
+        ['Total Cost', `₹${totalCost.toFixed(2)}`],
+        ['Final Cost (with overheads)', `₹${finalCost.toFixed(2)}`],
         ['Overheads', `${recipe.overheads}%`],
         ['Preparation', recipe.preparation || 'N/A'],
         ['Shelf Life', recipe.shelf_life || 'N/A'],
@@ -60,9 +65,8 @@ const Recipes = ({ recipes, masterIngredients, onRecipeUpdated, onBackToDashboar
       XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
     });
 
-    // Generate file name with timestamp
-    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-    const fileName = `Recipes_Export_${timestamp}.xlsx`;
+    // Generate simple file name
+    const fileName = `ALL RECIPES.xlsx`;
 
     // Save the file
     XLSX.writeFile(workbook, fileName);
