@@ -27,15 +27,15 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView }) => {
             <span className="text-xl font-bold text-orange-800">Artisan Delights</span>
           </div>
 
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="hidden md:flex items-center space-x-3">
             {navigationItems.map((item) => (
               <button
                 key={item.key}
                 onClick={() => setCurrentView && setCurrentView(item.key)}
-                className={`text-sm font-medium transition-colors hover:text-orange-600 ${
+                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                   currentView === item.key 
-                    ? 'text-orange-600 border-b-2 border-orange-600 pb-4' 
-                    : 'text-gray-700'
+                    ? 'bg-orange-600 text-white' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-orange-100 hover:text-orange-600'
                 }`}
               >
                 {item.label}

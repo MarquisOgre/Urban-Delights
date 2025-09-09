@@ -143,8 +143,9 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Ingredient Indent</h1>
+        
         <div className="flex gap-2">
           <Button 
             onClick={exportToExcel}

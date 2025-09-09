@@ -213,8 +213,9 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-4 sm:mb-0">Stock Register</h1>
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">Stock Register</h1>
+          
           <div className="flex gap-2">
             <Button 
               onClick={handlePrint}
