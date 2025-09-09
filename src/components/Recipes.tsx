@@ -39,8 +39,8 @@ const Recipes = ({ recipes, masterIngredients, onRecipeUpdated, onBackToDashboar
         
         recipeData.push([
           ingredient.ingredient_name,
-          `${ingredient.quantity}${ingredient.unit}`,
-          '',
+          `${ingredient.quantity}`,
+          `${ingredient.unit}`,
           `₹${pricePerKg}/kg`,
           `₹${amount.toFixed(2)}`
         ]);
@@ -85,7 +85,7 @@ const Recipes = ({ recipes, masterIngredients, onRecipeUpdated, onBackToDashboar
     });
 
     // Generate simple file name
-    const fileName = `ALL RECIPES.xlsx`;
+    const fileName = `All Recipes.xlsx`;
 
     // Save the file
     XLSX.writeFile(workbook, fileName);
