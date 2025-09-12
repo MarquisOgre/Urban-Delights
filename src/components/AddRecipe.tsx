@@ -286,8 +286,9 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
                   <div className="col-span-3">
                     <Input
                       type="number"
+                      step="any"
                       value={ingredient.quantity || ""}
-                      onChange={(e) => updateIngredient(index, 'quantity', Number(e.target.value))}
+                      onChange={(e) => updateIngredient(index, 'quantity', parseFloat(e.target.value) || 0)}
                       placeholder="Quantity"
                     />
                   </div>
