@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { FileText, Search, ArrowLeft, Download } from 'lucide-react';
+import { FileText, Search, ArrowLeft, Download, Plus } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { Input } from '@/components/ui/input';
 import RecipeCard from '@/components/RecipeCard';
+import AddRecipe from '@/components/AddRecipe';
 import { type MasterIngredient, type RecipeWithIngredients, calculateRecipeCost } from '@/services/database';
 
 interface RecipesProps {
@@ -16,6 +17,21 @@ interface RecipesProps {
 
 const Recipes = ({ recipes, masterIngredients, onRecipeUpdated, onBackToDashboard }: RecipesProps) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [showAddRecipe, setShowAddRecipe] = useState(false);
+
+  // If showing AddRecipe form, render it instead
+  if (showAddRecipe) {
+    return (
+      <AddRecipe
+        masterIngredients={masterIngredients}
+        onRecipeAdded={() => {
+          onRecipeUpdated();
+          setShowAddRecipe(false);
+        }}
+        onBackToDashboard={() => setShowAddRecipe(false)}
+      />
+    );
+  }
 
   const exportRecipesToExcel = () => {
     const workbook = XLSX.utils.book_new();
@@ -127,6 +143,14 @@ const Recipes = ({ recipes, masterIngredients, onRecipeUpdated, onBackToDashboar
         </div>
 
         <div className="flex items-center gap-3">
+          <Button 
+            onClick={() => setShowAddRecipe(true)}
+            size="sm"
+            className="bg-orange-600 hover:bg-orange-700 text-white flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add New Recipe
+          </Button>
           <Button 
             onClick={exportRecipesToExcel} 
             size="sm"
