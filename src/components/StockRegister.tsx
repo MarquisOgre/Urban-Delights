@@ -84,6 +84,34 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
     return opening + purchased - used;
   };
 
+  const getLastPodiClosingStock = (podiName: string): number => {
+    const filteredEntries = podiEntries
+      .filter(entry => entry.podiName === podiName)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    return filteredEntries.length > 0 ? filteredEntries[0].closingStock : 0;
+  };
+
+  const getLastRawMaterialClosingStock = (ingredient: string): number => {
+    const filteredEntries = rawMaterialEntries
+      .filter(entry => entry.ingredient === ingredient)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    return filteredEntries.length > 0 ? filteredEntries[0].closing : 0;
+  };
+
+  const handlePodiNameChange = (selectedPodiName: string) => {
+    setPodiName(selectedPodiName);
+    const lastClosingStock = getLastPodiClosingStock(selectedPodiName);
+    setPodiOpeningStock(lastClosingStock.toString());
+  };
+
+  const handleIngredientChange = (selectedIngredient: string) => {
+    setIngredient(selectedIngredient);
+    const lastClosingStock = getLastRawMaterialClosingStock(selectedIngredient);
+    setRmOpening(lastClosingStock.toString());
+  };
+
   const handleAddPodiEntry = () => {
     if (!podiName || !podiOpeningStock || !podiProduction || !podiSales) return;
 
@@ -323,7 +351,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                   {/* Podi Name */}
                   <div className="flex-1 min-w-[300px] max-w-[400px]">
                     <Label htmlFor="podiName">Podi Name</Label>
-                    <Select value={podiName} onValueChange={setPodiName}>
+                    <Select value={podiName} onValueChange={handlePodiNameChange}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select podi" />
                       </SelectTrigger>
@@ -474,7 +502,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                   {/* Ingredient */}
                   <div className="flex-1 min-w-[300px] max-w-[400px]">
                     <Label htmlFor="ingredient">Ingredient</Label>
-                    <Select value={ingredient} onValueChange={setIngredient}>
+                    <Select value={ingredient} onValueChange={handleIngredientChange}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select ingredient" />
                       </SelectTrigger>
