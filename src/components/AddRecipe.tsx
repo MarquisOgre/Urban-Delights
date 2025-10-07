@@ -192,56 +192,32 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Basic Info */}
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="recipeName">Recipe Name *</Label>
-              <Input
-                id="recipeName"
-                value={recipeName}
-                onChange={(e) => setRecipeName(e.target.value)}
-                placeholder="Enter recipe name"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="description">Description</Label>
-              <Input
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="e.g., Traditional South Indian Podi"
-              />
-            </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <Label htmlFor="sellingPrice">Selling Price (₹/kg)</Label>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">Auto Calculate</span>
-                  <Switch
-                    checked={autoCalculatePrice}
-                    onCheckedChange={setAutoCalculatePrice}
-                  />
-                </div>
-              </div>
-              <Input
-                id="sellingPrice"
-                type="number"
-                value={displaySellingPrice}
-                onChange={(e) => setManualSellingPrice(Number(e.target.value))}
-                readOnly={autoCalculatePrice}
-                className={autoCalculatePrice ? "bg-gray-100" : ""}
-              />
-              {autoCalculatePrice && (
-                <p className="text-xs text-gray-500 mt-1">Final Cost × 2</p>
-              )}
-            </div>
-          </div>
-
+        {/* Basic Info: Recipe Name & Description Side by Side */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
+            <Label htmlFor="recipeName">Recipe Name *</Label>
+            <Input
+              id="recipeName"
+              value={recipeName}
+              onChange={(e) => setRecipeName(e.target.value)}
+              placeholder="Enter recipe name"
+            />
+          </div>
+          <div>
+            <Label htmlFor="description">Description</Label>
+            <Input
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="e.g., Traditional South Indian Podi"
+            />
+          </div>
+        </div>
+
+        {/* Selling Price & Overheads Side by Side */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
             <Label htmlFor="overheads">Overheads (₹)</Label>
             <Input
               id="overheads"
@@ -250,6 +226,31 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
               onChange={(e) => setOverheads(Number(e.target.value))}
             />
           </div>
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <Label htmlFor="sellingPrice">Selling Price (₹/kg)</Label>
+              <div className="flex items-center gap-2">
+                <span className="text-sm">Auto Calculate</span>
+                <Switch
+                  checked={autoCalculatePrice}
+                  onCheckedChange={setAutoCalculatePrice}
+                />
+              </div>
+            </div>
+            <Input
+              id="sellingPrice"
+              type="number"
+              value={displaySellingPrice}
+              onChange={(e) => setManualSellingPrice(Number(e.target.value))}
+              readOnly={autoCalculatePrice}
+              className={autoCalculatePrice ? "bg-gray-100" : ""}
+            />
+            {autoCalculatePrice && (
+              <p className="text-xs text-gray-500 mt-1">Final Cost × 2</p>
+            )}
+          </div>
+        </div>
+
 
           {/* Cost Preview */}
           <div className="bg-blue-50 p-4 rounded-lg border">

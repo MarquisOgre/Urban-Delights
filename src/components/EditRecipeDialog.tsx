@@ -210,8 +210,8 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
         </DialogHeader>
         
         <div className="space-y-6">
-          {/* Basic Info */}
-          <div className="space-y-4">
+          {/* Basic Info: Recipe Name & Description Side by Side */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="recipeName">Recipe Name *</Label>
               <Input
@@ -221,7 +221,6 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
                 placeholder="Enter recipe name"
               />
             </div>
-            
             <div>
               <Label htmlFor="description">Description</Label>
               <Input
@@ -233,7 +232,17 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
             </div>
           </div>
 
+          {/* Selling Price & Overheads Side by Side */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="overheads">Overheads (₹)</Label>
+              <Input
+                id="overheads"
+                type="number"
+                value={overheads}
+                onChange={(e) => setOverheads(Number(e.target.value))}
+              />
+            </div>
             <div>
               <div className="flex items-center justify-between mb-2">
                 <Label htmlFor="sellingPrice">Selling Price (₹/kg)</Label>
@@ -259,15 +268,6 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="overheads">Overheads (₹)</Label>
-            <Input
-              id="overheads"
-              type="number"
-              value={overheads}
-              onChange={(e) => setOverheads(Number(e.target.value))}
-            />
-          </div>
 
           {/* Ingredients */}
           <div>
