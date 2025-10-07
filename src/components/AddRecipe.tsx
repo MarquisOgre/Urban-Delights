@@ -161,7 +161,7 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
 
       toast({
         title: "Recipe Added",
-        description: `${newRecipe.name} has been added successfully with selling price ₹${displaySellingPrice}!`,
+        description: `${newRecipe.name} has been added successfully with selling price ₹${Math.round(displaySellingPrice)}!`,
       });
     } catch (error) {
       toast({
@@ -240,7 +240,8 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
             <Input
               id="sellingPrice"
               type="number"
-              value={displaySellingPrice}
+              step="1"
+              value={Math.round(displaySellingPrice)}
               onChange={(e) => setManualSellingPrice(Number(e.target.value))}
               readOnly={autoCalculatePrice}
               className={autoCalculatePrice ? "bg-gray-100" : ""}
@@ -270,7 +271,7 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
               </div>
               <div className="flex justify-between font-bold text-green-700">
                 <span>Selling Price:</span>
-                <span>₹{displaySellingPrice.toFixed(2)}</span>
+                <span>₹{Math.round(displaySellingPrice)}</span>
               </div>
             </div>
           </div>

@@ -257,7 +257,8 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
               <Input
                 id="sellingPrice"
                 type="number"
-                value={displaySellingPrice}
+                step="1"
+                value={Math.round(displaySellingPrice)}
                 onChange={(e) => setManualSellingPrice(Number(e.target.value))}
                 readOnly={autoCalculatePrice}
                 className={autoCalculatePrice ? "bg-gray-100" : ""}

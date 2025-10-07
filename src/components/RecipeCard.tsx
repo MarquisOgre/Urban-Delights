@@ -133,7 +133,7 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
               <span className="text-gray-600">Selling Price:</span>
               <span className="font-semibold text-green-600 flex items-center">
                 <IndianRupee size={14} />
-                {(recipe.selling_price * desiredQty).toFixed(2)}
+                {Math.round(recipe.selling_price * desiredQty)}
                 {desiredQty !== 1 && <span className="text-xs ml-1">({desiredQty}kg)</span>}
               </span>
             </div>
@@ -219,7 +219,7 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
                 </div>
                 <div className="flex justify-between text-base sm:text-lg font-bold text-green-700">
                   <span>Selling Price:</span>
-                  <span>₹{(recipe.selling_price * desiredQty).toFixed(2)}</span>
+                  <span>₹{Math.round(recipe.selling_price * desiredQty)}</span>
                 </div>
               </div>
             </div>
