@@ -97,7 +97,7 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
             </div>
           </div>
           <CardDescription className="text-sm text-gray-600">
-            Traditional South Indian Podi
+            {(recipe as any).description || "Traditional South Indian Podi"}
           </CardDescription>
         </CardHeader>
         

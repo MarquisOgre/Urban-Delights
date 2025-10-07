@@ -17,6 +17,7 @@ interface AddRecipeProps {
 
 const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddRecipeProps) => {
   const [recipeName, setRecipeName] = useState("");
+  const [description, setDescription] = useState("");
   const [preparation, setPreparation] = useState("");
   const [overheads, setOverheads] = useState<number>(100);
   const [ingredients, setIngredients] = useState<NewIngredient[]>([
@@ -96,6 +97,7 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
 
     const newRecipe = {
       name: recipeName,
+      description: description || "Traditional South Indian Podi",
       preparation: preparation,
       overheads: overheads,
       shelf_life: "6 months in sealed packaging, away from moisture and sunlight",
@@ -120,6 +122,7 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
           .from('recipes')
           .insert({
             ...newRecipe,
+            description: description || "Traditional South Indian Podi",
             selling_price: manualSellingPrice
           })
           .select()
@@ -146,6 +149,7 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
       
       // Reset form
       setRecipeName("");
+      setDescription("");
       setPreparation("");
       setOverheads(100);
       setIngredients([{ ingredient_name: "", quantity: 0, unit: "g" }]);
@@ -189,7 +193,7 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Basic Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
             <div>
               <Label htmlFor="recipeName">Recipe Name *</Label>
               <Input
@@ -199,6 +203,19 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
                 placeholder="Enter recipe name"
               />
             </div>
+            
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Input
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="e.g., Traditional South Indian Podi"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <Label htmlFor="sellingPrice">Selling Price (₹/kg)</Label>

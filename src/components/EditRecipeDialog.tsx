@@ -28,6 +28,7 @@ interface EditRecipeDialogProps {
 
 const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRecipeUpdated }: EditRecipeDialogProps) => {
   const [recipeName, setRecipeName] = useState("");
+  const [description, setDescription] = useState("");
   const [preparation, setPreparation] = useState("");
   const [overheads, setOverheads] = useState<number>(100);
   const [ingredients, setIngredients] = useState<EditIngredient[]>([]);
@@ -62,6 +63,7 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
   useEffect(() => {
     if (open && recipe) {
       setRecipeName(recipe.name);
+      setDescription((recipe as any).description || "");
       setPreparation(recipe.preparation || "");
       setOverheads(recipe.overheads);
       setIngredients(recipe.ingredients.map(ing => ({
@@ -141,6 +143,7 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
         .from('recipes')
         .update({
           name: recipeName,
+          description: description || "Traditional South Indian Podi",
           preparation: preparation,
           selling_price: displaySellingPrice,
           overheads: overheads,
@@ -208,7 +211,7 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
         
         <div className="space-y-6">
           {/* Basic Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
             <div>
               <Label htmlFor="recipeName">Recipe Name *</Label>
               <Input
@@ -218,6 +221,19 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
                 placeholder="Enter recipe name"
               />
             </div>
+            
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Input
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="e.g., Traditional South Indian Podi"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <Label htmlFor="sellingPrice">Selling Price (₹/kg)</Label>
