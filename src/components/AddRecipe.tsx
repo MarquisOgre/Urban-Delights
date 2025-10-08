@@ -127,22 +127,6 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
           })
           .select()
           .single();
-        
-        if (recipeError) throw recipeError;
-        
-        // Insert ingredients
-        const ingredientInserts = ingredients.map(ingredient => ({
-          recipe_id: recipeData.id,
-          ingredient_name: ingredient.ingredient_name,
-          quantity: ingredient.quantity,
-          unit: ingredient.unit
-        }));
-        
-        const { error: ingredientsError } = await supabase
-          .from('recipe_ingredients')
-          .insert(ingredientInserts);
-        
-        if (ingredientsError) throw ingredientsError;
       } else {
         await addRecipeWithIngredients(newRecipe, ingredients, masterIngredients);
       }

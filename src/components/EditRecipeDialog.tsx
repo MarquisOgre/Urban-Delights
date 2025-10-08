@@ -47,12 +47,9 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
   const { finalCost } = calculateRecipeCost({
     ...recipe,
     ingredients: ingredients.map(ing => ({
-      id: ing.id || '',
-      recipe_id: recipe.id,
       ingredient_name: ing.ingredient_name,
       quantity: ing.quantity,
-      unit: ing.unit,
-      created_at: ''
+      unit: ing.unit
     })),
     overheads
   }, masterIngredients);
@@ -66,8 +63,8 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
       setDescription((recipe as any).description || "");
       setPreparation(recipe.preparation || "");
       setOverheads(recipe.overheads);
-      setIngredients(recipe.ingredients.map(ing => ({
-        id: ing.id,
+      setIngredients(recipe.ingredients.map((ing, index) => ({
+        id: `ing-${index}`,
         ingredient_name: ing.ingredient_name,
         quantity: ing.quantity,
         unit: ing.unit
@@ -78,7 +75,6 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
         fat: recipe.fat || 0,
         carbs: recipe.carbs || 0
       });
-      setManualSellingPrice(recipe.selling_price);
       setAutoCalculatePrice(true);
     }
   }, [open, recipe]);
@@ -138,7 +134,7 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
     setLoading(true);
 
     try {
-      // Update recipe
+      // Update recipe with ingredients in JSONB
       const { error: recipeError } = await supabase
         .from('recipes')
         .update({
@@ -151,31 +147,16 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
           protein: nutrition.protein || null,
           fat: nutrition.fat || null,
           carbs: nutrition.carbs || null,
+          ingredients: ingredients.map(ing => ({
+            ingredient_name: ing.ingredient_name,
+            quantity: ing.quantity,
+            unit: ing.unit
+          })),
           updated_at: new Date().toISOString()
         })
         .eq('id', recipe.id);
 
       if (recipeError) throw recipeError;
-
-      // Delete existing ingredients
-      const { error: deleteError } = await supabase
-        .from('recipe_ingredients')
-        .delete()
-        .eq('recipe_id', recipe.id);
-
-      if (deleteError) throw deleteError;
-
-      // Insert new ingredients
-      const { error: ingredientsError } = await supabase
-        .from('recipe_ingredients')
-        .insert(ingredients.map(ing => ({
-          recipe_id: recipe.id,
-          ingredient_name: ing.ingredient_name,
-          quantity: ing.quantity,
-          unit: ing.unit
-        })));
-
-      if (ingredientsError) throw ingredientsError;
 
       onRecipeUpdated();
       onOpenChange(false);

@@ -1,13 +1,18 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
-import { hardcodedIngredients } from '@/data/hardcodedIngredients';
-import { hardcodedRecipes } from '@/data/hardcodedRecipes';
+import { ingredients as initialIngredients } from '@/data/Ingredients';
+import { recipes as initialRecipes } from '@/data/Recipes';
 
 export type MasterIngredient = Database['public']['Tables']['master_ingredients']['Row'];
 export type Recipe = Database['public']['Tables']['recipes']['Row'];
-export type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row'];
 
-export interface RecipeWithIngredients extends Recipe {
+export interface RecipeIngredient {
+  ingredient_name: string;
+  quantity: number;
+  unit: string;
+}
+
+export interface RecipeWithIngredients extends Omit<Recipe, 'ingredients'> {
   ingredients: RecipeIngredient[];
 }
 
@@ -41,9 +46,9 @@ export const getAllIngredients = async (): Promise<Pick<MasterIngredient, 'name'
 };
 
 export const fetchMasterIngredients = async (): Promise<MasterIngredient[]> => {
-  // First, load hardcoded ingredients
-  const hardcodedData: MasterIngredient[] = hardcodedIngredients.map((ing, index) => ({
-    id: `hardcoded-${index}`,
+  // First, load initial ingredients
+  const initialData: MasterIngredient[] = initialIngredients.map((ing, index) => ({
+    id: `init-${index}`,
     ...ing,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -57,19 +62,19 @@ export const fetchMasterIngredients = async (): Promise<MasterIngredient[]> => {
       .order('name');
 
     if (error) {
-      console.warn('Error fetching from Supabase, using hardcoded data only:', error);
-      return hardcodedData;
+      console.warn('Error fetching from Supabase, using initial data only:', error);
+      return initialData;
     }
 
-    // Merge hardcoded data with database data
-    // Remove duplicates by name, preferring database data over hardcoded
+    // Merge initial data with database data
+    // Remove duplicates by name, preferring database data over initial
     const dbData = data || [];
-    const mergedData = [...hardcodedData];
+    const mergedData = [...initialData];
     
     dbData.forEach(dbItem => {
       const existingIndex = mergedData.findIndex(item => item.name === dbItem.name);
       if (existingIndex >= 0) {
-        // Replace hardcoded with database version
+        // Replace initial with database version
         mergedData[existingIndex] = dbItem;
       } else {
         // Add new database item
@@ -79,15 +84,15 @@ export const fetchMasterIngredients = async (): Promise<MasterIngredient[]> => {
 
     return mergedData.sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
-    console.warn('Error connecting to Supabase, using hardcoded data only:', error);
-    return hardcodedData;
+    console.warn('Error connecting to Supabase, using initial data only:', error);
+    return initialData;
   }
 };
 
 export const fetchRecipesWithIngredients = async (): Promise<RecipeWithIngredients[]> => {
-  // First, load hardcoded recipes
-  const hardcodedData: RecipeWithIngredients[] = hardcodedRecipes.map((recipe, index) => ({
-    id: `hardcoded-recipe-${index}`,
+  // First, load initial recipes
+  const initialData: RecipeWithIngredients[] = initialRecipes.map((recipe, index) => ({
+    id: `init-${index}`,
     ...recipe,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -101,32 +106,30 @@ export const fetchRecipesWithIngredients = async (): Promise<RecipeWithIngredien
       .order('name');
 
     if (recipesError) {
-      console.warn('Error fetching recipes from Supabase, using hardcoded data only:', recipesError);
-      return hardcodedData;
+      console.warn('Error fetching recipes from Supabase, using initial data only:', recipesError);
+      return initialData;
     }
 
-    const { data: ingredients, error: ingredientsError } = await supabase
-      .from('recipe_ingredients')
-      .select('*');
-
-    if (ingredientsError) {
-      console.warn('Error fetching ingredients from Supabase, using hardcoded data only:', ingredientsError);
-      return hardcodedData;
-    }
-
-    const dbRecipes = recipes.map(recipe => ({
+    // Parse ingredients from JSONB column
+    const dbRecipes: RecipeWithIngredients[] = recipes.map(recipe => ({
       ...recipe,
-      ingredients: ingredients.filter(ing => ing.recipe_id === recipe.id)
+      ingredients: Array.isArray(recipe.ingredients) 
+        ? (recipe.ingredients as any[]).map(ing => ({
+            ingredient_name: ing.ingredient_name,
+            quantity: ing.quantity,
+            unit: ing.unit
+          }))
+        : []
     }));
 
-    // Merge hardcoded data with database data
-    // Remove duplicates by name, preferring database data over hardcoded
-    const mergedRecipes = [...hardcodedData];
+    // Merge initial data with database data
+    // Remove duplicates by name, preferring database data over initial
+    const mergedRecipes = [...initialData];
     
     dbRecipes.forEach(dbRecipe => {
       const existingIndex = mergedRecipes.findIndex(recipe => recipe.name === dbRecipe.name);
       if (existingIndex >= 0) {
-        // Replace hardcoded with database version
+        // Replace initial with database version
         mergedRecipes[existingIndex] = dbRecipe;
       } else {
         // Add new database recipe
@@ -136,8 +139,8 @@ export const fetchRecipesWithIngredients = async (): Promise<RecipeWithIngredien
 
     return mergedRecipes.sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
-    console.warn('Error connecting to Supabase, using hardcoded data only:', error);
-    return hardcodedData;
+    console.warn('Error connecting to Supabase, using initial data only:', error);
+    return initialData;
   }
 };
 
@@ -271,26 +274,16 @@ export const addRecipeWithIngredients = async (
   const finalCost = totalCost + recipe.overheads;
   const sellingPrice = calculateSellingPrice(finalCost);
 
-  const { data: recipeData, error: recipeError } = await supabase
+  // Insert recipe with ingredients as JSONB
+  const { error: recipeError } = await supabase
     .from('recipes')
-    .insert({ ...recipe, selling_price: sellingPrice })
-    .select()
-    .single();
+    .insert([{ 
+      ...recipe, 
+      selling_price: sellingPrice,
+      ingredients: ingredients as any
+    }]);
 
   if (recipeError) throw recipeError;
-
-  const ingredientInserts = ingredients.map(ingredient => ({
-    recipe_id: recipeData.id,
-    ingredient_name: ingredient.ingredient_name,
-    quantity: ingredient.quantity,
-    unit: ingredient.unit
-  }));
-
-  const { error: ingredientsError } = await supabase
-    .from('recipe_ingredients')
-    .insert(ingredientInserts);
-
-  if (ingredientsError) throw ingredientsError;
 };
 
 export const updateRecipeVisibility = async (

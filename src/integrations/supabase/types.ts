@@ -143,41 +143,6 @@ export type Database = {
         }
         Relationships: []
       }
-      recipe_ingredients: {
-        Row: {
-          created_at: string
-          id: string
-          ingredient_name: string
-          quantity: number
-          recipe_id: string
-          unit: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          ingredient_name: string
-          quantity: number
-          recipe_id: string
-          unit: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          ingredient_name?: string
-          quantity?: number
-          recipe_id?: string
-          unit?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "recipe_ingredients_recipe_id_fkey"
-            columns: ["recipe_id"]
-            isOneToOne: false
-            referencedRelation: "recipes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       recipe_pricing: {
         Row: {
           created_at: string
@@ -216,6 +181,7 @@ export type Database = {
           description: string | null
           fat: number | null
           id: string
+          ingredients: Json | null
           is_hidden: boolean | null
           name: string
           overheads: number
@@ -233,6 +199,7 @@ export type Database = {
           description?: string | null
           fat?: number | null
           id?: string
+          ingredients?: Json | null
           is_hidden?: boolean | null
           name: string
           overheads?: number
@@ -250,6 +217,7 @@ export type Database = {
           description?: string | null
           fat?: number | null
           id?: string
+          ingredients?: Json | null
           is_hidden?: boolean | null
           name?: string
           overheads?: number
