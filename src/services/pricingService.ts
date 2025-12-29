@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { saveRecipePricing, getRecipePricing } from './localStorageService';
 
 export interface RecipePricing {
   id: string;
@@ -18,9 +19,23 @@ export const fetchRecipePricing = async (): Promise<RecipePricing[]> => {
       .order('recipe_name', { ascending: true });
     
     if (error) throw error;
+    
+    // Save to localStorage for offline access
+    if (data) {
+      saveRecipePricing(data);
+    }
+    
     return (data || []) as RecipePricing[];
   } catch (error) {
-    console.error('Error fetching recipe pricing:', error);
+    console.error('Error fetching recipe pricing, trying localStorage:', error);
+    
+    // Fallback to localStorage
+    const cachedData = getRecipePricing<RecipePricing[]>();
+    if (cachedData) {
+      console.log('Using cached recipe pricing');
+      return cachedData;
+    }
+    
     return [];
   }
 };
