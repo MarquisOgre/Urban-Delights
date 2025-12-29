@@ -83,6 +83,21 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
   const filteredPodiEntries = podiEntries.filter(entry => isSameMonth(entry.date, selectedMonth));
   const filteredRawMaterialEntries = rawMaterialEntries.filter(entry => isSameMonth(entry.date, selectedMonth));
 
+  // Calculate monthly summaries
+  const podiSummary = {
+    totalOpening: filteredPodiEntries.reduce((sum, e) => sum + e.openingStock, 0),
+    totalProduction: filteredPodiEntries.reduce((sum, e) => sum + e.production, 0),
+    totalSales: filteredPodiEntries.reduce((sum, e) => sum + e.sales, 0),
+    totalClosing: filteredPodiEntries.reduce((sum, e) => sum + e.closingStock, 0),
+  };
+
+  const rmSummary = {
+    totalOpening: filteredRawMaterialEntries.reduce((sum, e) => sum + e.opening, 0),
+    totalPurchased: filteredRawMaterialEntries.reduce((sum, e) => sum + e.purchased, 0),
+    totalUsed: filteredRawMaterialEntries.reduce((sum, e) => sum + e.used, 0),
+    totalClosing: filteredRawMaterialEntries.reduce((sum, e) => sum + e.closing, 0),
+  };
+
   // Load cached data from localStorage
   const loadCachedData = () => {
     try {
@@ -665,6 +680,34 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
           </TabsList>
 
           <TabsContent value="podi" className="space-y-6">
+            {/* Podi Summary Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card className="bg-blue-50 border-blue-200">
+                <CardContent className="pt-4">
+                  <p className="text-sm text-blue-600 font-medium">Total Opening</p>
+                  <p className="text-2xl font-bold text-blue-800">{podiSummary.totalOpening.toFixed(2)} kg</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-green-50 border-green-200">
+                <CardContent className="pt-4">
+                  <p className="text-sm text-green-600 font-medium">Total Production</p>
+                  <p className="text-2xl font-bold text-green-800">{podiSummary.totalProduction.toFixed(2)} kg</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-orange-50 border-orange-200">
+                <CardContent className="pt-4">
+                  <p className="text-sm text-orange-600 font-medium">Total Sales</p>
+                  <p className="text-2xl font-bold text-orange-800">{podiSummary.totalSales.toFixed(2)} kg</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-purple-50 border-purple-200">
+                <CardContent className="pt-4">
+                  <p className="text-sm text-purple-600 font-medium">Total Closing</p>
+                  <p className="text-2xl font-bold text-purple-800">{podiSummary.totalClosing.toFixed(2)} kg</p>
+                </CardContent>
+              </Card>
+            </div>
+
             {/* Podi Entry Form */}
             <Card>
               <CardHeader>
@@ -833,6 +876,34 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
           </TabsContent>
 
           <TabsContent value="raw-materials" className="space-y-6">
+            {/* Raw Material Summary Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card className="bg-blue-50 border-blue-200">
+                <CardContent className="pt-4">
+                  <p className="text-sm text-blue-600 font-medium">Total Opening</p>
+                  <p className="text-2xl font-bold text-blue-800">{rmSummary.totalOpening.toFixed(2)} kg</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-green-50 border-green-200">
+                <CardContent className="pt-4">
+                  <p className="text-sm text-green-600 font-medium">Total Purchased</p>
+                  <p className="text-2xl font-bold text-green-800">{rmSummary.totalPurchased.toFixed(2)} kg</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-orange-50 border-orange-200">
+                <CardContent className="pt-4">
+                  <p className="text-sm text-orange-600 font-medium">Total Used</p>
+                  <p className="text-2xl font-bold text-orange-800">{rmSummary.totalUsed.toFixed(2)} kg</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-purple-50 border-purple-200">
+                <CardContent className="pt-4">
+                  <p className="text-sm text-purple-600 font-medium">Total Closing</p>
+                  <p className="text-2xl font-bold text-purple-800">{rmSummary.totalClosing.toFixed(2)} kg</p>
+                </CardContent>
+              </Card>
+            </div>
+
             {/* Raw Material Entry Form */}
             <Card>
               <CardHeader>
