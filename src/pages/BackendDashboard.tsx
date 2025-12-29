@@ -10,6 +10,7 @@ import AddRecipe from '@/components/AddRecipe';
 import MasterIngredientList from '@/components/MasterIngredientList';
 import Indent from '@/components/Indent';
 import PricingManager from '@/components/PricingManager';
+import StockRegister from '@/components/StockRegister';
 import Recipes from '@/components/Recipes';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
@@ -134,11 +135,10 @@ const BackendDashboard: React.FC = () => {
     },
     {
       title: 'Stock Register',
-      description: 'Coming Soon - Track inventory and stock levels',
+      description: 'Track inventory and stock levels',
       icon: Archive,
-      color: 'bg-gray-400',
-      key: 'stock-register',
-      disabled: true
+      color: 'bg-red-500',
+      key: 'stock-register'
     }
   ];
 
@@ -154,9 +154,8 @@ const BackendDashboard: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {backendButtons.map((item) => {
               const IconComponent = item.icon;
-              const isDisabled = 'disabled' in item && item.disabled;
               return (
-                <Card key={item.key} className={`transition-shadow ${isDisabled ? 'opacity-60' : 'hover:shadow-lg cursor-pointer'}`}>
+                <Card key={item.key} className="hover:shadow-lg transition-shadow cursor-pointer">
                   <CardHeader className="text-center">
                     <div className={`w-16 h-16 ${item.color} rounded-full flex items-center justify-center mx-auto mb-4`}>
                       <IconComponent className="h-8 w-8 text-white" />
@@ -166,12 +165,11 @@ const BackendDashboard: React.FC = () => {
                   <CardContent className="text-center">
                     <p className="text-gray-600 mb-4">{item.description}</p>
                     <Button 
-                      onClick={() => !isDisabled && setCurrentView(item.key)}
+                      onClick={() => setCurrentView(item.key)}
                       className="w-full"
                       variant="outline"
-                      disabled={isDisabled}
                     >
-                      {isDisabled ? 'Coming Soon' : `Open ${item.title}`}
+                      Open {item.title}
                     </Button>
                   </CardContent>
                 </Card>
@@ -196,6 +194,8 @@ const BackendDashboard: React.FC = () => {
         return <PricingManager onBackToDashboard={() => setCurrentView('main')} />;
       case 'indent':
         return <Indent recipes={recipes} masterIngredients={masterIngredients} onBackToDashboard={() => setCurrentView('main')} />;
+      case 'stock-register':
+        return <StockRegister onBackToDashboard={() => setCurrentView('main')} />;
       default:
         return (
           <div className="space-y-6">
