@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { format } from "date-fns";
-import { CalendarIcon, Printer, Plus, ArrowLeft } from "lucide-react";
+import { format, isSameMonth } from "date-fns";
+import { CalendarIcon, Printer, Plus, ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { fetchMasterIngredients, fetchRecipesWithIngredients, type MasterIngredient, type RecipeWithIngredients } from "@/services/database";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,6 +61,27 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
   const [rmPurchased, setRmPurchased] = useState<string>("");
   const [rmUsed, setRmUsed] = useState<string>("");
   const [rawMaterialEntries, setRawMaterialEntries] = useState<RawMaterialEntry[]>([]);
+
+  // Edit/Delete state
+  const [editingPodiEntry, setEditingPodiEntry] = useState<PodiEntry | null>(null);
+  const [editingRmEntry, setEditingRmEntry] = useState<RawMaterialEntry | null>(null);
+  const [deletingPodiEntry, setDeletingPodiEntry] = useState<PodiEntry | null>(null);
+  const [deletingRmEntry, setDeletingRmEntry] = useState<RawMaterialEntry | null>(null);
+  
+  // Edit form state
+  const [editPodiDate, setEditPodiDate] = useState<Date>(new Date());
+  const [editPodiOpeningStock, setEditPodiOpeningStock] = useState<string>("");
+  const [editPodiProduction, setEditPodiProduction] = useState<string>("");
+  const [editPodiSales, setEditPodiSales] = useState<string>("");
+  
+  const [editRmDate, setEditRmDate] = useState<Date>(new Date());
+  const [editRmOpening, setEditRmOpening] = useState<string>("");
+  const [editRmPurchased, setEditRmPurchased] = useState<string>("");
+  const [editRmUsed, setEditRmUsed] = useState<string>("");
+
+  // Filtered entries for display
+  const filteredPodiEntries = podiEntries.filter(entry => isSameMonth(entry.date, selectedMonth));
+  const filteredRawMaterialEntries = rawMaterialEntries.filter(entry => isSameMonth(entry.date, selectedMonth));
 
   // Load cached data from localStorage
   const loadCachedData = () => {
@@ -333,6 +356,154 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
     setRmUsed("");
   };
 
+  // Edit handlers
+  const openEditPodiDialog = (entry: PodiEntry) => {
+    setEditingPodiEntry(entry);
+    setEditPodiDate(entry.date);
+    setEditPodiOpeningStock(entry.openingStock.toString());
+    setEditPodiProduction(entry.production.toString());
+    setEditPodiSales(entry.sales.toString());
+  };
+
+  const openEditRmDialog = (entry: RawMaterialEntry) => {
+    setEditingRmEntry(entry);
+    setEditRmDate(entry.date);
+    setEditRmOpening(entry.opening.toString());
+    setEditRmPurchased(entry.purchased.toString());
+    setEditRmUsed(entry.used.toString());
+  };
+
+  const calculateEditPodiClosing = () => {
+    const opening = parseFloat(editPodiOpeningStock) || 0;
+    const production = parseFloat(editPodiProduction) || 0;
+    const sales = parseFloat(editPodiSales) || 0;
+    return opening + production - sales;
+  };
+
+  const calculateEditRmClosing = () => {
+    const opening = parseFloat(editRmOpening) || 0;
+    const purchased = parseFloat(editRmPurchased) || 0;
+    const used = parseFloat(editRmUsed) || 0;
+    return opening + purchased - used;
+  };
+
+  const handleUpdatePodiEntry = async () => {
+    if (!editingPodiEntry) return;
+
+    const closingStock = calculateEditPodiClosing();
+    
+    try {
+      const { error } = await supabase
+        .from('podi_stock_entries')
+        .update({
+          entry_date: format(editPodiDate, 'yyyy-MM-dd'),
+          opening_stock: parseFloat(editPodiOpeningStock),
+          production: parseFloat(editPodiProduction),
+          sales: parseFloat(editPodiSales),
+          closing_stock: closingStock,
+        })
+        .eq('id', editingPodiEntry.id);
+
+      if (error) throw error;
+
+      const updatedEntries = podiEntries.map(e => 
+        e.id === editingPodiEntry.id 
+          ? { ...e, date: editPodiDate, openingStock: parseFloat(editPodiOpeningStock), production: parseFloat(editPodiProduction), sales: parseFloat(editPodiSales), closingStock }
+          : e
+      );
+      setPodiEntries(updatedEntries);
+      cachePodiEntries(updatedEntries);
+      toast.success('Entry updated successfully');
+    } catch (error) {
+      console.error('Error updating podi entry:', error);
+      toast.error('Failed to update entry');
+    }
+
+    setEditingPodiEntry(null);
+  };
+
+  const handleUpdateRmEntry = async () => {
+    if (!editingRmEntry) return;
+
+    const closing = calculateEditRmClosing();
+    
+    try {
+      const { error } = await supabase
+        .from('raw_material_entries')
+        .update({
+          entry_date: format(editRmDate, 'yyyy-MM-dd'),
+          opening: parseFloat(editRmOpening),
+          purchased: parseFloat(editRmPurchased),
+          used: parseFloat(editRmUsed),
+          closing,
+        })
+        .eq('id', editingRmEntry.id);
+
+      if (error) throw error;
+
+      const updatedEntries = rawMaterialEntries.map(e => 
+        e.id === editingRmEntry.id 
+          ? { ...e, date: editRmDate, opening: parseFloat(editRmOpening), purchased: parseFloat(editRmPurchased), used: parseFloat(editRmUsed), closing }
+          : e
+      );
+      setRawMaterialEntries(updatedEntries);
+      cacheRawMaterialEntries(updatedEntries);
+      toast.success('Entry updated successfully');
+    } catch (error) {
+      console.error('Error updating raw material entry:', error);
+      toast.error('Failed to update entry');
+    }
+
+    setEditingRmEntry(null);
+  };
+
+  // Delete handlers
+  const handleDeletePodiEntry = async () => {
+    if (!deletingPodiEntry) return;
+
+    try {
+      const { error } = await supabase
+        .from('podi_stock_entries')
+        .delete()
+        .eq('id', deletingPodiEntry.id);
+
+      if (error) throw error;
+
+      const updatedEntries = podiEntries.filter(e => e.id !== deletingPodiEntry.id);
+      setPodiEntries(updatedEntries);
+      cachePodiEntries(updatedEntries);
+      toast.success('Entry deleted successfully');
+    } catch (error) {
+      console.error('Error deleting podi entry:', error);
+      toast.error('Failed to delete entry');
+    }
+
+    setDeletingPodiEntry(null);
+  };
+
+  const handleDeleteRmEntry = async () => {
+    if (!deletingRmEntry) return;
+
+    try {
+      const { error } = await supabase
+        .from('raw_material_entries')
+        .delete()
+        .eq('id', deletingRmEntry.id);
+
+      if (error) throw error;
+
+      const updatedEntries = rawMaterialEntries.filter(e => e.id !== deletingRmEntry.id);
+      setRawMaterialEntries(updatedEntries);
+      cacheRawMaterialEntries(updatedEntries);
+      toast.success('Entry deleted successfully');
+    } catch (error) {
+      console.error('Error deleting raw material entry:', error);
+      toast.error('Failed to delete entry');
+    }
+
+    setDeletingRmEntry(null);
+  };
+
   const handlePrint = () => {
     const currentMonth = format(selectedMonth, "MMMM yyyy");
     const printContent = `
@@ -366,7 +537,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
               </tr>
             </thead>
             <tbody>
-              ${podiEntries.map((entry, index) => `
+              ${filteredPodiEntries.map((entry, index) => `
                 <tr>
                   <td>${index + 1}</td>
                   <td>${format(entry.date, "dd/MM/yyyy")}</td>
@@ -394,7 +565,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
               </tr>
             </thead>
             <tbody>
-              ${rawMaterialEntries.map((entry, index) => `
+              ${filteredRawMaterialEntries.map((entry, index) => `
                 <tr>
                   <td>${index + 1}</td>
                   <td>${format(entry.date, "dd/MM/yyyy")}</td>
@@ -429,7 +600,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
             <Button 
               onClick={handlePrint}
               className="flex items-center gap-2"
-              disabled={podiEntries.length === 0 && rawMaterialEntries.length === 0}
+              disabled={filteredPodiEntries.length === 0 && filteredRawMaterialEntries.length === 0}
             >
               <Printer className="h-4 w-4" />
               Print Monthly Report
@@ -605,10 +776,10 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
             </Card>
 
             {/* Podi Entries Table */}
-            {podiEntries.length > 0 && (
+            {filteredPodiEntries.length > 0 ? (
               <Card>
                 <CardHeader>
-                  <CardTitle>Podi's Register</CardTitle>
+                  <CardTitle>Podi's Register - {format(selectedMonth, "MMMM yyyy")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="overflow-x-auto">
@@ -622,10 +793,11 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                           <th className="text-left p-2 font-medium">Production (kg)</th>
                           <th className="text-left p-2 font-medium">Sales (kg)</th>
                           <th className="text-left p-2 font-medium">Closing Stock (kg)</th>
+                          <th className="text-left p-2 font-medium">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {podiEntries.map((entry, index) => (
+                        {filteredPodiEntries.map((entry, index) => (
                           <tr key={entry.id} className="border-b hover:bg-gray-50">
                             <td className="p-2">{index + 1}</td>
                             <td className="p-2">{format(entry.date, "dd/MM/yyyy")}</td>
@@ -634,11 +806,27 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                             <td className="p-2">{entry.production}</td>
                             <td className="p-2">{entry.sales}</td>
                             <td className="p-2 font-medium">{entry.closingStock.toFixed(1)}</td>
+                            <td className="p-2">
+                              <div className="flex gap-2">
+                                <Button variant="ghost" size="sm" onClick={() => openEditPodiDialog(entry)}>
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm" onClick={() => setDeletingPodiEntry(entry)}>
+                                  <Trash2 className="h-4 w-4 text-red-500" />
+                                </Button>
+                              </div>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  No entries for {format(selectedMonth, "MMMM yyyy")}
                 </CardContent>
               </Card>
             )}
@@ -756,10 +944,10 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
             </Card>
 
             {/* Raw Material Entries Table */}
-            {rawMaterialEntries.length > 0 && (
+            {filteredRawMaterialEntries.length > 0 ? (
               <Card>
                 <CardHeader>
-                  <CardTitle>Raw Material Inventory</CardTitle>
+                  <CardTitle>Raw Material Inventory - {format(selectedMonth, "MMMM yyyy")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="overflow-x-auto">
@@ -773,10 +961,11 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                           <th className="text-left p-2 font-medium">Purchased (kg)</th>
                           <th className="text-left p-2 font-medium">Used (kg)</th>
                           <th className="text-left p-2 font-medium">Closing (kg)</th>
+                          <th className="text-left p-2 font-medium">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {rawMaterialEntries.map((entry, index) => (
+                        {filteredRawMaterialEntries.map((entry, index) => (
                           <tr key={entry.id} className="border-b hover:bg-gray-50">
                             <td className="p-2">{index + 1}</td>
                             <td className="p-2">{format(entry.date, "dd/MM/yyyy")}</td>
@@ -785,6 +974,16 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                             <td className="p-2">{entry.purchased}</td>
                             <td className="p-2">{entry.used}</td>
                             <td className="p-2 font-medium">{entry.closing.toFixed(1)}</td>
+                            <td className="p-2">
+                              <div className="flex gap-2">
+                                <Button variant="ghost" size="sm" onClick={() => openEditRmDialog(entry)}>
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm" onClick={() => setDeletingRmEntry(entry)}>
+                                  <Trash2 className="h-4 w-4 text-red-500" />
+                                </Button>
+                              </div>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -792,9 +991,137 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                   </div>
                 </CardContent>
               </Card>
+            ) : (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  No entries for {format(selectedMonth, "MMMM yyyy")}
+                </CardContent>
+              </Card>
             )}
           </TabsContent>
         </Tabs>
+
+        {/* Edit Podi Entry Dialog */}
+        <Dialog open={!!editingPodiEntry} onOpenChange={(open) => !open && setEditingPodiEntry(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Podi Entry - {editingPodiEntry?.podiName}</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div>
+                <Label>Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {format(editPodiDate, "dd/MM/yyyy")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={editPodiDate} onSelect={(date) => date && setEditPodiDate(date)} initialFocus className="p-3 pointer-events-auto" />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div>
+                <Label>Opening Stock (kg)</Label>
+                <Input type="number" value={editPodiOpeningStock} onChange={(e) => setEditPodiOpeningStock(e.target.value)} />
+              </div>
+              <div>
+                <Label>Production (kg)</Label>
+                <Input type="number" value={editPodiProduction} onChange={(e) => setEditPodiProduction(e.target.value)} />
+              </div>
+              <div>
+                <Label>Sales (kg)</Label>
+                <Input type="number" value={editPodiSales} onChange={(e) => setEditPodiSales(e.target.value)} />
+              </div>
+              <div>
+                <Label>Closing Stock (kg)</Label>
+                <Input type="number" value={calculateEditPodiClosing().toFixed(1)} disabled />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditingPodiEntry(null)}>Cancel</Button>
+              <Button onClick={handleUpdatePodiEntry}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Raw Material Entry Dialog */}
+        <Dialog open={!!editingRmEntry} onOpenChange={(open) => !open && setEditingRmEntry(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Raw Material Entry - {editingRmEntry?.ingredient}</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div>
+                <Label>Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {format(editRmDate, "dd/MM/yyyy")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={editRmDate} onSelect={(date) => date && setEditRmDate(date)} initialFocus className="p-3 pointer-events-auto" />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div>
+                <Label>Opening (kg)</Label>
+                <Input type="number" value={editRmOpening} onChange={(e) => setEditRmOpening(e.target.value)} />
+              </div>
+              <div>
+                <Label>Purchased (kg)</Label>
+                <Input type="number" value={editRmPurchased} onChange={(e) => setEditRmPurchased(e.target.value)} />
+              </div>
+              <div>
+                <Label>Used (kg)</Label>
+                <Input type="number" value={editRmUsed} onChange={(e) => setEditRmUsed(e.target.value)} />
+              </div>
+              <div>
+                <Label>Closing (kg)</Label>
+                <Input type="number" value={calculateEditRmClosing().toFixed(1)} disabled />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditingRmEntry(null)}>Cancel</Button>
+              <Button onClick={handleUpdateRmEntry}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Podi Entry Confirmation */}
+        <AlertDialog open={!!deletingPodiEntry} onOpenChange={(open) => !open && setDeletingPodiEntry(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Entry?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete the entry for {deletingPodiEntry?.podiName} on {deletingPodiEntry && format(deletingPodiEntry.date, "dd/MM/yyyy")}.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeletePodiEntry} className="bg-red-500 hover:bg-red-600">Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Delete Raw Material Entry Confirmation */}
+        <AlertDialog open={!!deletingRmEntry} onOpenChange={(open) => !open && setDeletingRmEntry(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Entry?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete the entry for {deletingRmEntry?.ingredient} on {deletingRmEntry && format(deletingRmEntry.date, "dd/MM/yyyy")}.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteRmEntry} className="bg-red-500 hover:bg-red-600">Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
