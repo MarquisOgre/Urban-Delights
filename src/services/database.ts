@@ -1,5 +1,11 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
+import { 
+  saveMasterIngredients, 
+  getMasterIngredients, 
+  saveRecipes, 
+  getRecipes 
+} from './localStorageService';
 
 export type MasterIngredient = Database['public']['Tables']['master_ingredients']['Row'];
 export type Recipe = Database['public']['Tables']['recipes']['Row'];
@@ -44,36 +50,73 @@ export const getAllIngredients = async (): Promise<Pick<MasterIngredient, 'name'
 };
 
 export const fetchMasterIngredients = async (): Promise<MasterIngredient[]> => {
-  const { data, error } = await supabase
-    .from('master_ingredients')
-    .select('*')
-    .order('name');
+  try {
+    const { data, error } = await supabase
+      .from('master_ingredients')
+      .select('*')
+      .order('name');
 
-  if (error) throw new Error(error.message);
-  return data || [];
+    if (error) throw new Error(error.message);
+    
+    // Save to localStorage for offline access
+    if (data) {
+      saveMasterIngredients(data);
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching from database, trying localStorage:', error);
+    
+    // Fallback to localStorage
+    const cachedData = getMasterIngredients<MasterIngredient[]>();
+    if (cachedData) {
+      console.log('Using cached master ingredients');
+      return cachedData;
+    }
+    
+    throw error;
+  }
 };
 
 export const fetchRecipesWithIngredients = async (): Promise<RecipeWithIngredients[]> => {
-  const { data: recipes, error: recipesError } = await supabase
-    .from('recipes')
-    .select('*')
-    .order('name');
+  try {
+    const { data: recipes, error: recipesError } = await supabase
+      .from('recipes')
+      .select('*')
+      .order('name');
 
-  if (recipesError) throw new Error(recipesError.message);
+    if (recipesError) throw new Error(recipesError.message);
 
-  // Parse ingredients from JSONB column
-  const dbRecipes: RecipeWithIngredients[] = (recipes || []).map(recipe => ({
-    ...recipe,
-    ingredients: Array.isArray(recipe.ingredients) 
-      ? (recipe.ingredients as any[]).map(ing => ({
-          ingredient_name: ing.ingredient_name,
-          quantity: ing.quantity,
-          unit: ing.unit
-        }))
-      : []
-  }));
+    // Parse ingredients from JSONB column
+    const dbRecipes: RecipeWithIngredients[] = (recipes || []).map(recipe => ({
+      ...recipe,
+      ingredients: Array.isArray(recipe.ingredients) 
+        ? (recipe.ingredients as any[]).map(ing => ({
+            ingredient_name: ing.ingredient_name,
+            quantity: ing.quantity,
+            unit: ing.unit
+          }))
+        : []
+    }));
 
-  return dbRecipes;
+    // Save to localStorage for offline access
+    if (dbRecipes.length > 0) {
+      saveRecipes(dbRecipes);
+    }
+
+    return dbRecipes;
+  } catch (error) {
+    console.error('Error fetching from database, trying localStorage:', error);
+    
+    // Fallback to localStorage
+    const cachedData = getRecipes<RecipeWithIngredients[]>();
+    if (cachedData) {
+      console.log('Using cached recipes');
+      return cachedData;
+    }
+    
+    throw error;
+  }
 };
 
 export const calculateSellingPrice = (finalCost: number): number => {
