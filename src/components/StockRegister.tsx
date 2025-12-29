@@ -11,6 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { fetchMasterIngredients, fetchRecipesWithIngredients, type MasterIngredient, type RecipeWithIngredients } from "@/services/database";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface PodiEntry {
   id: string;
@@ -32,9 +34,13 @@ interface RawMaterialEntry {
   closing: number;
 }
 
+const PODI_ENTRIES_KEY = 'STOCK_REGISTER_PODI_ENTRIES';
+const RAW_MATERIAL_ENTRIES_KEY = 'STOCK_REGISTER_RAW_MATERIAL_ENTRIES';
+
 const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () => void }) => {
   const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [isLoading, setIsLoading] = useState(true);
   
   // Data State
   const [masterIngredients, setMasterIngredients] = useState<MasterIngredient[]>([]);
@@ -54,17 +60,112 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
   const [rmUsed, setRmUsed] = useState<string>("");
   const [rawMaterialEntries, setRawMaterialEntries] = useState<RawMaterialEntry[]>([]);
 
+  // Load cached data from localStorage
+  const loadCachedData = () => {
+    try {
+      const cachedPodiEntries = localStorage.getItem(PODI_ENTRIES_KEY);
+      const cachedRawMaterialEntries = localStorage.getItem(RAW_MATERIAL_ENTRIES_KEY);
+      
+      if (cachedPodiEntries) {
+        const parsed = JSON.parse(cachedPodiEntries);
+        setPodiEntries(parsed.map((e: any) => ({ ...e, date: new Date(e.date) })));
+      }
+      if (cachedRawMaterialEntries) {
+        const parsed = JSON.parse(cachedRawMaterialEntries);
+        setRawMaterialEntries(parsed.map((e: any) => ({ ...e, date: new Date(e.date) })));
+      }
+    } catch (error) {
+      console.error('Error loading cached stock data:', error);
+    }
+  };
+
+  // Save data to localStorage
+  const cachePodiEntries = (entries: PodiEntry[]) => {
+    try {
+      localStorage.setItem(PODI_ENTRIES_KEY, JSON.stringify(entries));
+    } catch (error) {
+      console.error('Error caching podi entries:', error);
+    }
+  };
+
+  const cacheRawMaterialEntries = (entries: RawMaterialEntry[]) => {
+    try {
+      localStorage.setItem(RAW_MATERIAL_ENTRIES_KEY, JSON.stringify(entries));
+    } catch (error) {
+      console.error('Error caching raw material entries:', error);
+    }
+  };
+
+  // Fetch entries from database
+  const fetchStockEntries = async () => {
+    try {
+      // Fetch podi entries
+      const { data: podiData, error: podiError } = await supabase
+        .from('podi_stock_entries')
+        .select('*')
+        .order('entry_date', { ascending: true });
+
+      if (podiError) throw podiError;
+
+      const mappedPodiEntries: PodiEntry[] = (podiData || []).map(entry => ({
+        id: entry.id,
+        date: new Date(entry.entry_date),
+        podiName: entry.podi_name,
+        openingStock: Number(entry.opening_stock),
+        production: Number(entry.production),
+        sales: Number(entry.sales),
+        closingStock: Number(entry.closing_stock),
+      }));
+      
+      setPodiEntries(mappedPodiEntries);
+      cachePodiEntries(mappedPodiEntries);
+
+      // Fetch raw material entries
+      const { data: rmData, error: rmError } = await supabase
+        .from('raw_material_entries')
+        .select('*')
+        .order('entry_date', { ascending: true });
+
+      if (rmError) throw rmError;
+
+      const mappedRmEntries: RawMaterialEntry[] = (rmData || []).map(entry => ({
+        id: entry.id,
+        date: new Date(entry.entry_date),
+        ingredient: entry.ingredient,
+        opening: Number(entry.opening),
+        purchased: Number(entry.purchased),
+        used: Number(entry.used),
+        closing: Number(entry.closing),
+      }));
+      
+      setRawMaterialEntries(mappedRmEntries);
+      cacheRawMaterialEntries(mappedRmEntries);
+    } catch (error) {
+      console.error('Error fetching stock entries, using cached data:', error);
+      loadCachedData();
+    }
+  };
+
   useEffect(() => {
     const loadData = async () => {
+      setIsLoading(true);
       try {
+        // Load cached data first for instant display
+        loadCachedData();
+        
         const [masterIngredientsData, recipesData] = await Promise.all([
           fetchMasterIngredients(),
           fetchRecipesWithIngredients()
         ]);
         setMasterIngredients(masterIngredientsData);
         setRecipes(recipesData);
+        
+        // Fetch stock entries from database
+        await fetchStockEntries();
       } catch (error) {
         console.error('Error loading data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     loadData();
@@ -112,40 +213,120 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
     setRmOpening(lastClosingStock.toString());
   };
 
-  const handleAddPodiEntry = () => {
+  const handleAddPodiEntry = async () => {
     if (!podiName || !podiOpeningStock || !podiProduction || !podiSales) return;
 
-    const newEntry: PodiEntry = {
-      id: Date.now().toString(),
-      date: selectedDate,
-      podiName,
-      openingStock: parseFloat(podiOpeningStock),
-      production: parseFloat(podiProduction),
-      sales: parseFloat(podiSales),
-      closingStock: calculatePodiClosingStock(),
-    };
+    const closingStock = calculatePodiClosingStock();
+    
+    try {
+      const { data, error } = await supabase
+        .from('podi_stock_entries')
+        .insert({
+          entry_date: format(selectedDate, 'yyyy-MM-dd'),
+          podi_name: podiName,
+          opening_stock: parseFloat(podiOpeningStock),
+          production: parseFloat(podiProduction),
+          sales: parseFloat(podiSales),
+          closing_stock: closingStock,
+        })
+        .select()
+        .single();
 
-    setPodiEntries([...podiEntries, newEntry]);
+      if (error) throw error;
+
+      const newEntry: PodiEntry = {
+        id: data.id,
+        date: new Date(data.entry_date),
+        podiName: data.podi_name,
+        openingStock: Number(data.opening_stock),
+        production: Number(data.production),
+        sales: Number(data.sales),
+        closingStock: Number(data.closing_stock),
+      };
+
+      const updatedEntries = [...podiEntries, newEntry];
+      setPodiEntries(updatedEntries);
+      cachePodiEntries(updatedEntries);
+      
+      toast.success('Podi entry added successfully');
+    } catch (error) {
+      console.error('Error adding podi entry:', error);
+      // Fallback to local-only entry
+      const newEntry: PodiEntry = {
+        id: Date.now().toString(),
+        date: selectedDate,
+        podiName,
+        openingStock: parseFloat(podiOpeningStock),
+        production: parseFloat(podiProduction),
+        sales: parseFloat(podiSales),
+        closingStock,
+      };
+      const updatedEntries = [...podiEntries, newEntry];
+      setPodiEntries(updatedEntries);
+      cachePodiEntries(updatedEntries);
+      toast.error('Saved locally - will sync when online');
+    }
+
     setPodiName("");
     setPodiOpeningStock("");
     setPodiProduction("");
     setPodiSales("");
   };
 
-  const handleAddRawMaterialEntry = () => {
+  const handleAddRawMaterialEntry = async () => {
     if (!ingredient || !rmOpening || !rmPurchased || !rmUsed) return;
 
-    const newEntry: RawMaterialEntry = {
-      id: Date.now().toString(),
-      date: selectedDate,
-      ingredient,
-      opening: parseFloat(rmOpening),
-      purchased: parseFloat(rmPurchased),
-      used: parseFloat(rmUsed),
-      closing: calculateRmClosing(),
-    };
+    const closing = calculateRmClosing();
+    
+    try {
+      const { data, error } = await supabase
+        .from('raw_material_entries')
+        .insert({
+          entry_date: format(selectedDate, 'yyyy-MM-dd'),
+          ingredient,
+          opening: parseFloat(rmOpening),
+          purchased: parseFloat(rmPurchased),
+          used: parseFloat(rmUsed),
+          closing,
+        })
+        .select()
+        .single();
 
-    setRawMaterialEntries([...rawMaterialEntries, newEntry]);
+      if (error) throw error;
+
+      const newEntry: RawMaterialEntry = {
+        id: data.id,
+        date: new Date(data.entry_date),
+        ingredient: data.ingredient,
+        opening: Number(data.opening),
+        purchased: Number(data.purchased),
+        used: Number(data.used),
+        closing: Number(data.closing),
+      };
+
+      const updatedEntries = [...rawMaterialEntries, newEntry];
+      setRawMaterialEntries(updatedEntries);
+      cacheRawMaterialEntries(updatedEntries);
+      
+      toast.success('Raw material entry added successfully');
+    } catch (error) {
+      console.error('Error adding raw material entry:', error);
+      // Fallback to local-only entry
+      const newEntry: RawMaterialEntry = {
+        id: Date.now().toString(),
+        date: selectedDate,
+        ingredient,
+        opening: parseFloat(rmOpening),
+        purchased: parseFloat(rmPurchased),
+        used: parseFloat(rmUsed),
+        closing,
+      };
+      const updatedEntries = [...rawMaterialEntries, newEntry];
+      setRawMaterialEntries(updatedEntries);
+      cacheRawMaterialEntries(updatedEntries);
+      toast.error('Saved locally - will sync when online');
+    }
+
     setIngredient("");
     setRmOpening("");
     setRmPurchased("");

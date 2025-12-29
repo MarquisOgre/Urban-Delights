@@ -113,6 +113,42 @@ export type Database = {
         }
         Relationships: []
       }
+      podi_stock_entries: {
+        Row: {
+          closing_stock: number
+          created_at: string
+          entry_date: string
+          id: string
+          opening_stock: number
+          podi_name: string
+          production: number
+          sales: number
+          updated_at: string
+        }
+        Insert: {
+          closing_stock?: number
+          created_at?: string
+          entry_date: string
+          id?: string
+          opening_stock?: number
+          podi_name: string
+          production?: number
+          sales?: number
+          updated_at?: string
+        }
+        Update: {
+          closing_stock?: number
+          created_at?: string
+          entry_date?: string
+          id?: string
+          opening_stock?: number
+          podi_name?: string
+          production?: number
+          sales?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -140,6 +176,42 @@ export type Database = {
           phone_number?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      raw_material_entries: {
+        Row: {
+          closing: number
+          created_at: string
+          entry_date: string
+          id: string
+          ingredient: string
+          opening: number
+          purchased: number
+          updated_at: string
+          used: number
+        }
+        Insert: {
+          closing?: number
+          created_at?: string
+          entry_date: string
+          id?: string
+          ingredient: string
+          opening?: number
+          purchased?: number
+          updated_at?: string
+          used?: number
+        }
+        Update: {
+          closing?: number
+          created_at?: string
+          entry_date?: string
+          id?: string
+          ingredient?: string
+          opening?: number
+          purchased?: number
+          updated_at?: string
+          used?: number
         }
         Relationships: []
       }
