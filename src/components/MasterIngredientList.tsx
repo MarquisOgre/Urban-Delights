@@ -144,7 +144,7 @@ const MasterIngredientList = ({ masterIngredients, onRefresh, onBackToDashboard 
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 sticky top-16 z-10 bg-white py-4 -mx-4 px-4">
         <h2 className="text-2xl font-bold text-gray-900">Master Ingredients List</h2>
         
         <div className="flex gap-2 items-center">

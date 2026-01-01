@@ -119,7 +119,7 @@ const PricingManager: React.FC<{ onBackToDashboard: () => void }> = ({ onBackToD
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 sticky top-16 z-10 bg-white py-4 -mx-4 px-4">
         <h2 className="text-2xl font-bold text-gray-900">Recipe Pricing Management</h2>
         <Button 
           onClick={onBackToDashboard} 
