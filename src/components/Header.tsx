@@ -9,6 +9,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView }) => {
 
   const navigationItems = [
     { key: 'recipes', label: 'Recipes' },
+    { key: 'add-recipe', label: 'Add Recipe' },
     { key: 'ingredients', label: 'Ingredients' },
     { key: 'pricing', label: 'Pricing Manager' },
     { key: 'indent', label: 'Indent' },
