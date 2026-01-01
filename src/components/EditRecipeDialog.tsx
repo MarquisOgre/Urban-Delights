@@ -31,6 +31,7 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
   const [description, setDescription] = useState("");
   const [preparation, setPreparation] = useState("");
   const [overheads, setOverheads] = useState<number>(100);
+  const [yieldOutput, setYieldOutput] = useState<number>(1000);
   const [ingredients, setIngredients] = useState<EditIngredient[]>([]);
   const [nutrition, setNutrition] = useState({
     calories: 0,
@@ -43,18 +44,20 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // Calculate selling price automatically
-  const { finalCost } = calculateRecipeCost({
-    ...recipe,
-    ingredients: ingredients.map(ing => ({
-      ingredient_name: ing.ingredient_name,
-      quantity: ing.quantity,
-      unit: ing.unit
-    })),
-    overheads
-  }, masterIngredients);
+  // Calculate cost per 1 kg based on yield
+  const totalCost = ingredients.reduce((sum, ing) => {
+    const master = masterIngredients.find(m => m.name === ing.ingredient_name);
+    if (!master) return sum;
+    const quantityInKg = ing.unit === 'kg' ? ing.quantity : ing.unit === 'g' ? ing.quantity / 1000 : 0;
+    return sum + (quantityInKg * master.price_per_kg);
+  }, 0);
+  
+  const yieldInKg = yieldOutput / 1000;
+  const costPerKg = yieldInKg > 0 ? totalCost / yieldInKg : 0;
+  const overheadsPerKg = yieldInKg > 0 ? overheads / yieldInKg : 0;
+  const finalCostPerKg = costPerKg + overheadsPerKg;
 
-  const calculatedSellingPrice = calculateSellingPrice(finalCost);
+  const calculatedSellingPrice = calculateSellingPrice(finalCostPerKg);
   const displaySellingPrice = autoCalculatePrice ? calculatedSellingPrice : manualSellingPrice;
 
   useEffect(() => {
@@ -63,6 +66,7 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
       setDescription((recipe as any).description || "");
       setPreparation(recipe.preparation || "");
       setOverheads(recipe.overheads);
+      setYieldOutput((recipe as any).yield_output || 1000);
       setIngredients(recipe.ingredients.map((ing, index) => ({
         id: `ing-${index}`,
         ingredient_name: ing.ingredient_name,
@@ -143,6 +147,7 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
           preparation: preparation,
           selling_price: displaySellingPrice,
           overheads: overheads,
+          yield_output: yieldOutput,
           calories: nutrition.calories || null,
           protein: nutrition.protein || null,
           fat: nutrition.fat || null,
@@ -310,6 +315,22 @@ const EditRecipeDialog = ({ recipe, masterIngredients, open, onOpenChange, onRec
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Yield Output */}
+          <div>
+            <Label htmlFor="yieldOutput">Yield Output (grams)</Label>
+            <Input
+              id="yieldOutput"
+              type="number"
+              step="any"
+              value={yieldOutput || ""}
+              onChange={(e) => setYieldOutput(Number(e.target.value) || 0)}
+              placeholder="Enter yield in grams (e.g., 900 for 900g)"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Total output from the recipe in grams. Costs will be calculated per 1 kg.
+            </p>
           </div>
 
           {/* Preparation */}
