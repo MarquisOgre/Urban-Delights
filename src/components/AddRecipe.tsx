@@ -29,6 +29,7 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
     fat: 0,
     carbs: 0
   });
+  const [yieldOutput, setYieldOutput] = useState<number>(1000); // Default 1000g = 1kg
   const [autoCalculatePrice, setAutoCalculatePrice] = useState(true);
   const [manualSellingPrice, setManualSellingPrice] = useState<number>(0);
   const { toast } = useToast();
@@ -39,8 +40,13 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
     return sum + calculateIngredientCostFromPartial(ingredient, masterIngredients);
   }, 0);
   
-  const finalCost = totalCost + overheads;
-  const calculatedSellingPrice = calculateSellingPrice(finalCost);
+  // Calculate cost per 1 kg based on yield
+  const yieldInKg = yieldOutput / 1000;
+  const costPerKg = yieldInKg > 0 ? totalCost / yieldInKg : 0;
+  const overheadsPerKg = yieldInKg > 0 ? overheads / yieldInKg : 0;
+  const finalCostPerKg = costPerKg + overheadsPerKg;
+  
+  const calculatedSellingPrice = calculateSellingPrice(finalCostPerKg);
   const displaySellingPrice = autoCalculatePrice ? calculatedSellingPrice : manualSellingPrice;
 
   const addIngredient = () => {
@@ -136,6 +142,7 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
       setDescription("");
       setPreparation("");
       setOverheads(100);
+      setYieldOutput(1000);
       setIngredients([{ ingredient_name: "", quantity: 0, unit: "g" }]);
       setNutrition({ calories: 0, protein: 0, fat: 0, carbs: 0 });
       setAutoCalculatePrice(true);
@@ -239,22 +246,26 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
 
           {/* Cost Preview */}
           <div className="bg-blue-50 p-4 rounded-lg border">
-            <h4 className="font-semibold text-blue-800 mb-2">Cost Preview</h4>
+            <h4 className="font-semibold text-blue-800 mb-2">Cost Preview (Per 1 Kg)</h4>
             <div className="space-y-1 text-sm">
-              <div className="flex justify-between">
-                <span>Raw Material Cost:</span>
+              <div className="flex justify-between text-muted-foreground">
+                <span>Total Raw Material Cost (for {yieldOutput}g yield):</span>
                 <span>₹{totalCost.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span>Overheads:</span>
-                <span>₹{overheads}</span>
+                <span>Raw Material Cost (per kg):</span>
+                <span>₹{costPerKg.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Overheads (per kg):</span>
+                <span>₹{overheadsPerKg.toFixed(2)}</span>
               </div>
               <div className="flex justify-between font-semibold">
-                <span>Final Cost:</span>
-                <span>₹{finalCost.toFixed(2)}</span>
+                <span>Final Cost (per kg):</span>
+                <span>₹{finalCostPerKg.toFixed(2)}</span>
               </div>
               <div className="flex justify-between font-bold text-green-700">
-                <span>Selling Price:</span>
+                <span>Selling Price (per kg):</span>
                 <span>₹{Math.round(displaySellingPrice)}</span>
               </div>
             </div>
@@ -320,6 +331,22 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Yield Output */}
+          <div>
+            <Label htmlFor="yieldOutput">Yield Output (grams)</Label>
+            <Input
+              id="yieldOutput"
+              type="number"
+              step="any"
+              value={yieldOutput || ""}
+              onChange={(e) => setYieldOutput(Number(e.target.value) || 0)}
+              placeholder="Enter yield in grams (e.g., 900 for 900g)"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Total output from the recipe in grams. Costs will be calculated per 1 kg.
+            </p>
           </div>
 
           {/* Preparation */}
