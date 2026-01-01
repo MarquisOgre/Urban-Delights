@@ -263,6 +263,7 @@ export type Database = {
           shelf_life: string | null
           storage: string | null
           updated_at: string
+          yield_output: number | null
         }
         Insert: {
           calories?: number | null
@@ -281,6 +282,7 @@ export type Database = {
           shelf_life?: string | null
           storage?: string | null
           updated_at?: string
+          yield_output?: number | null
         }
         Update: {
           calories?: number | null
@@ -299,6 +301,7 @@ export type Database = {
           shelf_life?: string | null
           storage?: string | null
           updated_at?: string
+          yield_output?: number | null
         }
         Relationships: []
       }

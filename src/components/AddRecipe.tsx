@@ -106,6 +106,7 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
       description: description || "Traditional South Indian Podi",
       preparation: preparation,
       overheads: overheads,
+      yield_output: yieldOutput,
       shelf_life: "6 months in sealed packaging, away from moisture and sunlight",
       storage: "Store in a cool, dry place in an airtight container after opening",
       calories: nutrition.calories || null,
@@ -129,7 +130,12 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
           .insert({
             ...newRecipe,
             description: description || "Traditional South Indian Podi",
-            selling_price: manualSellingPrice
+            selling_price: manualSellingPrice,
+            ingredients: ingredients.map(ing => ({
+              ingredient_name: ing.ingredient_name,
+              quantity: ing.quantity,
+              unit: ing.unit
+            }))
           })
           .select()
           .single();
