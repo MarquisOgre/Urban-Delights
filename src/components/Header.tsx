@@ -29,39 +29,39 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView }) => {
   
   return (
     <nav className="bg-white shadow-sm border-b border-orange-200 sticky top-0 z-50">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+      <div className="container mx-auto px-2 sm:px-4">
+        <div className="flex items-center justify-between h-14 sm:h-16">
           <div 
-            className="flex items-center space-x-4 cursor-pointer hover:opacity-80 transition-opacity" 
+            className="flex items-center space-x-2 sm:space-x-4 cursor-pointer hover:opacity-80 transition-opacity min-w-0" 
             onClick={() => setCurrentView && setCurrentView('main')}
           >
-            <img src="/logo.png" alt="Logo" className="h-8 w-8" />
-            <span className="text-xl font-bold text-orange-800">Artisan Delights</span>
+            <img src="/logo.png" alt="Logo" className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0" />
+            <span className="text-base sm:text-xl font-bold text-orange-800 truncate">Artisan Delights</span>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-2">
+          <div className="hidden lg:flex items-center space-x-1 xl:space-x-2">
             {navigationItems.map((item) => {
               const Icon = item.icon;
               return (
                 <button
                   key={item.key}
                   onClick={() => handleNavClick(item.key)}
-                  className={`px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
+                  className={`px-2 xl:px-3 py-2 text-xs xl:text-sm font-medium rounded-md transition-colors flex items-center gap-1 xl:gap-2 ${
                     currentView === item.key 
                       ? 'bg-orange-600 text-white' 
                       : 'bg-gray-100 text-gray-700 hover:bg-orange-100 hover:text-orange-600'
                   }`}
                 >
                   <Icon className="h-4 w-4" />
-                  {item.label}
+                  <span className="whitespace-nowrap">{item.label}</span>
                 </button>
               );
             })}
           </div>
 
           {/* Mobile Menu */}
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="text-orange-800">

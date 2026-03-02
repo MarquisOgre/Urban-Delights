@@ -1,11 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
-import { 
-  saveMasterIngredients, 
-  getMasterIngredients, 
-  saveRecipes, 
-  getRecipes 
-} from './localStorageService';
+import { HARDCODED_MASTER_INGREDIENTS, HARDCODED_RECIPES } from '@/data/hardcodedData';
 
 export type MasterIngredient = Database['public']['Tables']['master_ingredients']['Row'];
 export type Recipe = Database['public']['Tables']['recipes']['Row'];
@@ -38,89 +33,39 @@ export interface NewIngredient {
   unit: string;
 }
 
-// ✅ NEW: Export all master ingredients
+// ✅ Export all master ingredients (hardcoded)
 export const getAllIngredients = async (): Promise<Pick<MasterIngredient, 'name' | 'brand' | 'price_per_kg'>[]> => {
-  const { data, error } = await supabase
-    .from('master_ingredients')
-    .select('name, brand, price_per_kg')
-    .order('name');
-
-  if (error) throw new Error(error.message);
-  return data || [];
+  return HARDCODED_MASTER_INGREDIENTS.map(i => ({
+    name: i.name,
+    brand: i.brand,
+    price_per_kg: i.price_per_kg,
+  }));
 };
 
+// Return hardcoded master ingredients
 export const fetchMasterIngredients = async (): Promise<MasterIngredient[]> => {
-  try {
-    const { data, error } = await supabase
-      .from('master_ingredients')
-      .select('*')
-      .order('name');
-
-    if (error) throw new Error(error.message);
-    
-    // Save to localStorage for offline access
-    if (data) {
-      saveMasterIngredients(data);
-    }
-    
-    return data || [];
-  } catch (error) {
-    console.error('Error fetching from database, trying localStorage:', error);
-    
-    // Fallback to localStorage
-    const cachedData = getMasterIngredients<MasterIngredient[]>();
-    if (cachedData) {
-      console.log('Using cached master ingredients');
-      return cachedData;
-    }
-    
-    throw error;
-  }
+  return HARDCODED_MASTER_INGREDIENTS as MasterIngredient[];
 };
 
+// Return hardcoded recipes
 export const fetchRecipesWithIngredients = async (): Promise<RecipeWithIngredients[]> => {
-  try {
-    const { data: recipes, error: recipesError } = await supabase
-      .from('recipes')
-      .select('*')
-      .order('name');
-
-    if (recipesError) throw new Error(recipesError.message);
-
-    // Parse ingredients from JSONB column
-    const dbRecipes: RecipeWithIngredients[] = (recipes || []).map(recipe => ({
-      ...recipe,
-      ingredients: Array.isArray(recipe.ingredients) 
-        ? (recipe.ingredients as any[]).map(ing => ({
-            ingredient_name: ing.ingredient_name,
-            quantity: ing.quantity,
-            unit: ing.unit
-          }))
-        : []
-    }));
-
-    // Save to localStorage for offline access
-    if (dbRecipes.length > 0) {
-      saveRecipes(dbRecipes);
-    }
-
-    return dbRecipes;
-  } catch (error) {
-    console.error('Error fetching from database, trying localStorage:', error);
-    
-    // Fallback to localStorage
-    const cachedData = getRecipes<RecipeWithIngredients[]>();
-    if (cachedData) {
-      console.log('Using cached recipes');
-      return cachedData;
-    }
-    
-    throw error;
-  }
+  return HARDCODED_RECIPES.map(recipe => ({
+    ...recipe,
+    description: recipe.description || null,
+    preparation: recipe.preparation || null,
+    shelf_life: recipe.shelf_life || null,
+    storage: recipe.storage || null,
+    calories: recipe.calories || null,
+    protein: recipe.protein || null,
+    fat: recipe.fat || null,
+    carbs: recipe.carbs || null,
+    is_hidden: recipe.is_hidden || null,
+    yield_output: recipe.yield_output || null,
+  })) as RecipeWithIngredients[];
 };
 
 export const calculateSellingPrice = (finalCost: number): number => {
-  return finalCost * 2; // Simplified markup
+  return finalCost * 2;
 };
 
 export const calculateIngredientCost = (
@@ -181,7 +126,6 @@ export const addMasterIngredient = async (
   const { error } = await supabase
     .from('master_ingredients')
     .insert({ name, price_per_kg: pricePerKg, brand });
-
   if (error) throw error;
 };
 
@@ -194,7 +138,6 @@ export const updateMasterIngredient = async (
     .from('master_ingredients')
     .update({ price_per_kg: pricePerKg, brand, updated_at: new Date().toISOString() })
     .eq('id', id);
-
   if (error) throw error;
 };
 
@@ -224,7 +167,6 @@ export const updateMasterIngredientPrice = async (
     .from('master_ingredients')
     .update({ price_per_kg: pricePerKg, updated_at: new Date().toISOString() })
     .eq('id', id);
-
   if (error) throw error;
 };
 
@@ -233,7 +175,6 @@ export const deleteMasterIngredient = async (id: string): Promise<void> => {
     .from('master_ingredients')
     .delete()
     .eq('id', id);
-
   if (error) throw error;
 };
 
@@ -249,7 +190,6 @@ export const addRecipeWithIngredients = async (
   const finalCost = totalCost + recipe.overheads;
   const sellingPrice = calculateSellingPrice(finalCost);
 
-  // Insert recipe with ingredients as JSONB
   const { error: recipeError } = await supabase
     .from('recipes')
     .insert([{ 
@@ -272,6 +212,5 @@ export const updateRecipeVisibility = async (
       updated_at: new Date().toISOString()
     })
     .eq('id', recipeId);
-
   if (error) throw error;
 };
