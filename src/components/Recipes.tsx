@@ -142,60 +142,58 @@ const Recipes = ({
     <div className="bg-gray-50">
       
       {/* ================= STICKY HEADER ================= */}
-      <div className="sticky top-[64px] z-30 bg-white border-b shadow-sm">
-        {/* ↑ change 64px if your navbar height differs */}
-
-        <div className="px-4 sm:px-6 py-4">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="sticky top-[56px] sm:top-[64px] z-30 bg-white border-b shadow-sm">
+        <div className="px-2 sm:px-6 py-3 sm:py-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
 
             {/* LEFT */}
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-orange-800 whitespace-nowrap">
+            <div className="flex items-center justify-between lg:justify-start lg:gap-6">
+              <h2 className="text-lg sm:text-2xl font-bold text-orange-800 whitespace-nowrap">
                 All Recipes
               </h2>
 
-              <div className="flex items-center gap-2 flex-wrap lg:flex-nowrap">
-                <Badge className="bg-blue-100 text-blue-800 px-3 py-1.5 text-sm flex items-center gap-1 whitespace-nowrap">
-                  <FileText size={14} />
-                  Total Recipes: {visibleRecipes.length}
+              <div className="flex items-center gap-1 sm:gap-2">
+                <Badge className="bg-blue-100 text-blue-800 px-2 sm:px-3 py-1 text-xs sm:text-sm flex items-center gap-1 whitespace-nowrap">
+                  <FileText size={12} />
+                  {visibleRecipes.length}
                 </Badge>
 
-                <Badge className="bg-green-100 text-green-800 px-3 py-1.5 text-sm flex items-center gap-1 whitespace-nowrap">
-                  <img src="/logo.png" className="h-4 w-4" alt="icon" />
-                  Ingredients: {masterIngredients.length}
+                <Badge className="bg-green-100 text-green-800 px-2 sm:px-3 py-1 text-xs sm:text-sm flex items-center gap-1 whitespace-nowrap">
+                  <img src="/logo.png" className="h-3 w-3 sm:h-4 sm:w-4" alt="icon" />
+                  {masterIngredients.length}
                 </Badge>
               </div>
             </div>
 
             {/* RIGHT */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3 lg:flex-nowrap">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
               <div className="relative w-full sm:w-[260px] lg:w-[320px]">
                 <Search
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
+                  size={16}
                 />
                 <Input
-                  placeholder="Search recipes or ingredients..."
+                  placeholder="Search recipes..."
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-9 h-9 text-sm"
                 />
               </div>
 
-              <div className="flex items-center gap-2 flex-wrap lg:flex-nowrap">
+              <div className="flex items-center gap-2">
                 <Button
                   size="sm"
                   onClick={() => setShowAddRecipe(true)}
-                  className="bg-orange-600 hover:bg-orange-700 text-white whitespace-nowrap"
+                  className="bg-orange-600 hover:bg-orange-700 text-white whitespace-nowrap flex-1 sm:flex-none text-xs sm:text-sm h-9"
                 >
                   <Plus className="h-4 w-4 mr-1" />
-                  Add Recipe
+                  Add
                 </Button>
 
                 <Button
                   size="sm"
                   onClick={exportRecipesToExcel}
-                  className="bg-green-600 hover:bg-green-700 text-white whitespace-nowrap"
+                  className="bg-green-600 hover:bg-green-700 text-white whitespace-nowrap flex-1 sm:flex-none text-xs sm:text-sm h-9"
                 >
                   <Download className="h-4 w-4 mr-1" />
                   Export
@@ -205,10 +203,9 @@ const Recipes = ({
                   size="sm"
                   variant="outline"
                   onClick={onBackToDashboard}
-                  className="whitespace-nowrap"
+                  className="whitespace-nowrap text-xs sm:text-sm h-9"
                 >
-                  <ArrowLeft className="h-4 w-4 mr-1" />
-                  Back
+                  <ArrowLeft className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -218,8 +215,8 @@ const Recipes = ({
       </div>
 
       {/* ================= CONTENT ================= */}
-      <div className="px-4 sm:px-6 py-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="px-2 sm:px-6 py-4 sm:py-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {visibleRecipes.map(recipe => (
             <RecipeCard
               key={recipe.id}
@@ -231,7 +228,7 @@ const Recipes = ({
         </div>
 
         {visibleRecipes.length === 0 && (
-          <div className="text-center py-12 text-gray-500 text-lg">
+          <div className="text-center py-8 sm:py-12 text-gray-500 text-base sm:text-lg">
             {searchTerm
               ? 'No recipes found matching your search.'
               : 'No recipes available. Add your first recipe!'}

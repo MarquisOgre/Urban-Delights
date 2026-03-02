@@ -145,31 +145,32 @@ const BackendDashboard: React.FC = () => {
   const renderContent = () => {
     if (currentView === 'main') {
       return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-            <p className="text-gray-600">Manage your recipes, ingredients, pricing and inventory</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">Dashboard</h1>
+            <p className="text-sm sm:text-base text-gray-600">Manage your recipes, ingredients, pricing and inventory</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
             {backendButtons.map((item) => {
               const IconComponent = item.icon;
               return (
-                <Card key={item.key} className="hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardHeader className="text-center">
-                    <div className={`w-16 h-16 ${item.color} rounded-full flex items-center justify-center mx-auto mb-4`}>
-                      <IconComponent className="h-8 w-8 text-white" />
+                <Card key={item.key} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setCurrentView(item.key)}>
+                  <CardHeader className="text-center p-3 sm:p-6 pb-1 sm:pb-2">
+                    <div className={`w-10 h-10 sm:w-16 sm:h-16 ${item.color} rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-4`}>
+                      <IconComponent className="h-5 w-5 sm:h-8 sm:w-8 text-white" />
                     </div>
-                    <CardTitle className="text-xl">{item.title}</CardTitle>
+                    <CardTitle className="text-sm sm:text-xl">{item.title}</CardTitle>
                   </CardHeader>
-                  <CardContent className="text-center">
-                    <p className="text-gray-600 mb-4">{item.description}</p>
+                  <CardContent className="text-center p-3 sm:p-6 pt-0 sm:pt-0">
+                    <p className="text-gray-600 mb-2 sm:mb-4 text-xs sm:text-base hidden sm:block">{item.description}</p>
                     <Button 
-                      onClick={() => setCurrentView(item.key)}
-                      className="w-full"
+                      onClick={(e) => { e.stopPropagation(); setCurrentView(item.key); }}
+                      className="w-full text-xs sm:text-sm"
                       variant="outline"
+                      size="sm"
                     >
-                      Open {item.title}
+                      Open
                     </Button>
                   </CardContent>
                 </Card>
@@ -214,7 +215,7 @@ const BackendDashboard: React.FC = () => {
           currentView={currentView} 
           setCurrentView={setCurrentView}
         />
-      <main className="container mx-auto px-4 py-6 pb-24">
+      <main className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 pb-16 sm:pb-24">
         {renderContent()}
       </main>
       <Footer showTopButton={true} />

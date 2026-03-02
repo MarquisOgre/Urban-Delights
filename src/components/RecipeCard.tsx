@@ -61,53 +61,34 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
 
   return (
     <>
-      <Card className={`hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-orange-500 ${recipe.is_hidden ? 'opacity-60' : ''}`}>
-        <CardHeader className="pb-3">
-          <div className="flex justify-between items-start">
-            <CardTitle className="text-lg sm:text-xl text-gray-900">{recipe.name}</CardTitle>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
-                {profitMargin}% Profit
+      <Card className={`hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-orange-500 ${recipe.is_hidden ? 'opacity-60' : ''}`} onClick={() => setIsDialogOpen(true)}>
+        <CardHeader className="pb-2 p-3 sm:p-6 sm:pb-3">
+          <div className="flex justify-between items-start gap-2">
+            <CardTitle className="text-base sm:text-xl text-gray-900 leading-tight">{recipe.name}</CardTitle>
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <Badge variant="secondary" className="bg-green-100 text-green-800 text-[10px] sm:text-xs px-1.5 sm:px-2">
+                {profitMargin}%
               </Badge>
-              <Button
-                onClick={handleToggleVisibility}
-                size="sm"
-                variant="outline"
-                className="p-1 h-7 w-7"
-                title={recipe.is_hidden ? "Show Recipe" : "Hide Recipe"}
-              >
+              <Button onClick={(e) => { e.stopPropagation(); handleToggleVisibility(); }} size="sm" variant="outline" className="p-1 h-6 w-6 sm:h-7 sm:w-7" title={recipe.is_hidden ? "Show" : "Hide"}>
                 {recipe.is_hidden ? <Eye size={12} /> : <EyeOff size={12} />}
               </Button>
-              <Button
-                onClick={() => setIsEditDialogOpen(true)}
-                size="sm"
-                variant="outline"
-                className="p-1 h-7 w-7"
-              >
-                <Edit size={12} />
+              <Button onClick={(e) => { e.stopPropagation(); setIsEditDialogOpen(true); }} size="sm" variant="outline" className="p-1 h-6 w-6 sm:h-7 sm:w-7">
+                <Edit size={11} />
               </Button>
-              <Button
-                onClick={() => setIsDeleteDialogOpen(true)}
-                size="sm"
-                variant="outline"
-                className="p-1 h-7 w-7 text-red-600 hover:text-red-700"
-              >
-                <Trash2 size={12} />
+              <Button onClick={(e) => { e.stopPropagation(); setIsDeleteDialogOpen(true); }} size="sm" variant="outline" className="p-1 h-6 w-6 sm:h-7 sm:w-7 text-red-600 hover:text-red-700">
+                <Trash2 size={11} />
               </Button>
             </div>
           </div>
-          <CardDescription className="text-sm text-gray-600">
-            {(recipe as any).description || "Traditional South Indian Podi"}
-          </CardDescription>
         </CardHeader>
         
-        <CardContent>
-          <div className="space-y-3">
+        <CardContent className="p-3 sm:p-6 pt-0 sm:pt-0">
+          <div className="space-y-2 sm:space-y-3">
             {/* Quantity Calculator */}
-            <div className="bg-blue-50 p-3 rounded-lg border">
-              <div className="flex items-center gap-2 mb-2">
-                <Calculator size={16} className="text-blue-600" />
-                <span className="text-sm font-medium text-blue-800">Desired Quantity (kg)</span>
+            <div className="bg-blue-50 p-2 sm:p-3 rounded-lg border">
+              <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                <Calculator size={14} className="text-blue-600" />
+                <span className="text-xs sm:text-sm font-medium text-blue-800">Qty (kg)</span>
               </div>
               <Input
                 type="number"
@@ -115,54 +96,54 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
                 step="1"
                 value={desiredQty}
                 onChange={handleQtyChange}
-                className="w-full h-8 text-sm"
-                placeholder="Enter quantity in kg"
+                onClick={(e) => e.stopPropagation()}
+                className="w-full h-7 sm:h-8 text-xs sm:text-sm"
+                placeholder="Qty in kg"
               />
             </div>
             
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600">Cost Price:</span>
+            <div className="flex justify-between items-center text-xs sm:text-sm">
+              <span className="text-gray-600">Cost:</span>
               <span className="font-semibold text-red-600 flex items-center">
-                <IndianRupee size={14} />
+                <IndianRupee size={12} />
                 {scaledFinalCost.toFixed(2)}
-                {desiredQty !== 1 && <span className="text-xs ml-1">({desiredQty}kg)</span>}
+                {desiredQty !== 1 && <span className="text-[10px] ml-1">({desiredQty}kg)</span>}
               </span>
             </div>
             
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600">Selling Price:</span>
+            <div className="flex justify-between items-center text-xs sm:text-sm">
+              <span className="text-gray-600">Selling:</span>
               <span className="font-semibold text-green-600 flex items-center">
-                <IndianRupee size={14} />
+                <IndianRupee size={12} />
                 {Math.round(recipe.selling_price * desiredQty)}
-                {desiredQty !== 1 && <span className="text-xs ml-1">({desiredQty}kg)</span>}
               </span>
             </div>
             
-            <div className="flex justify-between items-center text-sm">
+            <div className="flex justify-between items-center text-xs sm:text-sm">
               <span className="text-gray-600">Ingredients:</span>
-              <span className="font-medium">{recipe.ingredients.length} items</span>
+              <span className="font-medium">{recipe.ingredients.length}</span>
             </div>
             
             <Separator />
             
-            <div className="grid grid-cols-2 gap-4 text-xs text-gray-600">
+            <div className="grid grid-cols-2 gap-2 sm:gap-4 text-[10px] sm:text-xs text-gray-600">
               <div className="flex items-center gap-1">
-                <Scale size={12} />
-                <span>{recipe.calories || 0} kcal/100g</span>
+                <Scale size={10} />
+                <span>{recipe.calories || 0} kcal</span>
               </div>
               <div className="flex items-center gap-1">
-                <Clock size={12} />
-                <span>6 months shelf</span>
+                <Clock size={10} />
+                <span>6m shelf</span>
               </div>
             </div>
             
-            <div className="mt-4">
+            <div className="mt-2 sm:mt-4">
               <Button 
-                onClick={() => setIsDialogOpen(true)}
-                className="w-full bg-orange-600 hover:bg-orange-700 text-sm sm:text-base"
+                onClick={(e) => { e.stopPropagation(); setIsDialogOpen(true); }}
+                className="w-full bg-orange-600 hover:bg-orange-700 text-xs sm:text-sm h-8 sm:h-9"
                 size="sm"
               >
-                <Eye size={16} className="mr-1 sm:mr-2" />
+                <Eye size={14} className="mr-1" />
                 View Details
               </Button>
             </div>

@@ -144,17 +144,17 @@ const MasterIngredientList = ({ masterIngredients, onRefresh, onBackToDashboard 
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 sticky top-16 z-10 bg-white py-4 -mx-4 px-4">
-        <h2 className="text-2xl font-bold text-gray-900">Master Ingredients List</h2>
+      <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center justify-between gap-3 sm:gap-4 mb-6 sticky top-14 sm:top-16 z-10 bg-white py-3 sm:py-4 -mx-2 sm:-mx-4 px-2 sm:px-4">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Master Ingredients</h2>
         
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 items-center flex-wrap">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
             <Input
-              placeholder="Search ingredients..."
+              placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-64"
+              className="pl-9 w-48 sm:w-64 h-9 text-sm"
             />
           </div>
           
