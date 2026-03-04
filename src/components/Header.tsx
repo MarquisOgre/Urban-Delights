@@ -1,16 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, ChefHat, PlusCircle, Package, DollarSign, ClipboardList, Warehouse } from 'lucide-react';
+import { Menu, X, ChefHat, PlusCircle, Package, DollarSign, ClipboardList, Warehouse, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 interface HeaderProps {
   currentView?: string;
   setCurrentView?: (view: string) => void;
+  onRefresh?: () => Promise<void>;
 }
 
-const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView }) => {
+const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, onRefresh }) => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navigationItems = [
@@ -25,6 +27,16 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView }) => {
   const handleNavClick = (key: string) => {
     setCurrentView && setCurrentView(key);
     setMobileMenuOpen(false);
+  };
+
+  const handleRefresh = async () => {
+    if (!onRefresh || isRefreshing) return;
+    setIsRefreshing(true);
+    try {
+      await onRefresh();
+    } finally {
+      setIsRefreshing(false);
+    }
   };
   
   return (
@@ -41,6 +53,12 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView }) => {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-1 xl:space-x-2">
+            {onRefresh && (
+              <Button variant="ghost" size="sm" onClick={handleRefresh} disabled={isRefreshing} className="text-orange-800 hover:bg-orange-100">
+                <RefreshCw className={`h-4 w-4 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
+                Sync
+              </Button>
+            )}
             {navigationItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -61,7 +79,12 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView }) => {
           </div>
 
           {/* Mobile Menu */}
-          <div className="lg:hidden">
+          <div className="lg:hidden flex items-center gap-1">
+            {onRefresh && (
+              <Button variant="ghost" size="icon" className="text-orange-800" onClick={handleRefresh} disabled={isRefreshing}>
+                <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </Button>
+            )}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="text-orange-800">

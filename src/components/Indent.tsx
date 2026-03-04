@@ -143,24 +143,26 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 sticky top-16 z-10 bg-white py-4 -mx-4 px-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Ingredient Indent</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 sm:mb-6 sticky top-14 sm:top-16 z-10 bg-white py-3 sm:py-4 -mx-2 sm:-mx-4 px-2 sm:px-4">
+        <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900">Ingredient Indent</h1>
         
         <div className="flex gap-2">
           <Button 
             onClick={exportToExcel}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            size="sm"
+            className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm"
           >
-            <Download className="w-4 h-4 mr-2" />
+            <Download className="w-4 h-4 mr-1" />
             Export
           </Button>
           <Button 
             onClick={onBackToDashboard} 
-            variant="outline" 
-            className="flex items-center gap-2"
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1 text-xs sm:text-sm"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
+            <span className="hidden sm:inline">Back</span>
           </Button>
         </div>
       </div>
@@ -171,13 +173,13 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
           <CardTitle>Recipe Quantities</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
             {visibleRecipes.map((recipe) => (
               <Card key={recipe.id} className="flex items-center p-0 overflow-hidden">
                 <div className="w-1 bg-orange-500 h-full" />
-                <div className="flex items-center justify-between w-full px-4 py-2">
+                <div className="flex items-center justify-between w-full px-2 sm:px-4 py-2">
                   <label
-                    className="text-sm font-medium truncate max-w-[80px] mr-1"
+                    className="text-xs sm:text-sm font-medium truncate max-w-[60px] sm:max-w-[80px] mr-1"
                     title={recipe.name}
                   >
                     {recipe.name}
@@ -188,7 +190,7 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
                     placeholder="Qty"
                     value={recipeQuantities[recipe.id] || ''}
                     onChange={(e) => handleQuantityChange(recipe.id, e.target.value)}
-                    className="w-20"
+                    className="w-16 sm:w-20 h-8 text-xs sm:text-sm"
                   />
                 </div>
               </Card>

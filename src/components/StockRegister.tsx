@@ -606,27 +606,30 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-8 sticky top-16 z-10 bg-white py-4 -mx-4 px-4">
-          <h1 className="text-3xl font-bold text-gray-800">Stock Register</h1>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 sm:mb-8 sticky top-14 sm:top-16 z-10 bg-white py-3 sm:py-4 -mx-2 sm:-mx-4 px-2 sm:px-4">
+          <h1 className="text-lg sm:text-3xl font-bold text-gray-800">Stock Register</h1>
           
           <div className="flex gap-2">
             <Button 
               onClick={handlePrint}
-              className="flex items-center gap-2"
+              size="sm"
+              className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
               disabled={filteredPodiEntries.length === 0 && filteredRawMaterialEntries.length === 0}
             >
               <Printer className="h-4 w-4" />
-              Print Monthly Report
+              <span className="hidden sm:inline">Print Report</span>
+              <span className="sm:hidden">Print</span>
             </Button>
             <Button 
               onClick={onBackToDashboard} 
-              variant="outline" 
-              className="flex items-center gap-2"
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1 text-xs sm:text-sm"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Dashboard
+              <span className="hidden sm:inline">Back</span>
             </Button>
           </div>
         </div>
@@ -685,25 +688,25 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
               <Card className="bg-blue-50 border-blue-200">
                 <CardContent className="pt-4">
                   <p className="text-sm text-blue-600 font-medium">Total Opening</p>
-                  <p className="text-2xl font-bold text-blue-800">{podiSummary.totalOpening.toFixed(2)} kg</p>
+                  <p className="text-lg sm:text-2xl font-bold text-blue-800">{podiSummary.totalOpening.toFixed(2)} kg</p>
                 </CardContent>
               </Card>
               <Card className="bg-green-50 border-green-200">
                 <CardContent className="pt-4">
                   <p className="text-sm text-green-600 font-medium">Total Production</p>
-                  <p className="text-2xl font-bold text-green-800">{podiSummary.totalProduction.toFixed(2)} kg</p>
+                  <p className="text-lg sm:text-2xl font-bold text-green-800">{podiSummary.totalProduction.toFixed(2)} kg</p>
                 </CardContent>
               </Card>
               <Card className="bg-orange-50 border-orange-200">
                 <CardContent className="pt-4">
                   <p className="text-sm text-orange-600 font-medium">Total Sales</p>
-                  <p className="text-2xl font-bold text-orange-800">{podiSummary.totalSales.toFixed(2)} kg</p>
+                  <p className="text-lg sm:text-2xl font-bold text-orange-800">{podiSummary.totalSales.toFixed(2)} kg</p>
                 </CardContent>
               </Card>
               <Card className="bg-purple-50 border-purple-200">
                 <CardContent className="pt-4">
                   <p className="text-sm text-purple-600 font-medium">Total Closing</p>
-                  <p className="text-2xl font-bold text-purple-800">{podiSummary.totalClosing.toFixed(2)} kg</p>
+                  <p className="text-lg sm:text-2xl font-bold text-purple-800">{podiSummary.totalClosing.toFixed(2)} kg</p>
                 </CardContent>
               </Card>
             </div>
@@ -714,9 +717,9 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                 <CardTitle>Add Podi Entry</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid sm:grid-cols-[180px_1fr_100px_100px_100px_120px_auto] gap-4 items-end w-full">
+                <div className="grid grid-cols-2 sm:grid-cols-[180px_1fr_100px_100px_100px_120px_auto] gap-3 sm:gap-4 items-end w-full">
                   {/* Date */}
-                  <div className="min-w-[180px]">
+                  <div className="col-span-2 sm:col-span-1 min-w-0">
                     <Label htmlFor="date">Date</Label>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -744,7 +747,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                   </div>
 
                   {/* Podi Name */}
-                  <div className="flex-1 min-w-[300px] max-w-[400px]">
+                  <div className="col-span-2 sm:col-span-1 min-w-0">
                     <Label htmlFor="podiName">Podi Name</Label>
                     <Select value={podiName} onValueChange={handlePodiNameChange}>
                       <SelectTrigger>
@@ -761,8 +764,8 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                   </div>
 
                   {/* Opening Stock */}
-                  <div className="min-w-[100px]">
-                    <Label htmlFor="podiOpeningStock">Opening</Label>
+                  <div className="min-w-0">
+                    <Label htmlFor="podiOpeningStock" className="text-xs sm:text-sm">Opening</Label>
                     <Input
                       id="podiOpeningStock"
                       type="number"
@@ -773,8 +776,8 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                   </div>
 
                   {/* Production */}
-                  <div className="min-w-[100px]">
-                    <Label htmlFor="podiProduction">Production</Label>
+                  <div className="min-w-0">
+                    <Label htmlFor="podiProduction" className="text-xs sm:text-sm">Production</Label>
                     <Input
                       id="podiProduction"
                       type="number"
@@ -785,8 +788,8 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                   </div>
 
                   {/* Sales */}
-                  <div className="min-w-[100px]">
-                    <Label htmlFor="podiSales">Sales</Label>
+                  <div className="min-w-0">
+                    <Label htmlFor="podiSales" className="text-xs sm:text-sm">Sales</Label>
                     <Input
                       id="podiSales"
                       type="number"
@@ -797,8 +800,8 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                   </div>
 
                   {/* Closing Stock */}
-                  <div className="min-w-[120px]">
-                    <Label htmlFor="podiClosingStock">Closing</Label>
+                  <div className="min-w-0">
+                    <Label htmlFor="podiClosingStock" className="text-xs sm:text-sm">Closing</Label>
                     <Input
                       id="podiClosingStock"
                       type="number"
@@ -808,10 +811,10 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                   </div>
 
                   {/* Add Button */}
-                  <div className="ml-auto">
-                    <Button onClick={handleAddPodiEntry}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      + Add
+                  <div className="col-span-2 sm:col-span-1">
+                    <Button onClick={handleAddPodiEntry} size="sm" className="w-full sm:w-auto">
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add
                     </Button>
                   </div>
                 </div>
@@ -881,25 +884,25 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
               <Card className="bg-blue-50 border-blue-200">
                 <CardContent className="pt-4">
                   <p className="text-sm text-blue-600 font-medium">Total Opening</p>
-                  <p className="text-2xl font-bold text-blue-800">{rmSummary.totalOpening.toFixed(2)} kg</p>
+                  <p className="text-lg sm:text-2xl font-bold text-blue-800">{rmSummary.totalOpening.toFixed(2)} kg</p>
                 </CardContent>
               </Card>
               <Card className="bg-green-50 border-green-200">
                 <CardContent className="pt-4">
                   <p className="text-sm text-green-600 font-medium">Total Purchased</p>
-                  <p className="text-2xl font-bold text-green-800">{rmSummary.totalPurchased.toFixed(2)} kg</p>
+                  <p className="text-lg sm:text-2xl font-bold text-green-800">{rmSummary.totalPurchased.toFixed(2)} kg</p>
                 </CardContent>
               </Card>
               <Card className="bg-orange-50 border-orange-200">
                 <CardContent className="pt-4">
                   <p className="text-sm text-orange-600 font-medium">Total Used</p>
-                  <p className="text-2xl font-bold text-orange-800">{rmSummary.totalUsed.toFixed(2)} kg</p>
+                  <p className="text-lg sm:text-2xl font-bold text-orange-800">{rmSummary.totalUsed.toFixed(2)} kg</p>
                 </CardContent>
               </Card>
               <Card className="bg-purple-50 border-purple-200">
                 <CardContent className="pt-4">
                   <p className="text-sm text-purple-600 font-medium">Total Closing</p>
-                  <p className="text-2xl font-bold text-purple-800">{rmSummary.totalClosing.toFixed(2)} kg</p>
+                  <p className="text-lg sm:text-2xl font-bold text-purple-800">{rmSummary.totalClosing.toFixed(2)} kg</p>
                 </CardContent>
               </Card>
             </div>
@@ -910,10 +913,10 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                 <CardTitle>Add Raw Material Entry</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid sm:grid-cols-[180px_1fr_100px_100px_100px_120px_auto] gap-4 items-end w-full">
+                <div className="grid grid-cols-2 sm:grid-cols-[180px_1fr_100px_100px_100px_120px_auto] gap-3 sm:gap-4 items-end w-full">
                   {/* Date */}
-                  <div className="min-w-[180px]">
-                    <Label htmlFor="rmDate">Date</Label>
+                  <div className="col-span-2 sm:col-span-1 min-w-0">
+                    <Label htmlFor="rmDate" className="text-xs sm:text-sm">Date</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
@@ -940,7 +943,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                   </div>
 
                   {/* Ingredient */}
-                  <div className="flex-1 min-w-[300px] max-w-[400px]">
+                  <div className="col-span-2 sm:col-span-1 min-w-0">
                     <Label htmlFor="ingredient">Ingredient</Label>
                     <Select value={ingredient} onValueChange={handleIngredientChange}>
                       <SelectTrigger>
@@ -957,8 +960,8 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                   </div>
 
                   {/* Opening */}
-                  <div className="min-w-[100px]">
-                    <Label htmlFor="rmOpening">Opening</Label>
+                  <div className="min-w-0">
+                    <Label htmlFor="rmOpening" className="text-xs sm:text-sm">Opening</Label>
                     <Input
                       id="rmOpening"
                       type="number"
@@ -969,8 +972,8 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                   </div>
 
                   {/* Purchased */}
-                  <div className="min-w-[100px]">
-                    <Label htmlFor="rmPurchased">Purchased</Label>
+                  <div className="min-w-0">
+                    <Label htmlFor="rmPurchased" className="text-xs sm:text-sm">Purchased</Label>
                     <Input
                       id="rmPurchased"
                       type="number"
@@ -981,8 +984,8 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                   </div>
 
                   {/* Used */}
-                  <div className="min-w-[100px]">
-                    <Label htmlFor="rmUsed">Used</Label>
+                  <div className="min-w-0">
+                    <Label htmlFor="rmUsed" className="text-xs sm:text-sm">Used</Label>
                     <Input
                       id="rmUsed"
                       type="number"
@@ -993,8 +996,8 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                   </div>
 
                   {/* Closing */}
-                  <div className="min-w-[120px]">
-                    <Label htmlFor="rmClosing">Closing</Label>
+                  <div className="min-w-0">
+                    <Label htmlFor="rmClosing" className="text-xs sm:text-sm">Closing</Label>
                     <Input
                       id="rmClosing"
                       type="number"
@@ -1004,10 +1007,10 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                   </div>
 
                   {/* Add Button */}
-                  <div className="ml-auto">
-                    <Button onClick={handleAddRawMaterialEntry}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      + Add
+                  <div className="col-span-2 sm:col-span-1">
+                    <Button onClick={handleAddRawMaterialEntry} size="sm" className="w-full sm:w-auto">
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add
                     </Button>
                   </div>
                 </div>

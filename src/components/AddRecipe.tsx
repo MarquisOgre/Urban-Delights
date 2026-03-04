@@ -170,15 +170,17 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex justify-end mb-4">
+    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+      <div className="flex justify-end mb-2 sm:mb-4">
         <Button 
           onClick={onBackToDashboard} 
-          variant="outline" 
-          className="flex items-center gap-2"
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Dashboard
+          <span className="hidden sm:inline">Back to Dashboard</span>
+          <span className="sm:hidden">Back</span>
         </Button>
       </div>
       <Card>
@@ -288,10 +290,10 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
             </div>
             <div className="space-y-3">
               {ingredients.map((ingredient, index) => (
-                <div key={index} className="grid grid-cols-12 gap-2 items-end">
+                <div key={index} className="grid grid-cols-12 gap-1 sm:gap-2 items-end">
                   <div className="col-span-5">
                     <select
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                      className="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm ring-offset-background"
                       value={ingredient.ingredient_name}
                       onChange={(e) => updateIngredient(index, 'ingredient_name', e.target.value)}
                     >
@@ -309,12 +311,13 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddR
                       step="any"
                       value={ingredient.quantity || ""}
                       onChange={(e) => updateIngredient(index, 'quantity', parseFloat(e.target.value) || 0)}
-                      placeholder="Quantity"
+                      placeholder="Qty"
+                      className="h-9 sm:h-10 text-xs sm:text-sm"
                     />
                   </div>
                   <div className="col-span-2">
                     <select
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      className="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-1 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm"
                       value={ingredient.unit}
                       onChange={(e) => updateIngredient(index, 'unit', e.target.value)}
                     >
