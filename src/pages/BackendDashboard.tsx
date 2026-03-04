@@ -214,6 +214,7 @@ const BackendDashboard: React.FC = () => {
         <Header 
           currentView={currentView} 
           setCurrentView={setCurrentView}
+          onRefresh={refreshData}
         />
       <main className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 pb-16 sm:pb-24">
         {renderContent()}

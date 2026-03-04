@@ -33,26 +33,25 @@ const ManageRecipes = ({ recipes, onRecipeUpdated, onBackToDashboard }: ManageRe
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="text-center flex-1">
-          <h2 className="text-2xl font-bold text-orange-800 mb-2">Manage All Recipes</h2>
-        </div>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex items-center justify-between gap-3 mb-4 sm:mb-6 sticky top-14 sm:top-16 z-10 bg-white py-3 sm:py-4 -mx-2 sm:-mx-4 px-2 sm:px-4">
+        <h2 className="text-lg sm:text-2xl font-bold text-orange-800">Manage All Recipes</h2>
         <Button 
           onClick={onBackToDashboard} 
           variant="outline" 
-          className="flex items-center gap-2"
+          size="sm"
+          className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Dashboard
+          <span className="hidden sm:inline">Back to Dashboard</span>
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
         {recipes.map(recipe => (
           <Card key={recipe.id} className={`${recipe.is_hidden ? 'opacity-60 border-gray-300' : 'border-orange-200'}`}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-semibold text-orange-800 flex items-center justify-between">
+            <CardHeader className="pb-2 p-3 sm:p-6 sm:pb-3">
+              <CardTitle className="text-sm sm:text-lg font-semibold text-orange-800 flex items-center justify-between">
                 <span className="truncate">{recipe.name}</span>
                 <div className="flex items-center gap-2 ml-2">
                   {recipe.is_hidden ? (
@@ -63,7 +62,7 @@ const ManageRecipes = ({ recipes, onRecipeUpdated, onBackToDashboard }: ManageRe
                 </div>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 p-3 sm:p-6 pt-0 sm:pt-0">
               {/* <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Selling Price:</span>
@@ -87,7 +86,8 @@ const ManageRecipes = ({ recipes, onRecipeUpdated, onBackToDashboard }: ManageRe
 
               <Button
                 onClick={() => handleToggleVisibility(recipe)}
-                className={`w-full ${
+                size="sm"
+                className={`w-full text-xs sm:text-sm ${
                   recipe.is_hidden 
                     ? 'bg-green-600 hover:bg-green-700' 
                     : 'bg-red-600 hover:bg-red-700'

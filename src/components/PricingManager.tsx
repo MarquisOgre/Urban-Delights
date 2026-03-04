@@ -119,19 +119,75 @@ const PricingManager: React.FC<{ onBackToDashboard: () => void }> = ({ onBackToD
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 sticky top-16 z-10 bg-white py-4 -mx-4 px-4">
-        <h2 className="text-2xl font-bold text-gray-900">Recipe Pricing Management</h2>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 sm:mb-6 sticky top-14 sm:top-16 z-10 bg-white py-3 sm:py-4 -mx-2 sm:-mx-4 px-2 sm:px-4">
+        <h2 className="text-lg sm:text-2xl font-bold text-gray-900">Pricing Management</h2>
         <Button 
           onClick={onBackToDashboard} 
-          variant="outline" 
-          className="flex items-center gap-2"
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Dashboard
+          <span className="hidden sm:inline">Back to Dashboard</span>
         </Button>
       </div>
+
+      {/* Mobile Card Layout */}
+      <div className="block sm:hidden space-y-3">
+        {recipes.map((recipe) => {
+          const anyPriceEntry = pricing.find(p => p.recipe_name === recipe.name);
+          const isRecipeEnabled = anyPriceEntry?.is_enabled ?? true;
+          return (
+            <Card key={recipe.id} className={`${!isRecipeEnabled ? 'opacity-60' : ''}`}>
+              <CardHeader className="p-3 pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-semibold">{recipe.name}</CardTitle>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => anyPriceEntry && toggleEnabled(anyPriceEntry.id, isRecipeEnabled)}
+                    className={`p-1 h-7 w-7 ${isRecipeEnabled ? "text-green-600" : "text-red-600"}`}
+                  >
+                    {isRecipeEnabled ? <Eye size={14} /> : <EyeOff size={14} />}
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-3 pt-0">
+                <div className="grid grid-cols-2 gap-2">
+                  {QUANTITY_OPTIONS.map(quantity => {
+                    const priceEntry = getPriceForRecipeAndQuantity(recipe.name, quantity);
+                    const isEditing = priceEntry && editingPrice.hasOwnProperty(priceEntry.id);
+                    const currentPrice = isEditing ? editingPrice[priceEntry!.id] : priceEntry?.price || 0;
+                    return (
+                      <div key={quantity} className="flex flex-col gap-1">
+                        <span className="text-[10px] text-gray-500 font-medium">{quantity}</span>
+                        <div className="flex items-center gap-1">
+                          <Input
+                            type="number"
+                            value={currentPrice}
+                            onChange={(e) => priceEntry && handlePriceChange(priceEntry.id, Number(e.target.value))}
+                            className="h-7 text-xs w-full"
+                            step="0.01"
+                          />
+                          {isEditing && (
+                            <Button size="sm" onClick={() => priceEntry && savePrice(priceEntry.id)} className="bg-green-600 hover:bg-green-700 h-7 w-7 p-0">
+                              <Save size={12} />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Desktop Table Layout */}
       
-      <Card className="w-full">
+      <Card className="w-full hidden sm:block">
         <CardContent>
         <div className="overflow-x-auto">
           <Table>
