@@ -281,6 +281,8 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
                               ${visibleRecipes
                                 .filter(recipe => recipeQuantities[recipe.id] > 0)
                                 .map(() => '<td>-</td>').join('')}
+                              <td>-</td>
+                              <td><strong>${(() => { const t = Object.entries(calculatedData.ingredientTotals).reduce((s, [n, d]) => s + Math.max(0, d.totalWeight - (availableQty[n] || 0)), 0); return t >= 1000 ? `${(t / 1000).toFixed(2)} kg` : `${Math.round(t)} g`; })()}</strong></td>
                             </tr>
                           </tbody>
                         </table>
