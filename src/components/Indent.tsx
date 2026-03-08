@@ -16,6 +16,7 @@ interface IndentProps {
 
 const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) => {
   const [recipeQuantities, setRecipeQuantities] = useState<Record<string, number>>({});
+  const [availableQty, setAvailableQty] = useState<Record<string, number>>({});
   const { toast } = useToast();
 
   const visibleRecipes = recipes
