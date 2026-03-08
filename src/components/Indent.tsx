@@ -247,6 +247,8 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
                                 .filter(recipe => recipeQuantities[recipe.id] > 0)
                                 .sort((a, b) => a.name.localeCompare(b.name))
                                 .map(recipe => `<th>${recipe.name}</th>`).join('')}
+                              <th>Available Qty</th>
+                              <th>Indent</th>
                             </tr>
                           </thead>
                           <tbody>
