@@ -164,7 +164,12 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4 sm:mb-6 sticky top-14 sm:top-16 z-10 bg-white py-3 sm:py-4 -mx-2 sm:-mx-4 px-2 sm:px-4">
         <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900">Ingredient Indent</h1>
         
-        <div className="flex gap-2">
+        <div className="flex gap-1 sm:gap-2">
+          <IndentSessionManager
+            recipeQuantities={recipeQuantities}
+            availableQty={availableQty}
+            onLoadSession={handleLoadSession}
+          />
           <Button 
             onClick={exportToExcel}
             size="sm"
