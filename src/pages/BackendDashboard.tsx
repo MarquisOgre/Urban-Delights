@@ -21,6 +21,21 @@ import { fetchMasterIngredients, fetchRecipesWithIngredients } from '@/services/
 const BackendDashboard: React.FC = () => {
   const [currentView, setCurrentView] = useState('main');
 
+  const viewOrder = ['main', 'recipes', 'manage-recipes', 'ingredients', 'add-recipe', 'pricing', 'indent', 'stock-register'];
+
+  const swipeHandlers = useMemo(() => ({
+    onSwipeLeft: () => {
+      const idx = viewOrder.indexOf(currentView);
+      if (idx < viewOrder.length - 1) setCurrentView(viewOrder[idx + 1]);
+    },
+    onSwipeRight: () => {
+      const idx = viewOrder.indexOf(currentView);
+      if (idx > 0) setCurrentView(viewOrder[idx - 1]);
+    },
+  }), [currentView]);
+
+  useSwipe(swipeHandlers);
+
   // Fetch data for backend components
   const { data: masterIngredients = [], refetch: refetchIngredients } = useQuery({
     queryKey: ['masterIngredients'],
