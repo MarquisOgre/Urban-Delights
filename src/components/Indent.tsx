@@ -291,7 +291,7 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
                   <TableHead className="font-semibold">Ingredient</TableHead>
                   <TableHead className="font-semibold">Total Weight</TableHead>
                   <TableHead className="font-semibold">Total Cost</TableHead>
-                  {visibleRecipes
+                   {visibleRecipes
                     .filter(recipe => recipeQuantities[recipe.id] > 0)
                     .sort((a, b) => a.name.localeCompare(b.name))
                     .map(recipe => (
@@ -299,6 +299,8 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
                         {recipe.name}
                       </TableHead>
                     ))}
+                  <TableHead className="font-semibold">Available Qty</TableHead>
+                  <TableHead className="font-semibold">Indent</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
