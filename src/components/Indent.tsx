@@ -16,6 +16,7 @@ interface IndentProps {
 
 const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) => {
   const [recipeQuantities, setRecipeQuantities] = useState<Record<string, number>>({});
+  const [availableQty, setAvailableQty] = useState<Record<string, number>>({});
   const { toast } = useToast();
 
   const visibleRecipes = recipes
@@ -290,7 +291,7 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
                   <TableHead className="font-semibold">Ingredient</TableHead>
                   <TableHead className="font-semibold">Total Weight</TableHead>
                   <TableHead className="font-semibold">Total Cost</TableHead>
-                  {visibleRecipes
+                   {visibleRecipes
                     .filter(recipe => recipeQuantities[recipe.id] > 0)
                     .sort((a, b) => a.name.localeCompare(b.name))
                     .map(recipe => (
@@ -298,6 +299,8 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
                         {recipe.name}
                       </TableHead>
                     ))}
+                  <TableHead className="font-semibold">Available Qty</TableHead>
+                  <TableHead className="font-semibold">Indent</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -326,6 +329,23 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
                           }
                         </TableCell>
                       ))}
+                    <TableCell>
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        value={availableQty[ingredientName] || ''}
+                        onChange={(e) => setAvailableQty(prev => ({ ...prev, [ingredientName]: parseFloat(e.target.value) || 0 }))}
+                        className="w-20 h-8 text-xs sm:text-sm"
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {(() => {
+                        const indentGrams = data.totalWeight - (availableQty[ingredientName] || 0);
+                        const val = Math.max(0, indentGrams);
+                        return val >= 1000 ? `${(val / 1000).toFixed(2)} kg` : `${Math.round(val)} g`;
+                      })()}
+                    </TableCell>
                   </TableRow>
                 ))}
                 
@@ -355,6 +375,15 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
                         <TableCell key={recipe.id}>₹{recipeCost.toFixed(2)}</TableCell>
                       );
                     })}
+                  <TableCell>-</TableCell>
+                  <TableCell className="font-medium">
+                    {(() => {
+                      const totalIndent = Object.entries(calculatedData.ingredientTotals).reduce((sum, [name, data]) => {
+                        return sum + Math.max(0, data.totalWeight - (availableQty[name] || 0));
+                      }, 0);
+                      return totalIndent >= 1000 ? `${(totalIndent / 1000).toFixed(2)} kg` : `${Math.round(totalIndent)} g`;
+                    })()}
+                  </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
