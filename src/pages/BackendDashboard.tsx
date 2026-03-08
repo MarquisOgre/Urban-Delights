@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSwipe } from '@/hooks/use-swipe';
 
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
