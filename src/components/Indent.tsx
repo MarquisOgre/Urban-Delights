@@ -177,10 +177,9 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
             {visibleRecipes.map((recipe) => (
               <Card key={recipe.id} className="flex items-center p-0 overflow-hidden">
                 <div className="w-1 bg-orange-500 h-full" />
-                <div className="flex items-center justify-between w-full px-2 sm:px-4 py-2">
+                <div className="flex items-center justify-between w-full px-2 sm:px-4 py-2 gap-2">
                   <label
-                    className="text-xs sm:text-sm font-medium truncate max-w-[60px] sm:max-w-[80px] mr-1"
-                    title={recipe.name}
+                    className="text-xs sm:text-sm font-medium leading-tight break-words flex-1 min-w-0"
                   >
                     {recipe.name}
                   </label>

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSwipe } from '@/hooks/use-swipe';
 
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +21,21 @@ import { fetchMasterIngredients, fetchRecipesWithIngredients } from '@/services/
 const BackendDashboard: React.FC = () => {
   const [currentView, setCurrentView] = useState('main');
 
+  const viewOrder = ['main', 'recipes', 'manage-recipes', 'ingredients', 'add-recipe', 'pricing', 'indent', 'stock-register'];
+
+  const swipeHandlers = useMemo(() => ({
+    onSwipeLeft: () => {
+      const idx = viewOrder.indexOf(currentView);
+      if (idx < viewOrder.length - 1) setCurrentView(viewOrder[idx + 1]);
+    },
+    onSwipeRight: () => {
+      const idx = viewOrder.indexOf(currentView);
+      if (idx > 0) setCurrentView(viewOrder[idx - 1]);
+    },
+  }), [currentView]);
+
+  useSwipe(swipeHandlers);
+
   // Fetch data for backend components
   const { data: masterIngredients = [], refetch: refetchIngredients } = useQuery({
     queryKey: ['masterIngredients'],
@@ -35,8 +51,12 @@ const BackendDashboard: React.FC = () => {
     try {
       await refetchIngredients();
       await refetchRecipes();
+      const { toast } = await import('@/hooks/use-toast');
+      toast({ title: "Data synced successfully!", description: "All data has been refreshed." });
     } catch (error) {
       console.error('Error refreshing data:', error);
+      const { toast } = await import('@/hooks/use-toast');
+      toast({ title: "Sync failed", description: "Could not refresh data.", variant: "destructive" });
     }
   };
 
