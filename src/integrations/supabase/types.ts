@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      indent_sessions: {
+        Row: {
+          available_qty: Json
+          created_at: string
+          id: string
+          name: string
+          recipe_quantities: Json
+          updated_at: string
+        }
+        Insert: {
+          available_qty?: Json
+          created_at?: string
+          id?: string
+          name: string
+          recipe_quantities?: Json
+          updated_at?: string
+        }
+        Update: {
+          available_qty?: Json
+          created_at?: string
+          id?: string
+          name?: string
+          recipe_quantities?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       master_ingredients: {
         Row: {
           brand: string | null
