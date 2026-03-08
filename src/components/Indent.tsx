@@ -329,6 +329,23 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
                           }
                         </TableCell>
                       ))}
+                    <TableCell>
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        value={availableQty[ingredientName] || ''}
+                        onChange={(e) => setAvailableQty(prev => ({ ...prev, [ingredientName]: parseFloat(e.target.value) || 0 }))}
+                        className="w-20 h-8 text-xs sm:text-sm"
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {(() => {
+                        const indentGrams = data.totalWeight - (availableQty[ingredientName] || 0);
+                        const val = Math.max(0, indentGrams);
+                        return val >= 1000 ? `${(val / 1000).toFixed(2)} kg` : `${Math.round(val)} g`;
+                      })()}
+                    </TableCell>
                   </TableRow>
                 ))}
                 
