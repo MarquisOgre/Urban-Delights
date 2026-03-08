@@ -20,6 +20,11 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
   const [availableQty, setAvailableQty] = useState<Record<string, number>>({});
   const { toast } = useToast();
 
+  const handleLoadSession = (rq: Record<string, number>, aq: Record<string, number>) => {
+    setRecipeQuantities(rq);
+    setAvailableQty(aq);
+  };
+
   const visibleRecipes = recipes
     .filter(recipe => !recipe.is_hidden)
     .sort((a, b) => a.name.localeCompare(b.name));
