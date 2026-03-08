@@ -88,31 +88,42 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
        ...visibleRecipes
          .filter(recipe => recipeQuantities[recipe.id] > 0)
          .sort((a, b) => a.name.localeCompare(b.name))
-         .map(recipe => recipe.name)
+         .map(recipe => recipe.name),
+       'Available Qty', 'Indent'
       ],
       ...Object.entries(calculatedData.ingredientTotals)
         .sort(([a], [b]) => a.localeCompare(b))
-        .map(([ingredientName, data]) => [
-        ingredientName,
-        data.totalWeight >= 1000 
-          ? `${(data.totalWeight / 1000).toFixed(2)} kg`
-          : `${Math.round(data.totalWeight)} g`,
-        `₹${data.cost.toFixed(2)}`,
-        ...visibleRecipes
-          .filter(recipe => recipeQuantities[recipe.id] > 0)
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .map(recipe => {
-            if (data.recipes[recipe.name]) {
-              const weight = data.recipes[recipe.name];
-              return weight >= 1000 
-                ? `${(weight / 1000).toFixed(2)} kg`
-                : `${Math.round(weight)} g`;
-            }
-            return '-';
-          })
-      ]),
+        .map(([ingredientName, data]) => {
+        const avail = availableQty[ingredientName] || 0;
+        const indent = Math.max(0, data.totalWeight - avail);
+        return [
+          ingredientName,
+          data.totalWeight >= 1000 
+            ? `${(data.totalWeight / 1000).toFixed(2)} kg`
+            : `${Math.round(data.totalWeight)} g`,
+          `₹${data.cost.toFixed(2)}`,
+          ...visibleRecipes
+            .filter(recipe => recipeQuantities[recipe.id] > 0)
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map(recipe => {
+              if (data.recipes[recipe.name]) {
+                const weight = data.recipes[recipe.name];
+                return weight >= 1000 
+                  ? `${(weight / 1000).toFixed(2)} kg`
+                  : `${Math.round(weight)} g`;
+              }
+              return '-';
+            }),
+          avail >= 1000 ? `${(avail / 1000).toFixed(2)} kg` : `${Math.round(avail)} g`,
+          indent >= 1000 ? `${(indent / 1000).toFixed(2)} kg` : `${Math.round(indent)} g`
+        ];
+      }),
       [''],
-      ['Grand Total', '', `₹${calculatedData.grandTotal.toFixed(2)}`]
+      ['Grand Total', '', `₹${calculatedData.grandTotal.toFixed(2)}`, 
+       ...visibleRecipes.filter(recipe => recipeQuantities[recipe.id] > 0).map(() => ''),
+       '-',
+       (() => { const t = Object.entries(calculatedData.ingredientTotals).reduce((s, [n, d]) => s + Math.max(0, d.totalWeight - (availableQty[n] || 0)), 0); return t >= 1000 ? `${(t / 1000).toFixed(2)} kg` : `${Math.round(t)} g`; })()
+      ]
     ];
 
     const recipeData = [
