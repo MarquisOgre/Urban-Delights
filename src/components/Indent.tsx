@@ -375,6 +375,15 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
                         <TableCell key={recipe.id}>₹{recipeCost.toFixed(2)}</TableCell>
                       );
                     })}
+                  <TableCell>-</TableCell>
+                  <TableCell className="font-medium">
+                    {(() => {
+                      const totalIndent = Object.entries(calculatedData.ingredientTotals).reduce((sum, [name, data]) => {
+                        return sum + Math.max(0, data.totalWeight - (availableQty[name] || 0));
+                      }, 0);
+                      return totalIndent >= 1000 ? `${(totalIndent / 1000).toFixed(2)} kg` : `${Math.round(totalIndent)} g`;
+                    })()}
+                  </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
