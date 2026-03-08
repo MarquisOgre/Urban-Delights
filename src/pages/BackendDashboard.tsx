@@ -35,8 +35,12 @@ const BackendDashboard: React.FC = () => {
     try {
       await refetchIngredients();
       await refetchRecipes();
+      const { toast } = await import('@/hooks/use-toast');
+      toast({ title: "Data synced successfully!", description: "All data has been refreshed." });
     } catch (error) {
       console.error('Error refreshing data:', error);
+      const { toast } = await import('@/hooks/use-toast');
+      toast({ title: "Sync failed", description: "Could not refresh data.", variant: "destructive" });
     }
   };
 
