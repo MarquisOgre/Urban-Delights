@@ -52,7 +52,8 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
         const masterIngredient = masterIngredients.find(mi => mi.name === ingredient.ingredient_name);
         if (!masterIngredient) return;
 
-        const totalWeight = ingredient.quantity * quantity;
+        const rawQty = ingredient.unit === 'kg' ? ingredient.quantity * 1000 : ingredient.quantity;
+        const totalWeight = rawQty * quantity;
         const costPerGram = masterIngredient.price_per_kg / 1000;
         const totalCost = totalWeight * costPerGram;
 
