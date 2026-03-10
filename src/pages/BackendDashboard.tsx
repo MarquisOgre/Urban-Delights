@@ -5,7 +5,7 @@ import { useSwipe } from '@/hooks/use-swipe';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChefHat, Package, Plus, DollarSign, FileText, Archive } from 'lucide-react';
+import { ChefHat, Package, Plus, DollarSign, FileText, Archive, GlassWater } from 'lucide-react';
 import ManageRecipes from '@/components/ManageRecipes';
 import AddRecipe from '@/components/AddRecipe';
 import MasterIngredientList from '@/components/MasterIngredientList';
