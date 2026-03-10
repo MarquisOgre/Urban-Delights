@@ -146,6 +146,26 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
     ];
 
     const summaryWorksheet = XLSX.utils.aoa_to_sheet(summaryData);
+
+    // Highlight rows where Available Qty >= Total Weight
+    const sortedIngredients = Object.entries(calculatedData.ingredientTotals)
+      .sort(([a], [b]) => a.localeCompare(b));
+    const numCols = summaryData[2]?.length || 0;
+    sortedIngredients.forEach(([ingredientName, data], idx) => {
+      const avail = availableQty[ingredientName] || 0;
+      if (avail >= data.totalWeight && avail > 0) {
+        const rowIdx = idx + 3; // offset: title, blank, header
+        for (let c = 0; c < numCols; c++) {
+          const cellRef = XLSX.utils.encode_cell({ r: rowIdx, c });
+          if (summaryWorksheet[cellRef]) {
+            summaryWorksheet[cellRef].s = {
+              fill: { fgColor: { rgb: "DCFCE7" } }
+            };
+          }
+        }
+      }
+    });
+
     const recipeWorksheet = XLSX.utils.aoa_to_sheet(recipeData);
 
     XLSX.utils.book_append_sheet(workbook, summaryWorksheet, 'Ingredient Summary');
