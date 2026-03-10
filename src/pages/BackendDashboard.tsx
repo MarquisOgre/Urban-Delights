@@ -13,6 +13,7 @@ import Indent from '@/components/Indent';
 import PricingManager from '@/components/PricingManager';
 import StockRegister from '@/components/StockRegister';
 import Recipes from '@/components/Recipes';
+import DetoxJuices from '@/components/DetoxJuices';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import Header from '@/components/Header';
