@@ -267,8 +267,12 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
                           <tbody>
                             ${Object.entries(calculatedData.ingredientTotals)
                               .sort(([a], [b]) => a.localeCompare(b))
-                              .map(([ingredientName, data]) => `
-                              <tr>
+                              .map(([ingredientName, data]) => {
+                                const avail = availableQty[ingredientName] || 0;
+                                const isSufficient = avail >= data.totalWeight && avail > 0;
+                                const indent = Math.max(0, data.totalWeight - avail);
+                                return `
+                              <tr style="${isSufficient ? 'background-color: #dcfce7 !important;' : ''}">
                                 <td>${ingredientName}</td>
                                 <td>${data.totalWeight >= 1000 ? `${(data.totalWeight / 1000).toFixed(2)} kg` : `${Math.round(data.totalWeight)} g`}</td>
                                 <td>₹${data.cost.toFixed(2)}</td>
@@ -279,14 +283,10 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
                                     const weight = data.recipes[recipe.name] || 0;
                                     return `<td>${weight ? (weight >= 1000 ? `${(weight / 1000).toFixed(2)} kg` : `${Math.round(weight)} g`) : '-'}</td>`;
                                   }).join('')}
-                                ${(() => {
-                                  const avail = availableQty[ingredientName] || 0;
-                                  const indent = Math.max(0, data.totalWeight - avail);
-                                  return `<td>${avail >= 1000 ? `${(avail / 1000).toFixed(2)} kg` : `${Math.round(avail)} g`}</td>
-                                          <td>${indent >= 1000 ? `${(indent / 1000).toFixed(2)} kg` : `${Math.round(indent)} g`}</td>`;
-                                })()}
+                                <td>${avail >= 1000 ? `${(avail / 1000).toFixed(2)} kg` : `${Math.round(avail)} g`}</td>
+                                <td>${indent >= 1000 ? `${(indent / 1000).toFixed(2)} kg` : `${Math.round(indent)} g`}</td>
                               </tr>
-                            `).join('')}
+                            `}).join('')}
                             <tr class="total-row">
                               <td><strong>Grand Total</strong></td>
                               <td>-</td>
