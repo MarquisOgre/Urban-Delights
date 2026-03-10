@@ -22,7 +22,7 @@ import { fetchMasterIngredients, fetchRecipesWithIngredients } from '@/services/
 const BackendDashboard: React.FC = () => {
   const [currentView, setCurrentView] = useState('main');
 
-  const viewOrder = ['main', 'recipes', 'manage-recipes', 'ingredients', 'add-recipe', 'pricing', 'indent', 'stock-register'];
+  const viewOrder = ['main', 'recipes', 'manage-recipes', 'ingredients', 'add-recipe', 'pricing', 'indent', 'stock-register', 'detox-juices'];
 
   const swipeHandlers = useMemo(() => ({
     onSwipeLeft: () => {
