@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Download, ArrowLeft } from 'lucide-react';
 import IndentSessionManager from './IndentSessionManager';
-import * as XLSX from 'xlsx';
+import XLSX from 'xlsx-js-style';
 import { useToast } from '@/hooks/use-toast';
 import { type MasterIngredient, type RecipeWithIngredients } from '@/services/database';
 
