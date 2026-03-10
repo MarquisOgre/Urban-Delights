@@ -225,6 +225,8 @@ const BackendDashboard: React.FC = () => {
         return <Indent recipes={recipes} masterIngredients={masterIngredients} onBackToDashboard={() => setCurrentView('main')} />;
       case 'stock-register':
         return <StockRegister onBackToDashboard={() => setCurrentView('main')} />;
+      case 'detox-juices':
+        return <DetoxJuices onBackToDashboard={() => setCurrentView('main')} />;
       default:
         return (
           <div className="space-y-6">

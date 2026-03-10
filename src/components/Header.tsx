@@ -22,6 +22,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, onRefresh 
     { key: 'pricing', label: 'Pricing Manager', icon: DollarSign },
     { key: 'indent', label: 'Indent', icon: ClipboardList },
     { key: 'stock-register', label: 'Stock Register', icon: Warehouse },
+    { key: 'detox-juices', label: 'Detox Juices', icon: GlassWater },
   ];
 
   const handleNavClick = (key: string) => {
