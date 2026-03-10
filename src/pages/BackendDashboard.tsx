@@ -5,7 +5,7 @@ import { useSwipe } from '@/hooks/use-swipe';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChefHat, Package, Plus, DollarSign, FileText, Archive } from 'lucide-react';
+import { ChefHat, Package, Plus, DollarSign, FileText, Archive, GlassWater } from 'lucide-react';
 import ManageRecipes from '@/components/ManageRecipes';
 import AddRecipe from '@/components/AddRecipe';
 import MasterIngredientList from '@/components/MasterIngredientList';
@@ -13,6 +13,7 @@ import Indent from '@/components/Indent';
 import PricingManager from '@/components/PricingManager';
 import StockRegister from '@/components/StockRegister';
 import Recipes from '@/components/Recipes';
+import DetoxJuices from '@/components/DetoxJuices';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import Header from '@/components/Header';
@@ -21,7 +22,7 @@ import { fetchMasterIngredients, fetchRecipesWithIngredients } from '@/services/
 const BackendDashboard: React.FC = () => {
   const [currentView, setCurrentView] = useState('main');
 
-  const viewOrder = ['main', 'recipes', 'manage-recipes', 'ingredients', 'add-recipe', 'pricing', 'indent', 'stock-register'];
+  const viewOrder = ['main', 'recipes', 'manage-recipes', 'ingredients', 'add-recipe', 'pricing', 'indent', 'stock-register', 'detox-juices'];
 
   const swipeHandlers = useMemo(() => ({
     onSwipeLeft: () => {
@@ -159,6 +160,13 @@ const BackendDashboard: React.FC = () => {
       icon: Archive,
       color: 'bg-red-500',
       key: 'stock-register'
+    },
+    {
+      title: 'Detox Juices',
+      description: 'Juice recipes, ingredients & costing',
+      icon: GlassWater,
+      color: 'bg-green-600',
+      key: 'detox-juices'
     }
   ];
 
@@ -217,6 +225,8 @@ const BackendDashboard: React.FC = () => {
         return <Indent recipes={recipes} masterIngredients={masterIngredients} onBackToDashboard={() => setCurrentView('main')} />;
       case 'stock-register':
         return <StockRegister onBackToDashboard={() => setCurrentView('main')} />;
+      case 'detox-juices':
+        return <DetoxJuices onBackToDashboard={() => setCurrentView('main')} />;
       default:
         return (
           <div className="space-y-6">
