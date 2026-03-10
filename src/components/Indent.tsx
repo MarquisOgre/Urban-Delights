@@ -262,10 +262,11 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
                           body { font-family: Arial, sans-serif; margin: 20px; }
                           h1 { text-align: center; color: #333; margin-bottom: 30px; }
                           table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                          th { background-color: #f5f5f5; font-weight: bold; }
-                          tr:nth-child(even) { background-color: #f9f9f9; }
-                          .total-row { font-weight: bold; background-color: #e8f4fd !important; }
+                           th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                           th { background-color: #f5f5f5; font-weight: bold; }
+                           .sufficient-row { background-color: #dcfce7 !important; }
+                           tr:nth-child(even):not(.sufficient-row) { background-color: #f9f9f9; }
+                           .total-row { font-weight: bold; background-color: #e8f4fd !important; }
                         </style>
                       </head>
                       <body>
