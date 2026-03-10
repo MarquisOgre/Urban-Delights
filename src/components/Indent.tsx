@@ -293,7 +293,7 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
                                 const isSufficient = avail >= data.totalWeight && avail > 0;
                                 const indent = Math.max(0, data.totalWeight - avail);
                                 return `
-                              <tr style="${isSufficient ? 'background-color: #dcfce7 !important;' : ''}">
+                              <tr class="${isSufficient ? 'sufficient-row' : ''}">
                                 <td>${ingredientName}</td>
                                 <td>${data.totalWeight >= 1000 ? `${(data.totalWeight / 1000).toFixed(2)} kg` : `${Math.round(data.totalWeight)} g`}</td>
                                 <td>₹${data.cost.toFixed(2)}</td>
