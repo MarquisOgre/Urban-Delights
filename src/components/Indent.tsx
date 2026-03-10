@@ -340,8 +340,11 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
               <TableBody>
                 {Object.entries(calculatedData.ingredientTotals)
                   .sort(([a], [b]) => a.localeCompare(b))
-                  .map(([ingredientName, data]) => (
-                  <TableRow key={ingredientName}>
+                  .map(([ingredientName, data]) => {
+                    const avail = availableQty[ingredientName] || 0;
+                    const isSufficient = avail >= data.totalWeight && avail > 0;
+                    return (
+                  <TableRow key={ingredientName} className={isSufficient ? 'bg-green-100' : ''}>
                     <TableCell className="font-medium">{ingredientName}</TableCell>
                     <TableCell>
                       {data.totalWeight >= 1000 
@@ -375,13 +378,14 @@ const Indent = ({ recipes, masterIngredients, onBackToDashboard }: IndentProps) 
                     </TableCell>
                     <TableCell className="font-medium">
                       {(() => {
-                        const indentGrams = data.totalWeight - (availableQty[ingredientName] || 0);
+                        const indentGrams = data.totalWeight - avail;
                         const val = Math.max(0, indentGrams);
                         return val >= 1000 ? `${(val / 1000).toFixed(2)} kg` : `${Math.round(val)} g`;
                       })()}
                     </TableCell>
                   </TableRow>
-                ))}
+                    );
+                  })}
                 
                 {/* Grand Total Row */}
                 <TableRow className="font-bold bg-gray-50">
