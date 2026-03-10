@@ -160,6 +160,13 @@ const BackendDashboard: React.FC = () => {
       icon: Archive,
       color: 'bg-red-500',
       key: 'stock-register'
+    },
+    {
+      title: 'Detox Juices',
+      description: 'Juice recipes, ingredients & costing',
+      icon: GlassWater,
+      color: 'bg-green-600',
+      key: 'detox-juices'
     }
   ];
 
