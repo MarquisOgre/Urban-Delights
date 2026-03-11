@@ -224,7 +224,7 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
         const scaledQty = ing.quantity * multiplier;
         const cost = (scaledQty / 1000) * ing.pricePerKg;
         return { ...ing, scaledQty, cost };
-      });
+      }).sort((a, b) => a.name.localeCompare(b.name));
       const ingredientCost = scaled.reduce((s, i) => s + i.cost, 0);
       const totalBottleCost = bottleCount * BOTTLE_COST;
       const totalCost = ingredientCost + totalBottleCost;
