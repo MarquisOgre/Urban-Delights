@@ -4,7 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowLeft, GlassWater } from 'lucide-react';
+import { ArrowLeft, GlassWater, FileSpreadsheet, Printer } from 'lucide-react';
+import XLSX from 'xlsx-js-style';
 
 interface DetoxJuicesProps {
   onBackToDashboard: () => void;
@@ -20,7 +21,6 @@ interface IngredientRow {
   pricePerKg: number;
 }
 
-// Vegetable prices (avg of ranges from screenshot, ₹/kg)
 const PRICES: Record<string, number> = {
   'Wheatgrass': 200,
   'Ash Gourd': 23,
@@ -32,14 +32,22 @@ const PRICES: Record<string, number> = {
   'Coriander Leaves': 80,
   'Mint Leaves': 100,
   'Ginger': 135,
-  'Lemon Juice': 200, // approx per kg/liter
+  'Lemon Juice': 200,
   'Black Salt': 60,
   'Water': 0,
 };
 
 const BOTTLE_COST = 4;
 
-// Sujatha Juicer recipes – 10 glasses (300ml each = 3L batch), no water needed
+// Day multipliers for 7-day plan: Ash Gourd ×2, Wheatgrass ×2, others ×1
+const DAY_MULTIPLIERS: Record<string, number> = {
+  ash_gourd: 2,
+  wheatgrass: 2,
+  beetroot: 1,
+  carrot: 1,
+  mix_veg: 1,
+};
+
 const SUJATHA_RECIPES: Record<string, IngredientRow[]> = {
   wheatgrass: [
     { name: 'Wheatgrass', quantity: 400, unit: 'g', pricePerKg: PRICES['Wheatgrass'] },
@@ -91,7 +99,6 @@ const SUJATHA_RECIPES: Record<string, IngredientRow[]> = {
   ],
 };
 
-// Mixer recipes – 3L batch, includes water
 const MIXER_RECIPES: Record<string, IngredientRow[]> = {
   wheatgrass: [
     { name: 'Wheatgrass', quantity: 400, unit: 'g', pricePerKg: PRICES['Wheatgrass'] },
@@ -156,7 +163,7 @@ const JUICE_LABELS: Record<string, string> = {
   wheatgrass: 'Wheat Grass Shot',
 };
 
-const BATCH_GLASSES = 10; // each batch = 10 glasses of 300ml
+const BATCH_GLASSES = 10;
 
 const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
   const [juiceType, setJuiceType] = useState<JuiceType>('ash_gourd');
@@ -173,15 +180,16 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
 
   const computedData = useMemo(() => {
     if (juiceType === 'all') {
-      // Combine all juice ingredients, aggregating by name
+      // 7-day plan: Ash Gourd ×2, Wheatgrass ×2, Beetroot ×1, Carrot ×1, Mix Veg ×1 = 7 days
       const aggregated: Record<string, { name: string; unit: string; pricePerKg: number; scaledQty: number; cost: number }> = {};
-      const allKeys = Object.keys(JUICE_LABELS);
-      const totalBottles = bottleCount * allKeys.length;
-      
-      allKeys.forEach(key => {
+      const totalDays = 7;
+      const totalBottles = totalDays * bottleCount;
+
+      Object.keys(JUICE_LABELS).forEach(key => {
+        const dayMul = DAY_MULTIPLIERS[key] || 1;
         const baseIngredients = recipes[key] || [];
         baseIngredients.forEach(ing => {
-          const scaledQty = ing.quantity * multiplier;
+          const scaledQty = ing.quantity * multiplier * dayMul;
           const cost = (scaledQty / 1000) * ing.pricePerKg;
           if (aggregated[ing.name]) {
             aggregated[ing.name].scaledQty += scaledQty;
@@ -200,7 +208,7 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
 
       return [{
         key: 'all',
-        label: `All Juices Combined (${allKeys.length} types × ${bottleCount} bottles each = ${totalBottles} bottles)`,
+        label: `Weekly Plan (7 Days) — Ash Gourd ×2, Wheatgrass ×2, Beetroot ×1, Carrot ×1, Mix Veg ×1`,
         ingredients,
         ingredientCost,
         totalBottleCost,
@@ -241,6 +249,141 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
     return `${qty.toFixed(1)} ${unit}`;
   };
 
+  const handleExportExcel = () => {
+    const wb = XLSX.utils.book_new();
+
+    computedData.forEach(juice => {
+      const headerStyle = { font: { bold: true, sz: 12, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: '2E7D32' } }, alignment: { horizontal: 'center' } };
+      const boldStyle = { font: { bold: true } };
+      const rightAlign = { alignment: { horizontal: 'right' } };
+      const boldRight = { font: { bold: true }, alignment: { horizontal: 'right' } };
+
+      const rows: any[][] = [];
+
+      // Title
+      rows.push([{ v: juice.label, s: { font: { bold: true, sz: 14, color: { rgb: '2E7D32' } } } }]);
+      rows.push([{ v: `Method: ${method === 'sujatha' ? 'Sujatha Juicer' : 'Normal Mixer'} | Bottles: ${juice.totalBottles}`, s: { font: { sz: 10, color: { rgb: '666666' } } } }]);
+      rows.push([]);
+
+      // Header row
+      rows.push([
+        { v: 'Ingredient', s: headerStyle },
+        { v: `Qty (${juice.totalBottles} bottles)`, s: headerStyle },
+        { v: 'Rate (₹/kg)', s: headerStyle },
+        { v: 'Cost (₹)', s: headerStyle },
+      ]);
+
+      // Data rows
+      juice.ingredients.forEach(ing => {
+        rows.push([
+          { v: ing.name, s: boldStyle },
+          { v: formatQty(ing.scaledQty, ing.unit), s: rightAlign },
+          { v: `₹${ing.pricePerKg}`, s: rightAlign },
+          { v: `₹${ing.cost.toFixed(2)}`, s: rightAlign },
+        ]);
+      });
+
+      rows.push([]);
+      rows.push([
+        { v: 'Ingredient Cost', s: boldStyle }, '', '',
+        { v: `₹${juice.ingredientCost.toFixed(2)}`, s: boldRight },
+      ]);
+      rows.push([
+        { v: `Bottle Cost (${juice.totalBottles} × ₹${BOTTLE_COST})`, s: boldStyle }, '', '',
+        { v: `₹${juice.totalBottleCost.toFixed(2)}`, s: boldRight },
+      ]);
+      rows.push([
+        { v: 'Total Cost', s: { font: { bold: true, sz: 12, color: { rgb: '2E7D32' } } } }, '', '',
+        { v: `₹${juice.totalCost.toFixed(2)}`, s: { font: { bold: true, sz: 12, color: { rgb: '2E7D32' } }, alignment: { horizontal: 'right' } } },
+      ]);
+      rows.push([
+        { v: 'Cost per Glass', s: { font: { bold: true, color: { rgb: '7B1FA2' } } } }, '', '',
+        { v: `₹${juice.costPerGlass.toFixed(2)}`, s: { font: { bold: true, color: { rgb: '7B1FA2' } }, alignment: { horizontal: 'right' } } },
+      ]);
+
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols'] = [{ wch: 22 }, { wch: 20 }, { wch: 14 }, { wch: 14 }];
+
+      const sheetName = juice.key === 'all' ? 'Weekly Plan' : juice.label.substring(0, 31);
+      XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    });
+
+    const fileName = juiceType === 'all'
+      ? `Detox_Juices_Weekly_Plan_${bottleCount}bottles.xlsx`
+      : `Detox_${JUICE_LABELS[juiceType]?.replace(/\s/g, '_')}_${bottleCount}bottles.xlsx`;
+    XLSX.writeFile(wb, fileName);
+  };
+
+  const handlePrint = () => {
+    const printContent = computedData.map(juice => `
+      <div style="margin-bottom:30px;page-break-inside:avoid;">
+        <h2 style="color:#2E7D32;margin-bottom:4px;">${juice.label}</h2>
+        <p style="color:#666;font-size:12px;margin-bottom:12px;">
+          Method: ${method === 'sujatha' ? 'Sujatha Juicer' : 'Normal Mixer'} | Bottles: ${juice.totalBottles}
+        </p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead>
+            <tr style="background:#2E7D32;color:white;">
+              <th style="padding:8px;text-align:left;border:1px solid #ccc;">Ingredient</th>
+              <th style="padding:8px;text-align:right;border:1px solid #ccc;">Qty (${juice.totalBottles} bottles)</th>
+              <th style="padding:8px;text-align:right;border:1px solid #ccc;">Rate (₹/kg)</th>
+              <th style="padding:8px;text-align:right;border:1px solid #ccc;">Cost (₹)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${juice.ingredients.map((ing, i) => `
+              <tr style="background:${i % 2 === 0 ? '#f9f9f9' : 'white'};">
+                <td style="padding:6px 8px;border:1px solid #ddd;font-weight:500;">${ing.name}</td>
+                <td style="padding:6px 8px;border:1px solid #ddd;text-align:right;font-weight:600;">${formatQty(ing.scaledQty, ing.unit)}</td>
+                <td style="padding:6px 8px;border:1px solid #ddd;text-align:right;">₹${ing.pricePerKg}</td>
+                <td style="padding:6px 8px;border:1px solid #ddd;text-align:right;">₹${ing.cost.toFixed(2)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;">
+          <div style="background:#EBF5FB;padding:10px 16px;border-radius:8px;text-align:center;flex:1;">
+            <div style="font-size:11px;color:#1976D2;">Ingredient Cost</div>
+            <div style="font-size:18px;font-weight:bold;color:#0D47A1;">₹${juice.ingredientCost.toFixed(2)}</div>
+          </div>
+          <div style="background:#FFF3E0;padding:10px 16px;border-radius:8px;text-align:center;flex:1;">
+            <div style="font-size:11px;color:#E65100;">Bottle Cost (${juice.totalBottles} × ₹${BOTTLE_COST})</div>
+            <div style="font-size:18px;font-weight:bold;color:#BF360C;">₹${juice.totalBottleCost.toFixed(2)}</div>
+          </div>
+          <div style="background:#E8F5E9;padding:10px 16px;border-radius:8px;text-align:center;flex:1;">
+            <div style="font-size:11px;color:#2E7D32;">Total Cost</div>
+            <div style="font-size:18px;font-weight:bold;color:#1B5E20;">₹${juice.totalCost.toFixed(2)}</div>
+          </div>
+          <div style="background:#F3E5F5;padding:10px 16px;border-radius:8px;text-align:center;flex:1;">
+            <div style="font-size:11px;color:#7B1FA2;">Cost per Glass</div>
+            <div style="font-size:18px;font-weight:bold;color:#4A148C;">₹${juice.costPerGlass.toFixed(2)}</div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Detox Juices Recipes</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            @media print { body { padding: 10px; } }
+          </style>
+        </head>
+        <body>
+          <h1 style="color:#2E7D32;border-bottom:2px solid #2E7D32;padding-bottom:8px;">🥤 Detox Juices Recipes</h1>
+          ${printContent}
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Sticky Header */}
@@ -258,7 +401,7 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
                   <SelectValue placeholder="Select Juice" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">ALL</SelectItem>
+                  <SelectItem value="all">ALL (7 Days)</SelectItem>
                   <SelectItem value="ash_gourd">Ash Gourd Juice</SelectItem>
                   <SelectItem value="beetroot">Beetroot Juice</SelectItem>
                   <SelectItem value="carrot">Carrot Juice</SelectItem>
@@ -280,7 +423,7 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
 
               {/* Bottle Count */}
               <div className="flex items-center gap-1">
-                <span className="text-xs text-gray-600 whitespace-nowrap">Bottles (300ml):</span>
+                <span className="text-xs text-gray-600 whitespace-nowrap">Bottles/day:</span>
                 <Input
                   type="number"
                   min={1}
@@ -289,6 +432,14 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
                   className="w-20 h-9 text-sm"
                 />
               </div>
+
+              {/* Export & Print */}
+              <Button size="sm" variant="outline" onClick={handleExportExcel} className="h-9" title="Export to Excel">
+                <FileSpreadsheet className="h-4 w-4" />
+              </Button>
+              <Button size="sm" variant="outline" onClick={handlePrint} className="h-9" title="Print">
+                <Printer className="h-4 w-4" />
+              </Button>
 
               <Button size="sm" variant="outline" onClick={onBackToDashboard} className="h-9">
                 <ArrowLeft className="h-4 w-4" />
