@@ -323,7 +323,7 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
               <CardTitle className="text-base sm:text-lg text-green-800 flex items-center justify-between flex-wrap gap-2">
                 <span>{juice.label}</span>
                 <span className="text-sm font-normal text-gray-500">
-                  {method === 'sujatha' ? 'Sujatha Juicer' : 'Normal Mixer'} · {bottleCount} bottles
+                  {method === 'sujatha' ? 'Sujatha Juicer' : 'Normal Mixer'} · {juice.totalBottles} bottles
                 </span>
               </CardTitle>
             </CardHeader>
@@ -333,8 +333,7 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="text-xs">Ingredient</TableHead>
-                      <TableHead className="text-xs text-right">Base Qty (10 glasses)</TableHead>
-                      <TableHead className="text-xs text-right">Scaled Qty ({bottleCount} bottles)</TableHead>
+                      <TableHead className="text-xs text-right">Qty ({juice.totalBottles} bottles)</TableHead>
                       <TableHead className="text-xs text-right">Rate (₹/kg)</TableHead>
                       <TableHead className="text-xs text-right">Cost (₹)</TableHead>
                     </TableRow>
@@ -343,7 +342,6 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
                     {juice.ingredients.map((ing, idx) => (
                       <TableRow key={idx}>
                         <TableCell className="text-sm font-medium">{ing.name}</TableCell>
-                        <TableCell className="text-sm text-right">{ing.quantity} {ing.unit}</TableCell>
                         <TableCell className="text-sm text-right font-semibold">{formatQty(ing.scaledQty, ing.unit)}</TableCell>
                         <TableCell className="text-sm text-right">₹{ing.pricePerKg}</TableCell>
                         <TableCell className="text-sm text-right">₹{ing.cost.toFixed(2)}</TableCell>
