@@ -358,7 +358,7 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
                   <p className="text-lg font-bold text-blue-800">₹{juice.ingredientCost.toFixed(2)}</p>
                 </div>
                 <div className="bg-orange-50 p-3 rounded-lg text-center">
-                  <p className="text-xs text-orange-600">Bottle Cost ({bottleCount} × ₹{BOTTLE_COST})</p>
+                  <p className="text-xs text-orange-600">Bottle Cost ({juice.totalBottles} × ₹{BOTTLE_COST})</p>
                   <p className="text-lg font-bold text-orange-800">₹{juice.totalBottleCost.toFixed(2)}</p>
                 </div>
                 <div className="bg-green-50 p-3 rounded-lg text-center">
