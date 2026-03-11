@@ -22,19 +22,19 @@ interface IngredientRow {
 }
 
 const PRICES: Record<string, number> = {
-  'Wheatgrass': 200,
-  'Ash Gourd': 23,
-  'Carrot': 60,
-  'Beetroot': 40,
-  'Cucumber': 34,
-  'Bottle Gourd': 29,
   'Amla': 105,
+  'Ash Gourd': 23,
+  'Beetroot': 40,
+  'Black Salt': 60,
+  'Bottle Gourd': 29,
+  'Carrot': 60,
   'Coriander Leaves': 80,
-  'Mint Leaves': 100,
+  'Cucumber': 34,
   'Ginger': 135,
   'Lemon Juice': 200,
-  'Black Salt': 60,
+  'Mint Leaves': 100,
   'Water': 1,
+  'Wheatgrass': 200,
 };
 
 const BOTTLE_COST = 4;
