@@ -172,6 +172,44 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
   const recipes = method === 'sujatha' ? SUJATHA_RECIPES : MIXER_RECIPES;
 
   const computedData = useMemo(() => {
+    if (juiceType === 'all') {
+      // Combine all juice ingredients, aggregating by name
+      const aggregated: Record<string, { name: string; unit: string; pricePerKg: number; scaledQty: number; cost: number }> = {};
+      const allKeys = Object.keys(JUICE_LABELS);
+      const totalBottles = bottleCount * allKeys.length;
+      
+      allKeys.forEach(key => {
+        const baseIngredients = recipes[key] || [];
+        baseIngredients.forEach(ing => {
+          const scaledQty = ing.quantity * multiplier;
+          const cost = (scaledQty / 1000) * ing.pricePerKg;
+          if (aggregated[ing.name]) {
+            aggregated[ing.name].scaledQty += scaledQty;
+            aggregated[ing.name].cost += cost;
+          } else {
+            aggregated[ing.name] = { name: ing.name, unit: ing.unit, pricePerKg: ing.pricePerKg, scaledQty, cost };
+          }
+        });
+      });
+
+      const ingredients = Object.values(aggregated);
+      const ingredientCost = ingredients.reduce((s, i) => s + i.cost, 0);
+      const totalBottleCost = totalBottles * BOTTLE_COST;
+      const totalCost = ingredientCost + totalBottleCost;
+      const costPerGlass = totalBottles > 0 ? totalCost / totalBottles : 0;
+
+      return [{
+        key: 'all',
+        label: `All Juices Combined (${allKeys.length} types × ${bottleCount} bottles each = ${totalBottles} bottles)`,
+        ingredients,
+        ingredientCost,
+        totalBottleCost,
+        totalCost,
+        costPerGlass,
+        totalBottles,
+      }];
+    }
+
     return juiceKeys.map(key => {
       const baseIngredients = recipes[key] || [];
       const scaled = baseIngredients.map(ing => {
@@ -191,9 +229,10 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
         totalBottleCost,
         totalCost,
         costPerGlass,
+        totalBottles: bottleCount,
       };
     });
-  }, [juiceKeys.join(','), method, bottleCount, multiplier]);
+  }, [juiceType, juiceKeys.join(','), method, bottleCount, multiplier]);
 
   const formatQty = (qty: number, unit: string) => {
     if (qty >= 1000 && (unit === 'g' || unit === 'ml')) {
@@ -284,7 +323,7 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
               <CardTitle className="text-base sm:text-lg text-green-800 flex items-center justify-between flex-wrap gap-2">
                 <span>{juice.label}</span>
                 <span className="text-sm font-normal text-gray-500">
-                  {method === 'sujatha' ? 'Sujatha Juicer' : 'Normal Mixer'} · {bottleCount} bottles
+                  {method === 'sujatha' ? 'Sujatha Juicer' : 'Normal Mixer'} · {juice.totalBottles} bottles
                 </span>
               </CardTitle>
             </CardHeader>
@@ -294,8 +333,7 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="text-xs">Ingredient</TableHead>
-                      <TableHead className="text-xs text-right">Base Qty (10 glasses)</TableHead>
-                      <TableHead className="text-xs text-right">Scaled Qty ({bottleCount} bottles)</TableHead>
+                      <TableHead className="text-xs text-right">Qty ({juice.totalBottles} bottles)</TableHead>
                       <TableHead className="text-xs text-right">Rate (₹/kg)</TableHead>
                       <TableHead className="text-xs text-right">Cost (₹)</TableHead>
                     </TableRow>
@@ -304,7 +342,6 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
                     {juice.ingredients.map((ing, idx) => (
                       <TableRow key={idx}>
                         <TableCell className="text-sm font-medium">{ing.name}</TableCell>
-                        <TableCell className="text-sm text-right">{ing.quantity} {ing.unit}</TableCell>
                         <TableCell className="text-sm text-right font-semibold">{formatQty(ing.scaledQty, ing.unit)}</TableCell>
                         <TableCell className="text-sm text-right">₹{ing.pricePerKg}</TableCell>
                         <TableCell className="text-sm text-right">₹{ing.cost.toFixed(2)}</TableCell>
@@ -321,7 +358,7 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
                   <p className="text-lg font-bold text-blue-800">₹{juice.ingredientCost.toFixed(2)}</p>
                 </div>
                 <div className="bg-orange-50 p-3 rounded-lg text-center">
-                  <p className="text-xs text-orange-600">Bottle Cost ({bottleCount} × ₹{BOTTLE_COST})</p>
+                  <p className="text-xs text-orange-600">Bottle Cost ({juice.totalBottles} × ₹{BOTTLE_COST})</p>
                   <p className="text-lg font-bold text-orange-800">₹{juice.totalBottleCost.toFixed(2)}</p>
                 </div>
                 <div className="bg-green-50 p-3 rounded-lg text-center">
