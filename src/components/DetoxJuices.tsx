@@ -450,82 +450,144 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
       </div>
 
       {/* Content */}
-      <div className="px-2 sm:px-6 py-4 sm:py-6 space-y-6">
-        {/* Vegetable Price Reference */}
-        <Card>
-          <CardHeader className="pb-2 p-3 sm:p-6 sm:pb-2">
-            <CardTitle className="text-sm sm:text-base text-gray-700">Vegetable Market Prices (₹/kg)</CardTitle>
+
+<div className="px-2 sm:px-6 py-4 sm:py-6">
+
+  <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+    {/* LEFT SIDE - JUICE RECIPE CARDS (80%) */}
+    <div className="lg:col-span-4 space-y-6">
+
+      {computedData.map(juice => (
+        <Card key={juice.key}>
+          <CardHeader className="p-3 sm:p-6 pb-2">
+            <CardTitle className="text-base sm:text-lg text-green-800 flex items-center justify-between flex-wrap gap-2">
+              <span>{juice.label}</span>
+              <span className="text-sm font-normal text-gray-500">
+                {method === 'sujatha' ? 'Sujatha Juicer' : 'Normal Mixer'} · {juice.totalBottles} bottles
+              </span>
+            </CardTitle>
           </CardHeader>
+
           <CardContent className="p-3 sm:p-6 pt-0">
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(PRICES).filter(([, p]) => p > 0).map(([name, price]) => (
-                <span key={name} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs sm:text-sm">
+
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-xs">Ingredient</TableHead>
+                    <TableHead className="text-xs text-right">
+                      Qty ({juice.totalBottles} bottles)
+                    </TableHead>
+                    <TableHead className="text-xs text-right">Rate (₹/kg)</TableHead>
+                    <TableHead className="text-xs text-right">Cost (₹)</TableHead>
+                  </TableRow>
+                </TableHeader>
+
+                <TableBody>
+                  {juice.ingredients.map((ing, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell className="text-sm font-medium">
+                        {ing.name}
+                      </TableCell>
+
+                      <TableCell className="text-sm text-right font-semibold">
+                        {formatQty(ing.scaledQty, ing.unit)}
+                      </TableCell>
+
+                      <TableCell className="text-sm text-right">
+                        ₹{ing.pricePerKg}
+                      </TableCell>
+
+                      <TableCell className="text-sm text-right">
+                        ₹{ing.cost.toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+
+              </Table>
+            </div>
+
+            {/* Cost Summary */}
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+              <div className="bg-blue-50 p-3 rounded-lg text-center">
+                <p className="text-xs text-blue-600">Ingredient Cost</p>
+                <p className="text-lg font-bold text-blue-800">
+                  ₹{juice.ingredientCost.toFixed(2)}
+                </p>
+              </div>
+
+              <div className="bg-orange-50 p-3 rounded-lg text-center">
+                <p className="text-xs text-orange-600">
+                  Bottle Cost ({juice.totalBottles} × ₹{BOTTLE_COST})
+                </p>
+                <p className="text-lg font-bold text-orange-800">
+                  ₹{juice.totalBottleCost.toFixed(2)}
+                </p>
+              </div>
+
+              <div className="bg-green-50 p-3 rounded-lg text-center">
+                <p className="text-xs text-green-600">Total Cost</p>
+                <p className="text-lg font-bold text-green-800">
+                  ₹{juice.totalCost.toFixed(2)}
+                </p>
+              </div>
+
+              <div className="bg-purple-50 p-3 rounded-lg text-center">
+                <p className="text-xs text-purple-600">Cost per Glass</p>
+                <p className="text-lg font-bold text-purple-800">
+                  ₹{juice.costPerGlass.toFixed(2)}
+                </p>
+              </div>
+
+            </div>
+
+          </CardContent>
+        </Card>
+      ))}
+
+    </div>
+
+
+    {/* RIGHT SIDE - VEGETABLE MARKET PRICES (20%) */}
+    <div className="lg:col-span-1">
+
+      <Card className="sticky top-6">
+
+        <CardHeader className="pb-2 p-3 sm:p-6 sm:pb-2">
+          <CardTitle className="text-sm sm:text-base text-gray-700">
+            Vegetable Market Prices (₹/kg)
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent className="p-3 sm:p-6 pt-0">
+
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(PRICES)
+              .filter(([, p]) => p > 0)
+              .map(([name, price]) => (
+                <span
+                  key={name}
+                  className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs sm:text-sm"
+                >
                   {name}: <strong>₹{price}</strong>/kg
                 </span>
               ))}
-            </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Juice Recipe Cards */}
-        {computedData.map(juice => (
-          <Card key={juice.key}>
-            <CardHeader className="p-3 sm:p-6 pb-2">
-              <CardTitle className="text-base sm:text-lg text-green-800 flex items-center justify-between flex-wrap gap-2">
-                <span>{juice.label}</span>
-                <span className="text-sm font-normal text-gray-500">
-                  {method === 'sujatha' ? 'Sujatha Juicer' : 'Normal Mixer'} · {juice.totalBottles} bottles
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-3 sm:p-6 pt-0">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-xs">Ingredient</TableHead>
-                      <TableHead className="text-xs text-right">Qty ({juice.totalBottles} bottles)</TableHead>
-                      <TableHead className="text-xs text-right">Rate (₹/kg)</TableHead>
-                      <TableHead className="text-xs text-right">Cost (₹)</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {juice.ingredients.map((ing, idx) => (
-                      <TableRow key={idx}>
-                        <TableCell className="text-sm font-medium">{ing.name}</TableCell>
-                        <TableCell className="text-sm text-right font-semibold">{formatQty(ing.scaledQty, ing.unit)}</TableCell>
-                        <TableCell className="text-sm text-right">₹{ing.pricePerKg}</TableCell>
-                        <TableCell className="text-sm text-right">₹{ing.cost.toFixed(2)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+        </CardContent>
 
-              {/* Cost Summary */}
-              <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="bg-blue-50 p-3 rounded-lg text-center">
-                  <p className="text-xs text-blue-600">Ingredient Cost</p>
-                  <p className="text-lg font-bold text-blue-800">₹{juice.ingredientCost.toFixed(2)}</p>
-                </div>
-                <div className="bg-orange-50 p-3 rounded-lg text-center">
-                  <p className="text-xs text-orange-600">Bottle Cost ({juice.totalBottles} × ₹{BOTTLE_COST})</p>
-                  <p className="text-lg font-bold text-orange-800">₹{juice.totalBottleCost.toFixed(2)}</p>
-                </div>
-                <div className="bg-green-50 p-3 rounded-lg text-center">
-                  <p className="text-xs text-green-600">Total Cost</p>
-                  <p className="text-lg font-bold text-green-800">₹{juice.totalCost.toFixed(2)}</p>
-                </div>
-                <div className="bg-purple-50 p-3 rounded-lg text-center">
-                  <p className="text-xs text-purple-600">Cost per Glass</p>
-                  <p className="text-lg font-bold text-purple-800">₹{juice.costPerGlass.toFixed(2)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      </Card>
+
     </div>
+
+  </div>
+
+</div>
+</div>
+
   );
 };
 
