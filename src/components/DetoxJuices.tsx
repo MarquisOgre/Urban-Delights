@@ -34,7 +34,7 @@ const PRICES: Record<string, number> = {
   'Ginger': 135,
   'Lemon Juice': 200,
   'Black Salt': 60,
-  'Water': 0,
+  'Water': 1,
 };
 
 const BOTTLE_COST = 4;
@@ -108,7 +108,7 @@ const MIXER_RECIPES: Record<string, IngredientRow[]> = {
     { name: 'Ginger', quantity: 50, unit: 'g', pricePerKg: PRICES['Ginger'] },
     { name: 'Lemon Juice', quantity: 50, unit: 'ml', pricePerKg: PRICES['Lemon Juice'] },
     { name: 'Black Salt', quantity: 6, unit: 'g', pricePerKg: PRICES['Black Salt'] },
-    { name: 'Water', quantity: 2200, unit: 'ml', pricePerKg: 0 },
+    { name: 'Water', quantity: 2200, unit: 'ml', pricePerKg: PRICES['Water'] },
   ],
   ash_gourd: [
     { name: 'Ash Gourd', quantity: 2500, unit: 'g', pricePerKg: PRICES['Ash Gourd'] },
@@ -118,7 +118,7 @@ const MIXER_RECIPES: Record<string, IngredientRow[]> = {
     { name: 'Ginger', quantity: 50, unit: 'g', pricePerKg: PRICES['Ginger'] },
     { name: 'Lemon Juice', quantity: 50, unit: 'ml', pricePerKg: PRICES['Lemon Juice'] },
     { name: 'Black Salt', quantity: 6, unit: 'g', pricePerKg: PRICES['Black Salt'] },
-    { name: 'Water', quantity: 1000, unit: 'ml', pricePerKg: 0 },
+    { name: 'Water', quantity: 1000, unit: 'ml', pricePerKg: PRICES['Water'] },
   ],
   carrot: [
     { name: 'Carrot', quantity: 2500, unit: 'g', pricePerKg: PRICES['Carrot'] },
@@ -128,7 +128,7 @@ const MIXER_RECIPES: Record<string, IngredientRow[]> = {
     { name: 'Ginger', quantity: 50, unit: 'g', pricePerKg: PRICES['Ginger'] },
     { name: 'Lemon Juice', quantity: 50, unit: 'ml', pricePerKg: PRICES['Lemon Juice'] },
     { name: 'Black Salt', quantity: 6, unit: 'g', pricePerKg: PRICES['Black Salt'] },
-    { name: 'Water', quantity: 1200, unit: 'ml', pricePerKg: 0 },
+    { name: 'Water', quantity: 1200, unit: 'ml', pricePerKg: PRICES['Water'] },
   ],
   beetroot: [
     { name: 'Beetroot', quantity: 2300, unit: 'g', pricePerKg: PRICES['Beetroot'] },
@@ -138,7 +138,7 @@ const MIXER_RECIPES: Record<string, IngredientRow[]> = {
     { name: 'Ginger', quantity: 50, unit: 'g', pricePerKg: PRICES['Ginger'] },
     { name: 'Lemon Juice', quantity: 50, unit: 'ml', pricePerKg: PRICES['Lemon Juice'] },
     { name: 'Black Salt', quantity: 6, unit: 'g', pricePerKg: PRICES['Black Salt'] },
-    { name: 'Water', quantity: 1200, unit: 'ml', pricePerKg: 0 },
+    { name: 'Water', quantity: 1200, unit: 'ml', pricePerKg: PRICES['Water'] },
   ],
   mix_veg: [
     { name: 'Carrot', quantity: 1000, unit: 'g', pricePerKg: PRICES['Carrot'] },
@@ -151,7 +151,7 @@ const MIXER_RECIPES: Record<string, IngredientRow[]> = {
     { name: 'Ginger', quantity: 50, unit: 'g', pricePerKg: PRICES['Ginger'] },
     { name: 'Lemon Juice', quantity: 50, unit: 'ml', pricePerKg: PRICES['Lemon Juice'] },
     { name: 'Black Salt', quantity: 6, unit: 'g', pricePerKg: PRICES['Black Salt'] },
-    { name: 'Water', quantity: 1200, unit: 'ml', pricePerKg: 0 },
+    { name: 'Water', quantity: 1200, unit: 'ml', pricePerKg: PRICES['Water'] },
   ],
 };
 
@@ -200,7 +200,7 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
         });
       });
 
-      const ingredients = Object.values(aggregated);
+      const ingredients = Object.values(aggregated).sort((a, b) => a.name.localeCompare(b.name));
       const ingredientCost = ingredients.reduce((s, i) => s + i.cost, 0);
       const totalBottleCost = totalBottles * BOTTLE_COST;
       const totalCost = ingredientCost + totalBottleCost;
@@ -224,7 +224,7 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
         const scaledQty = ing.quantity * multiplier;
         const cost = (scaledQty / 1000) * ing.pricePerKg;
         return { ...ing, scaledQty, cost };
-      });
+      }).sort((a, b) => a.name.localeCompare(b.name));
       const ingredientCost = scaled.reduce((s, i) => s + i.cost, 0);
       const totalBottleCost = bottleCount * BOTTLE_COST;
       const totalCost = ingredientCost + totalBottleCost;
