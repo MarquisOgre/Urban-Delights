@@ -128,7 +128,7 @@ const MIXER_RECIPES: Record<string, IngredientRow[]> = {
     { name: 'Ginger', quantity: 50, unit: 'g', pricePerKg: PRICES['Ginger'] },
     { name: 'Lemon Juice', quantity: 50, unit: 'ml', pricePerKg: PRICES['Lemon Juice'] },
     { name: 'Black Salt', quantity: 6, unit: 'g', pricePerKg: PRICES['Black Salt'] },
-    { name: 'Water', quantity: 1200, unit: 'ml', pricePerKg: 0 },
+    { name: 'Water', quantity: 1200, unit: 'ml', pricePerKg: PRICES['Water'] },
   ],
   beetroot: [
     { name: 'Beetroot', quantity: 2300, unit: 'g', pricePerKg: PRICES['Beetroot'] },
