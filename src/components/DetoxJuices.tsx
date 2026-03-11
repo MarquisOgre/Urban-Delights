@@ -33,6 +33,7 @@ const PRICES: Record<string, number> = {
   'Ginger': 135,
   'Lemon Juice': 200,
   'Mint Leaves': 100,
+  'Tomato':30,
   'Water': 1,
   'Wheatgrass': 200,
 };
@@ -96,6 +97,7 @@ const SUJATHA_RECIPES: Record<string, IngredientRow[]> = {
     { name: 'Ginger', quantity: 50, unit: 'g', pricePerKg: PRICES['Ginger'] },
     { name: 'Lemon Juice', quantity: 50, unit: 'ml', pricePerKg: PRICES['Lemon Juice'] },
     { name: 'Black Salt', quantity: 6, unit: 'g', pricePerKg: PRICES['Black Salt'] },
+    { name: 'Tomato', quantity: 1200, unit: 'g', pricePerKg: PRICES['Tomato'] },
   ],
 };
 
@@ -152,6 +154,7 @@ const MIXER_RECIPES: Record<string, IngredientRow[]> = {
     { name: 'Lemon Juice', quantity: 50, unit: 'ml', pricePerKg: PRICES['Lemon Juice'] },
     { name: 'Black Salt', quantity: 6, unit: 'g', pricePerKg: PRICES['Black Salt'] },
     { name: 'Water', quantity: 1200, unit: 'ml', pricePerKg: PRICES['Water'] },
+    { name: 'Tomato', quantity: 800, unit: 'g', pricePerKg: PRICES['Tomato'] },
   ],
 };
 
