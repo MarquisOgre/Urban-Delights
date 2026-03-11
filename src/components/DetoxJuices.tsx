@@ -200,7 +200,7 @@ const DetoxJuices = ({ onBackToDashboard }: DetoxJuicesProps) => {
         });
       });
 
-      const ingredients = Object.values(aggregated);
+      const ingredients = Object.values(aggregated).sort((a, b) => a.name.localeCompare(b.name));
       const ingredientCost = ingredients.reduce((s, i) => s + i.cost, 0);
       const totalBottleCost = totalBottles * BOTTLE_COST;
       const totalCost = ingredientCost + totalBottleCost;
