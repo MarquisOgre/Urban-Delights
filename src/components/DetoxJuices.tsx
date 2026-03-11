@@ -34,7 +34,7 @@ const PRICES: Record<string, number> = {
   'Ginger': 135,
   'Lemon Juice': 200,
   'Black Salt': 60,
-  'Water': 0,
+  'Water': 1,
 };
 
 const BOTTLE_COST = 4;
