@@ -1,24 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Printer, Pencil, Trash2 } from 'lucide-react';
 import { fetchOrders, updateOrderStatus, updatePaymentStatus, deleteOrder, Order } from '@/services/orderService';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import html2canvas from 'html2canvas';
+import InvoiceTemplate from './InvoiceTemplate';
+import EditOrderDialog from './EditOrderDialog';
 
 interface OrdersListProps {
   onBackToDashboard: () => void;
   onEditOrder?: (order: Order) => void;
 }
 
-const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard, onEditOrder }) => {
+const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard }) => {
   const { toast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [printingOrder, setPrintingOrder] = useState<Order | null>(null);
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const invoiceRef = useRef<HTMLDivElement>(null);
 
   const loadOrders = async () => {
     setLoading(true);
@@ -68,89 +72,37 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard, onEditOrder 
 
   const formatInvoiceNo = (num: number) => `INV-${String(num).padStart(3, '0')}`;
 
-  const generateInvoicePDF = (order: Order) => {
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
+  const generateInvoicePDF = async (order: Order) => {
+    setPrintingOrder(order);
+    // Wait for render
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-    // Header
-    doc.setFillColor(234, 88, 12); // orange-600
-    doc.rect(0, 0, pageWidth, 40, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Artisan Delights', 14, 20);
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Premium Spices & Condiments', 14, 28);
-    doc.text(`INVOICE`, pageWidth - 14, 18, { align: 'right' });
-    doc.text(formatInvoiceNo(order.invoice_number), pageWidth - 14, 26, { align: 'right' });
-
-    // Reset
-    doc.setTextColor(0, 0, 0);
-    let y = 50;
-
-    // Bill To & Invoice Details
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Bill To:', 14, y);
-    doc.text('Invoice Details:', pageWidth / 2 + 10, y);
-    
-    doc.setFont('helvetica', 'normal');
-    y += 7;
-    doc.text(order.customer_name, 14, y);
-    doc.text(`Invoice #: ${formatInvoiceNo(order.invoice_number)}`, pageWidth / 2 + 10, y);
-    y += 6;
-    doc.text(order.phone_number, 14, y);
-    doc.text(`Date: ${order.order_date || new Date().toLocaleDateString('en-IN')}`, pageWidth / 2 + 10, y);
-    y += 6;
-    doc.text(order.address, 14, y);
-    doc.text(`Payment: ${(order.payment_status || 'unpaid').toUpperCase()}`, pageWidth / 2 + 10, y);
-    y += 6;
-    doc.text(`Status: ${order.status.toUpperCase()}`, pageWidth / 2 + 10, y);
-
-    y += 12;
-
-    // Items table
-    const tableData = (order.items || []).map((item, i) => [
-      String(i + 1),
-      item.recipe_name,
-      item.quantity_type,
-      `₹${item.amount.toFixed(2)}`,
-    ]);
-
-    autoTable(doc, {
-      startY: y,
-      head: [['#', 'Product', 'Quantity', 'Amount']],
-      body: tableData,
-      theme: 'striped',
-      headStyles: { fillColor: [234, 88, 12] },
-      foot: [['', '', 'Total', `₹${order.total_amount.toFixed(2)}`]],
-      footStyles: { fillColor: [249, 115, 22], textColor: [255, 255, 255], fontStyle: 'bold' },
-    });
-
-    // Footer
-    const footerY = doc.internal.pageSize.getHeight() - 20;
-    doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100);
-    doc.text('Artisan Delights | Premium Spices & Condiments', pageWidth / 2, footerY, { align: 'center' });
-    doc.text('This is a computer-generated invoice and does not require a signature.', pageWidth / 2, footerY + 5, { align: 'center' });
-
-    doc.save(`invoice-${formatInvoiceNo(order.invoice_number)}.pdf`);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'received': return 'bg-blue-100 text-blue-800';
-      case 'order_sent': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+    const element = invoiceRef.current;
+    if (!element) {
+      setPrintingOrder(null);
+      return;
     }
-  };
 
-  const getPaymentColor = (status: string | null) => {
-    switch (status) {
-      case 'paid': return 'bg-green-100 text-green-800';
-      case 'unpaid': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+      });
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/png');
+      const pdfWidth = 210;
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`invoice-${formatInvoiceNo(order.invoice_number)}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({ title: 'Failed to generate invoice', variant: 'destructive' });
+    } finally {
+      setPrintingOrder(null);
     }
   };
 
@@ -197,7 +149,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard, onEditOrder 
                           <div key={i} className="text-xs">{item.recipe_name} ({item.quantity_type})</div>
                         ))}
                       </TableCell>
-                      <TableCell className="font-medium">₹{order.total_amount.toFixed(2)}</TableCell>
+                      <TableCell className="font-medium">{'\u20B9'}{order.total_amount.toFixed(2)}</TableCell>
                       <TableCell>
                         <Select value={order.status} onValueChange={(v) => handleStatusChange(order.id, v)}>
                           <SelectTrigger className="w-[130px] h-8 text-xs">
@@ -225,12 +177,10 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard, onEditOrder 
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => generateInvoicePDF(order)}>
                             <Printer className="h-4 w-4" />
                           </Button>
-                          {onEditOrder && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEditOrder(order)}>
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                          )}
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500" onClick={() => handleDelete(order.id)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setEditingOrder(order)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(order.id)}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -243,6 +193,23 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard, onEditOrder 
           )}
         </CardContent>
       </Card>
+
+      {/* Hidden invoice template for PDF generation */}
+      {printingOrder && (
+        <div style={{ position: 'fixed', left: '-9999px', top: 0 }}>
+          <div ref={invoiceRef}>
+            <InvoiceTemplate order={printingOrder} />
+          </div>
+        </div>
+      )}
+
+      {/* Edit Order Dialog */}
+      <EditOrderDialog
+        order={editingOrder}
+        open={!!editingOrder}
+        onClose={() => setEditingOrder(null)}
+        onUpdated={loadOrders}
+      />
     </div>
   );
 };
