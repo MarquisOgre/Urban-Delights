@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, ChefHat, PlusCircle, Package, DollarSign, ClipboardList, Warehouse, RefreshCw, GlassWater } from 'lucide-react';
+import { Menu, X, ChefHat, PlusCircle, Package, DollarSign, ClipboardList, Warehouse, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
@@ -16,13 +16,13 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, onRefresh 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navigationItems = [
+    { key: 'order-dashboard', label: 'Orders', icon: ClipboardList },
     { key: 'recipes', label: 'Recipes', icon: ChefHat },
     { key: 'add-recipe', label: 'Add Recipe', icon: PlusCircle },
     { key: 'ingredients', label: 'Ingredients', icon: Package },
     { key: 'pricing', label: 'Pricing Manager', icon: DollarSign },
     { key: 'indent', label: 'Indent', icon: ClipboardList },
     { key: 'stock-register', label: 'Stock Register', icon: Warehouse },
-    { key: 'detox-juices', label: 'Detox Juices', icon: GlassWater },
   ];
 
   const handleNavClick = (key: string) => {
