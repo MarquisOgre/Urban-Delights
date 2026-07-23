@@ -14,16 +14,368 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      indent_sessions: {
+        Row: {
+          available_qty: Json
+          created_at: string
+          id: string
+          name: string
+          recipe_quantities: Json
+          updated_at: string
+        }
+        Insert: {
+          available_qty?: Json
+          created_at?: string
+          id?: string
+          name: string
+          recipe_quantities?: Json
+          updated_at?: string
+        }
+        Update: {
+          available_qty?: Json
+          created_at?: string
+          id?: string
+          name?: string
+          recipe_quantities?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      master_ingredients: {
+        Row: {
+          brand: string | null
+          created_at: string
+          id: string
+          name: string
+          price_per_kg: number
+          updated_at: string
+        }
+        Insert: {
+          brand?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          price_per_kg: number
+          updated_at?: string
+        }
+        Update: {
+          brand?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          price_per_kg?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          order_id: string
+          quantity_type: string
+          recipe_name: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          order_id: string
+          quantity_type: string
+          recipe_name: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          order_id?: string
+          quantity_type?: string
+          recipe_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          address: string
+          created_at: string
+          customer_name: string
+          id: string
+          invoice_number: number
+          order_date: string | null
+          payment_status: string | null
+          phone_number: string
+          status: string
+          total_amount: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          customer_name: string
+          id?: string
+          invoice_number?: number
+          order_date?: string | null
+          payment_status?: string | null
+          phone_number: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          customer_name?: string
+          id?: string
+          invoice_number?: number
+          order_date?: string | null
+          payment_status?: string | null
+          phone_number?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      podi_stock_entries: {
+        Row: {
+          closing_stock: number
+          created_at: string
+          entry_date: string
+          id: string
+          opening_stock: number
+          podi_name: string
+          production: number
+          sales: number
+          updated_at: string
+        }
+        Insert: {
+          closing_stock?: number
+          created_at?: string
+          entry_date: string
+          id?: string
+          opening_stock?: number
+          podi_name: string
+          production?: number
+          sales?: number
+          updated_at?: string
+        }
+        Update: {
+          closing_stock?: number
+          created_at?: string
+          entry_date?: string
+          id?: string
+          opening_stock?: number
+          podi_name?: string
+          production?: number
+          sales?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          phone_number: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id?: string
+          phone_number?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          phone_number?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      raw_material_entries: {
+        Row: {
+          closing: number
+          created_at: string
+          entry_date: string
+          id: string
+          ingredient: string
+          opening: number
+          purchased: number
+          updated_at: string
+          used: number
+        }
+        Insert: {
+          closing?: number
+          created_at?: string
+          entry_date: string
+          id?: string
+          ingredient: string
+          opening?: number
+          purchased?: number
+          updated_at?: string
+          used?: number
+        }
+        Update: {
+          closing?: number
+          created_at?: string
+          entry_date?: string
+          id?: string
+          ingredient?: string
+          opening?: number
+          purchased?: number
+          updated_at?: string
+          used?: number
+        }
+        Relationships: []
+      }
+      recipe_pricing: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          price: number
+          quantity_type: string
+          recipe_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          price: number
+          quantity_type: string
+          recipe_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          price?: number
+          quantity_type?: string
+          recipe_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      recipes: {
+        Row: {
+          calories: number | null
+          carbs: number | null
+          created_at: string
+          description: string | null
+          fat: number | null
+          id: string
+          ingredients: Json
+          is_hidden: boolean | null
+          name: string
+          overheads: number
+          preparation: string | null
+          protein: number | null
+          selling_price: number
+          shelf_life: string | null
+          storage: string | null
+          updated_at: string
+          yield_output: number
+        }
+        Insert: {
+          calories?: number | null
+          carbs?: number | null
+          created_at?: string
+          description?: string | null
+          fat?: number | null
+          id?: string
+          ingredients?: Json
+          is_hidden?: boolean | null
+          name: string
+          overheads?: number
+          preparation?: string | null
+          protein?: number | null
+          selling_price?: number
+          shelf_life?: string | null
+          storage?: string | null
+          updated_at?: string
+          yield_output?: number
+        }
+        Update: {
+          calories?: number | null
+          carbs?: number | null
+          created_at?: string
+          description?: string | null
+          fat?: number | null
+          id?: string
+          ingredients?: Json
+          is_hidden?: boolean | null
+          name?: string
+          overheads?: number
+          preparation?: string | null
+          protein?: number | null
+          selling_price?: number
+          shelf_life?: string | null
+          storage?: string | null
+          updated_at?: string
+          yield_output?: number
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +502,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const
