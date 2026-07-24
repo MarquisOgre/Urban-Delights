@@ -320,11 +320,23 @@ const Recipes = ({
                 <Button
                   size="sm"
                   onClick={exportRecipesToExcel}
-                  className="bg-green-600 hover:bg-green-700 text-white whitespace-nowrap flex-1 sm:flex-none text-xs sm:text-sm h-9"
+                  variant="outline"
+                  className="border-green-600 text-green-700 hover:bg-green-50 whitespace-nowrap flex-1 sm:flex-none text-xs sm:text-sm h-9"
                 >
                   <Download className="h-4 w-4 mr-1" />
-                  Export
+                  Excel
                 </Button>
+
+                <Button
+                  size="sm"
+                  onClick={exportRecipesToPDF}
+                  variant="outline"
+                  className="border-red-600 text-red-700 hover:bg-red-50 whitespace-nowrap flex-1 sm:flex-none text-xs sm:text-sm h-9"
+                >
+                  <FileDown className="h-4 w-4 mr-1" />
+                  PDF
+                </Button>
+
 
                 <Button
                   size="sm"
