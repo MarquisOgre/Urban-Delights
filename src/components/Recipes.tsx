@@ -161,6 +161,109 @@ const Recipes = ({
     XLSX.writeFile(workbook, 'All Recipes.xlsx');
   };
 
+  /* ---------------- Export PDF (All Recipes) ---------------- */
+  const exportRecipesToPDF = async () => {
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const logoData = await loadImageDataUrl('/logo.png');
+
+    const drawHeader = () => {
+      if (logoData) {
+        try {
+          pdf.addImage(logoData, 'PNG', 10, 8, 40, 14);
+        } catch {}
+      }
+      pdf.setFontSize(14);
+      pdf.setTextColor(194, 65, 12);
+      pdf.text(COMPANY_NAME, pageWidth - 10, 15, { align: 'right' });
+      pdf.setFontSize(10);
+      pdf.setTextColor(90);
+      pdf.text('Recipes — Ingredients & Cost', pageWidth - 10, 21, { align: 'right' });
+      pdf.setDrawColor(230);
+      pdf.line(10, 26, pageWidth - 10, 26);
+    };
+
+    const drawFooter = () => {
+      pdf.setDrawColor(230);
+      pdf.line(10, pageHeight - 14, pageWidth - 10, pageHeight - 14);
+      pdf.setFontSize(8);
+      pdf.setTextColor(110);
+      pdf.text(COMPANY_ADDRESS, pageWidth / 2, pageHeight - 8, { align: 'center' });
+    };
+
+    visibleRecipes.forEach((recipe, idx) => {
+      if (idx > 0) pdf.addPage();
+      drawHeader();
+
+      let y = 34;
+      pdf.setFontSize(16);
+      pdf.setTextColor(30);
+      pdf.text(recipe.name, 10, y);
+      y += 6;
+      pdf.setFontSize(10);
+      pdf.setTextColor(90);
+      pdf.text('Ingredients & Costs (1 KG Batch)', 10, y);
+      y += 3;
+
+      const { totalCost, finalCost } = calculateRecipeCost(recipe, masterIngredients);
+      const overheads = finalCost - totalCost;
+
+      const rows = recipe.ingredients.map(ing => {
+        const master = masterIngredients.find(mi => mi.name === ing.ingredient_name);
+        const pricePerKg = master?.price_per_kg || 0;
+        const amount = (ing.quantity * pricePerKg) / 1000;
+        return [
+          ing.ingredient_name,
+          `${ing.quantity} ${ing.unit}`,
+          `Rs. ${pricePerKg}/kg`,
+          `Rs. ${amount.toFixed(2)}`,
+        ];
+      });
+
+      autoTable(pdf, {
+        startY: y + 3,
+        head: [['Ingredient', 'Qty', 'Price', 'Amount']],
+        body: rows,
+        theme: 'striped',
+        headStyles: { fillColor: [234, 88, 12], textColor: 255 },
+        styles: { fontSize: 9, cellPadding: 2 },
+        margin: { left: 10, right: 10 },
+      });
+
+      const afterTableY = (pdf as any).lastAutoTable.finalY + 6;
+      const summary: [string, string][] = [
+        ['Raw Material Cost', `Rs. ${totalCost.toFixed(2)}`],
+        ['Overheads', `Rs. ${overheads.toFixed(2)}`],
+        ['Final Cost', `Rs. ${finalCost.toFixed(2)}`],
+        ['Selling Price', `Rs. ${Math.round(recipe.selling_price)}`],
+      ];
+      pdf.setFontSize(10);
+      summary.forEach(([k, v], i) => {
+        const yy = afterTableY + i * 6;
+        const bold = i >= 2;
+        pdf.setTextColor(bold ? (i === 2 ? 194 : 21) : 60, bold ? (i === 2 ? 65 : 128) : 60, bold ? (i === 2 ? 12 : 61) : 60);
+        pdf.setFont(undefined as any, bold ? 'bold' : 'normal');
+        pdf.text(k + ':', pageWidth - 70, yy);
+        pdf.text(v, pageWidth - 12, yy, { align: 'right' });
+      });
+      pdf.setFont(undefined as any, 'normal');
+
+      drawFooter();
+    });
+
+    // Page numbers
+    const total = pdf.getNumberOfPages();
+    for (let i = 1; i <= total; i++) {
+      pdf.setPage(i);
+      pdf.setFontSize(8);
+      pdf.setTextColor(140);
+      pdf.text(`${i} / ${total}`, 10, pageHeight - 8);
+    }
+
+    pdf.save('All Recipes - Ingredients & Cost.pdf');
+  };
+
   /* ---------------- UI ---------------- */
   return (
     <div className="bg-gray-50">
