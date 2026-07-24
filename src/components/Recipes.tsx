@@ -8,8 +8,32 @@ import {
   ArrowLeft,
   Download,
   Plus,
+  FileDown,
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
+const COMPANY_NAME = 'Urban Delights';
+const COMPANY_ADDRESS =
+  'Plot No. 12, Jubilee Hills, Hyderabad, Telangana - 500033 | +91 98765 43210 | hello@urbandelights.in';
+
+const loadImageDataUrl = (src: string): Promise<string | null> =>
+  new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return resolve(null);
+      ctx.drawImage(img, 0, 0);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
 
 import RecipeCard from '@/components/RecipeCard';
 import AddRecipe from '@/components/AddRecipe';
