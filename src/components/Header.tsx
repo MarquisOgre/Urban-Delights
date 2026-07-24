@@ -48,8 +48,8 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, onRefresh 
             className="flex items-center space-x-2 sm:space-x-4 cursor-pointer hover:opacity-80 transition-opacity min-w-0" 
             onClick={() => setCurrentView && setCurrentView('main')}
           >
-            <img src="/logo.png" alt="Logo" className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0" />
-            <span className="text-base sm:text-xl font-bold text-orange-800 truncate">Artisan Delights</span>
+            <img src="/logo.png" alt="Urban Delights" className="h-8 sm:h-10 w-auto flex-shrink-0" />
+            <span className="sr-only">Urban Delights</span>
           </div>
 
           {/* Desktop Navigation */}
