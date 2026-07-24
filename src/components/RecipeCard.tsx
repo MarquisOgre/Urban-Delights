@@ -1,16 +1,18 @@
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Eye, IndianRupee, Scale, Clock, AlertTriangle, Calculator, Edit, Trash2, EyeOff } from "lucide-react";
+import { Eye, IndianRupee, Scale, Clock, AlertTriangle, Calculator, Edit, Trash2, EyeOff, Download } from "lucide-react";
 import { calculateIngredientCost, calculateRecipeCost, updateRecipeVisibility, type RecipeWithIngredients, type MasterIngredient } from "@/services/database";
 import EditRecipeDialog from "./EditRecipeDialog";
 import DeleteRecipeDialog from "./DeleteRecipeDialog";
 import { useToast } from "@/hooks/use-toast";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 interface RecipeCardProps {
   recipe: RecipeWithIngredients;
