@@ -25,6 +25,8 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [desiredQty, setDesiredQty] = useState<number>(1);
+  const [isExporting, setIsExporting] = useState(false);
+  const ingredientsRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const { totalCost, finalCost } = calculateRecipeCost(recipe, masterIngredients);
