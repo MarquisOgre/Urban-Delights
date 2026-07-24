@@ -167,47 +167,67 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Ingredients & Costs */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Ingredients & Costs ({desiredQty}KG Batch)</h3>
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {scaledIngredients.map((ingredient, index) => {
-                  const masterIngredient = masterIngredients.find(mi => mi.name === ingredient.ingredient_name);
-                  const pricePerKg = masterIngredient?.price_per_kg || 0;
-                  const cost = calculateIngredientCost(ingredient, masterIngredients);
-                  return (
-                    <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded text-sm">
-                      <div className="flex-1 min-w-0">
-                        <span className="font-medium truncate block">{ingredient.ingredient_name}</span>
-                        <div className="text-xs text-gray-600">
-                          {ingredient.quantity}{ingredient.unit} @ ₹{pricePerKg}/kg
-                        </div>
-                      </div>
-                      <span className="font-semibold text-orange-600 ml-2">₹{cost.toFixed(2)}</span>
-                    </div>
-                  );
-                })}
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-lg font-semibold text-gray-900">Ingredients & Costs ({desiredQty}KG Batch)</h3>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleExportPDF}
+                  disabled={isExporting}
+                  className="text-xs h-8"
+                >
+                  <Download className="h-3.5 w-3.5 mr-1" />
+                  {isExporting ? 'Exporting...' : 'PDF'}
+                </Button>
               </div>
-              
-              <Separator />
-              
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Raw Material Cost:</span>
-                  <span className="font-semibold">₹{scaledTotalCost.toFixed(2)}</span>
+              <div ref={ingredientsRef} className="bg-white p-4 space-y-4">
+                <div>
+                  <h2 className="text-xl font-bold text-orange-700">{recipe.name}</h2>
+                  <p className="text-sm text-gray-600">Complete recipe details for {desiredQty}KG Batch</p>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span>Overheads:</span>
-                  <span className="font-semibold">₹{(recipe.overheads * desiredQty).toFixed(2)}</span>
+                <h3 className="text-base font-semibold text-gray-900">Ingredients &amp; Costs ({desiredQty}KG Batch)</h3>
+                <div className="space-y-2">
+                  {scaledIngredients.map((ingredient, index) => {
+                    const masterIngredient = masterIngredients.find(mi => mi.name === ingredient.ingredient_name);
+                    const pricePerKg = masterIngredient?.price_per_kg || 0;
+                    const cost = calculateIngredientCost(ingredient, masterIngredients);
+                    return (
+                      <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded text-sm">
+                        <div className="flex-1 min-w-0">
+                          <span className="font-medium truncate block">{ingredient.ingredient_name}</span>
+                          <div className="text-xs text-gray-600">
+                            {ingredient.quantity}{ingredient.unit} @ ₹{pricePerKg}/kg
+                          </div>
+                        </div>
+                        <span className="font-semibold text-orange-600 ml-2">₹{cost.toFixed(2)}</span>
+                      </div>
+                    );
+                  })}
                 </div>
-                <div className="flex justify-between text-base sm:text-lg font-bold text-orange-700">
-                  <span>Final Cost:</span>
-                  <span>₹{scaledFinalCost.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-base sm:text-lg font-bold text-green-700">
-                  <span>Selling Price:</span>
-                  <span>₹{Math.round(recipe.selling_price * desiredQty)}</span>
+
+                <Separator />
+
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Raw Material Cost:</span>
+                    <span className="font-semibold">₹{scaledTotalCost.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Overheads:</span>
+                    <span className="font-semibold">₹{(recipe.overheads * desiredQty).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-base sm:text-lg font-bold text-orange-700">
+                    <span>Final Cost:</span>
+                    <span>₹{scaledFinalCost.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-base sm:text-lg font-bold text-green-700">
+                    <span>Selling Price:</span>
+                    <span>₹{Math.round(recipe.selling_price * desiredQty)}</span>
+                  </div>
                 </div>
               </div>
             </div>
+
 
             {/* Preparation & Info */}
             <div className="space-y-4">
