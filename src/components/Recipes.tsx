@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import html2canvas from 'html2canvas';
 
 const COMPANY_NAME = 'Urban Delights';
 const COMPANY_ADDRESS =
@@ -161,108 +161,130 @@ const Recipes = ({
     XLSX.writeFile(workbook, 'All Recipes.xlsx');
   };
 
-  /* ---------------- Export PDF (All Recipes) ---------------- */
+  /* ---------------- Export PDF (All Recipes, 2 per page) ---------------- */
   const exportRecipesToPDF = async () => {
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const logoData = await loadImageDataUrl('/logo.png');
+    const margin = 10;
 
-    const drawHeader = () => {
-      if (logoData) {
-        try {
-          pdf.addImage(logoData, 'PNG', 10, 8, 40, 14);
-        } catch {}
-      }
-      pdf.setFontSize(14);
-      pdf.setTextColor(194, 65, 12);
-      pdf.text(COMPANY_NAME, pageWidth - 10, 15, { align: 'right' });
-      pdf.setFontSize(10);
-      pdf.setTextColor(90);
-      pdf.text('Recipes — Ingredients & Cost', pageWidth - 10, 21, { align: 'right' });
-      pdf.setDrawColor(230);
-      pdf.line(10, 26, pageWidth - 10, 26);
-    };
+    // Build an offscreen container to render pages via html2canvas
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.left = '-10000px';
+    container.style.top = '0';
+    container.style.width = '794px'; // A4 @ ~96dpi
+    container.style.background = '#ffffff';
+    container.style.fontFamily =
+      "'Noto Sans', 'Noto Sans Telugu', 'Noto Sans Devanagari', Arial, sans-serif";
+    document.body.appendChild(container);
 
-    const drawFooter = () => {
-      pdf.setDrawColor(230);
-      pdf.line(10, pageHeight - 14, pageWidth - 10, pageHeight - 14);
-      pdf.setFontSize(8);
-      pdf.setTextColor(110);
-      pdf.text(COMPANY_ADDRESS, pageWidth / 2, pageHeight - 8, { align: 'center' });
-    };
-
-    visibleRecipes.forEach((recipe, idx) => {
-      if (idx > 0) pdf.addPage();
-      drawHeader();
-
-      let y = 34;
-      pdf.setFontSize(16);
-      pdf.setTextColor(30);
-      pdf.text(recipe.name, 10, y);
-      y += 6;
-      pdf.setFontSize(10);
-      pdf.setTextColor(90);
-      pdf.text('Ingredients & Costs (1 KG Batch)', 10, y);
-      y += 3;
-
+    const renderRecipeBlock = (recipe: RecipeWithIngredients) => {
       const { totalCost, finalCost } = calculateRecipeCost(recipe, masterIngredients);
       const overheads = finalCost - totalCost;
 
-      const rows = recipe.ingredients.map(ing => {
-        const master = masterIngredients.find(mi => mi.name === ing.ingredient_name);
-        const pricePerKg = master?.price_per_kg || 0;
-        const amount = (ing.quantity * pricePerKg) / 1000;
-        return [
-          ing.ingredient_name,
-          `${ing.quantity} ${ing.unit}`,
-          `Rs. ${pricePerKg}/kg`,
-          `Rs. ${amount.toFixed(2)}`,
-        ];
+      const rows = recipe.ingredients
+        .map(ing => {
+          const master = masterIngredients.find(mi => mi.name === ing.ingredient_name);
+          const pricePerKg = master?.price_per_kg || 0;
+          const amount = (ing.quantity * pricePerKg) / 1000;
+          return `
+            <tr>
+              <td style="padding:6px 8px;border-bottom:1px solid #eee;">${ing.ingredient_name}</td>
+              <td style="padding:6px 8px;border-bottom:1px solid #eee;white-space:nowrap;">${ing.quantity} ${ing.unit}</td>
+              <td style="padding:6px 8px;border-bottom:1px solid #eee;white-space:nowrap;">₹${pricePerKg}/kg</td>
+              <td style="padding:6px 8px;border-bottom:1px solid #eee;white-space:nowrap;text-align:right;">₹${amount.toFixed(2)}</td>
+            </tr>`;
+        })
+        .join('');
+
+      return `
+        <div style="padding:12px 16px;border:1px solid #eee;border-radius:6px;margin-bottom:14px;">
+          <div style="font-size:18px;font-weight:700;color:#1f2937;margin-bottom:2px;">${recipe.name}</div>
+          <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Ingredients & Costs (1 KG Batch)</div>
+          <table style="width:100%;border-collapse:collapse;font-size:12px;color:#111827;">
+            <thead>
+              <tr style="background:#ea580c;color:#fff;text-align:left;">
+                <th style="padding:6px 8px;">Ingredient</th>
+                <th style="padding:6px 8px;">Qty</th>
+                <th style="padding:6px 8px;">Price</th>
+                <th style="padding:6px 8px;text-align:right;">Amount</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <div style="margin-top:8px;font-size:12px;display:flex;justify-content:flex-end;">
+            <table style="font-size:12px;">
+              <tr><td style="padding:2px 12px 2px 0;color:#374151;">Raw Material Cost:</td><td style="text-align:right;">₹${totalCost.toFixed(2)}</td></tr>
+              <tr><td style="padding:2px 12px 2px 0;color:#374151;">Overheads:</td><td style="text-align:right;">₹${overheads.toFixed(2)}</td></tr>
+              <tr><td style="padding:2px 12px 2px 0;color:#c2410c;font-weight:700;">Final Cost:</td><td style="text-align:right;color:#c2410c;font-weight:700;">₹${finalCost.toFixed(2)}</td></tr>
+              <tr><td style="padding:2px 12px 2px 0;color:#15803d;font-weight:700;">Selling Price:</td><td style="text-align:right;color:#15803d;font-weight:700;">₹${Math.round(recipe.selling_price)}</td></tr>
+            </table>
+          </div>
+        </div>`;
+    };
+
+    const headerHtml = `
+      <div style="display:flex;justify-content:center;align-items:center;padding:8px 0 12px;border-bottom:1px solid #eee;margin-bottom:14px;">
+        <img src="/logo.png" style="height:48px;object-fit:contain;" crossorigin="anonymous" />
+      </div>`;
+
+    const footerHtml = `
+      <div style="border-top:1px solid #eee;margin-top:10px;padding-top:6px;text-align:center;font-size:10px;color:#6b7280;">
+        ${COMPANY_ADDRESS}
+      </div>`;
+
+    const totalPages = Math.ceil(visibleRecipes.length / 2);
+
+    for (let p = 0; p < totalPages; p++) {
+      const pair = visibleRecipes.slice(p * 2, p * 2 + 2);
+
+      container.innerHTML = `
+        <div style="padding:20px;">
+          ${headerHtml}
+          ${pair.map(renderRecipeBlock).join('')}
+          ${footerHtml}
+        </div>`;
+
+      // Ensure images (logo) are loaded before capture
+      const imgs = Array.from(container.querySelectorAll('img'));
+      await Promise.all(
+        imgs.map(
+          img =>
+            new Promise<void>(resolve => {
+              if ((img as HTMLImageElement).complete) return resolve();
+              img.addEventListener('load', () => resolve());
+              img.addEventListener('error', () => resolve());
+            })
+        )
+      );
+
+      const canvas = await html2canvas(container, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
       });
 
-      autoTable(pdf, {
-        startY: y + 3,
-        head: [['Ingredient', 'Qty', 'Price', 'Amount']],
-        body: rows,
-        theme: 'striped',
-        headStyles: { fillColor: [234, 88, 12], textColor: 255 },
-        styles: { fontSize: 9, cellPadding: 2 },
-        margin: { left: 10, right: 10 },
-      });
+      const imgData = canvas.toDataURL('image/png');
+      const availableWidth = pageWidth - margin * 2;
+      const imgHeight = (canvas.height * availableWidth) / canvas.width;
+      const renderHeight = Math.min(imgHeight, pageHeight - margin * 2);
 
-      const afterTableY = (pdf as any).lastAutoTable.finalY + 6;
-      const summary: [string, string][] = [
-        ['Raw Material Cost', `Rs. ${totalCost.toFixed(2)}`],
-        ['Overheads', `Rs. ${overheads.toFixed(2)}`],
-        ['Final Cost', `Rs. ${finalCost.toFixed(2)}`],
-        ['Selling Price', `Rs. ${Math.round(recipe.selling_price)}`],
-      ];
-      pdf.setFontSize(10);
-      summary.forEach(([k, v], i) => {
-        const yy = afterTableY + i * 6;
-        const bold = i >= 2;
-        pdf.setTextColor(bold ? (i === 2 ? 194 : 21) : 60, bold ? (i === 2 ? 65 : 128) : 60, bold ? (i === 2 ? 12 : 61) : 60);
-        pdf.setFont(undefined as any, bold ? 'bold' : 'normal');
-        pdf.text(k + ':', pageWidth - 70, yy);
-        pdf.text(v, pageWidth - 12, yy, { align: 'right' });
-      });
-      pdf.setFont(undefined as any, 'normal');
+      if (p > 0) pdf.addPage();
+      pdf.addImage(imgData, 'PNG', margin, margin, availableWidth, renderHeight);
 
-      drawFooter();
-    });
-
-    // Page numbers
-    const total = pdf.getNumberOfPages();
-    for (let i = 1; i <= total; i++) {
-      pdf.setPage(i);
+      // page number
       pdf.setFontSize(8);
       pdf.setTextColor(140);
-      pdf.text(`${i} / ${total}`, 10, pageHeight - 8);
+      pdf.text(`${p + 1} / ${totalPages}`, pageWidth - margin, pageHeight - 4, {
+        align: 'right',
+      });
     }
 
+    document.body.removeChild(container);
     pdf.save('All Recipes - Ingredients & Cost.pdf');
   };
+
 
   /* ---------------- UI ---------------- */
   return (
