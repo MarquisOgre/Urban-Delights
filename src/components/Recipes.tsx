@@ -199,7 +199,7 @@ const Recipes = ({
         .join('');
 
       return `
-        <div style="padding:12px 16px;border:1px solid #eee;border-radius:6px;margin-bottom:14px;">
+        <div style="padding:12px 16px;border:3px solid #c2410c;border-radius:8px;margin-bottom:14px;">
           <div style="font-size:18px;font-weight:700;color:#1f2937;margin-bottom:2px;">${recipe.name}</div>
           <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Ingredients & Costs (1 KG Batch)</div>
           <table style="width:100%;border-collapse:collapse;font-size:12px;color:#111827;">
