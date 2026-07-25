@@ -241,10 +241,9 @@ const Recipes = ({
 
       container.innerHTML = `
         <div style="padding:20px;">
-          ${headerHtml}
-          ${pair.map(renderRecipeBlock).join('')}
-          ${footerHtml}
+          ${pair.map(r => `${headerHtml}${renderRecipeBlock(r)}`).join('')}
         </div>`;
+
 
       // Ensure images (logo) are loaded before capture
       const imgs = Array.from(container.querySelectorAll('img'));
