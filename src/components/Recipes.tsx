@@ -307,7 +307,7 @@ const Recipes = ({
                 </Badge>
 
                 <Badge className="bg-green-100 text-green-800 px-2 sm:px-3 py-1 text-xs sm:text-sm flex items-center gap-1 whitespace-nowrap">
-                  <img src="/logo.png" className="h-3 w-3 sm:h-4 sm:w-4" alt="icon" />
+                  <img src="/favicon.png" className="h-3 w-3 sm:h-4 sm:w-4" alt="icon" />
                   {masterIngredients.length}
                 </Badge>
               </div>
