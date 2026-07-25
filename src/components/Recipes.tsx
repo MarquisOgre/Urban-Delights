@@ -225,7 +225,7 @@ const Recipes = ({
     };
 
     const headerHtml = `
-      <div style="display:flex;justify-content:center;align-items:center;padding:8px 0 12px;border-bottom:1px solid #eee;margin-bottom:14px;">
+      <div style="display:flex;justify-content:center;align-items:center;padding:8px 0 12px;margin-bottom:14px;">
         <img src="/logo.png" style="height:48px;object-fit:contain;" crossorigin="anonymous" />
       </div>`;
 
