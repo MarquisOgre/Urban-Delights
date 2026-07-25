@@ -202,19 +202,7 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Ingredients & Costs */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between gap-2">
-                <h3 className="text-lg font-semibold text-gray-900">Ingredients & Costs ({desiredQty}KG Batch)</h3>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleExportPDF}
-                  disabled={isExporting}
-                  className="text-xs h-8"
-                >
-                  <Download className="h-3.5 w-3.5 mr-1" />
-                  {isExporting ? 'Exporting...' : 'PDF'}
-                </Button>
-              </div>
+              <h3 className="text-lg font-semibold text-gray-900">Ingredients & Costs ({desiredQty}KG Batch)</h3>
               <div ref={ingredientsRef} className="bg-white p-4 space-y-4">
                 <div>
                   <h2 className="text-xl font-bold text-orange-700">{recipe.name}</h2>

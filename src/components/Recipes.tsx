@@ -199,7 +199,7 @@ const Recipes = ({
         .join('');
 
       return `
-        <div style="padding:12px 16px;border:1px solid #eee;border-radius:6px;margin-bottom:14px;">
+        <div style="padding:12px 16px;border:3px solid #c2410c;border-radius:8px;margin-bottom:14px;">
           <div style="font-size:18px;font-weight:700;color:#1f2937;margin-bottom:2px;">${recipe.name}</div>
           <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Ingredients & Costs (1 KG Batch)</div>
           <table style="width:100%;border-collapse:collapse;font-size:12px;color:#111827;">
@@ -225,7 +225,7 @@ const Recipes = ({
     };
 
     const headerHtml = `
-      <div style="display:flex;justify-content:center;align-items:center;padding:8px 0 12px;border-bottom:1px solid #eee;margin-bottom:14px;">
+      <div style="display:flex;justify-content:center;align-items:center;padding:8px 0 12px;margin-bottom:14px;">
         <img src="/logo.png" style="height:48px;object-fit:contain;" crossorigin="anonymous" />
       </div>`;
 
@@ -307,7 +307,7 @@ const Recipes = ({
                 </Badge>
 
                 <Badge className="bg-green-100 text-green-800 px-2 sm:px-3 py-1 text-xs sm:text-sm flex items-center gap-1 whitespace-nowrap">
-                  <img src="/logo.png" className="h-3 w-3 sm:h-4 sm:w-4" alt="icon" />
+                  <img src="/favicon.png" className="h-3 w-3 sm:h-4 sm:w-4" alt="icon" />
                   {masterIngredients.length}
                 </Badge>
               </div>
