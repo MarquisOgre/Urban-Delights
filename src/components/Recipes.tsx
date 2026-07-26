@@ -121,8 +121,9 @@ const Recipes = ({
           const amount = (ing.quantity * pricePerKg) / 1000;
           return `
             <tr>
-              <td style="padding:6px 8px;border-bottom:1px solid #eee;">${ing.ingredient_name}</td>
-              <td style="padding:6px 8px;border-bottom:1px solid #eee;white-space:nowrap;">${ing.quantity} ${ing.unit}</td>
+              <td style="padding:6px 8px;border-bottom:1px solid #eee;">${esc(ing.ingredient_name)}</td>
+              <td style="padding:6px 8px;border-bottom:1px solid #eee;white-space:nowrap;">${esc(ing.quantity)} ${esc(ing.unit)}</td>
+
               <td style="padding:6px 8px;border-bottom:1px solid #eee;white-space:nowrap;">₹${pricePerKg}/kg</td>
               <td style="padding:6px 8px;border-bottom:1px solid #eee;white-space:nowrap;text-align:right;">₹${amount.toFixed(2)}</td>
             </tr>`;
@@ -131,7 +132,7 @@ const Recipes = ({
 
       return `
         <div style="padding:12px 16px;border:3px solid #c2410c;border-radius:8px;margin-bottom:14px;">
-          <div style="font-size:18px;font-weight:700;color:#1f2937;margin-bottom:2px;">${recipe.name}</div>
+          <div style="font-size:18px;font-weight:700;color:#1f2937;margin-bottom:2px;">${esc(recipe.name)}</div>
           <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Ingredients & Costs (1 KG Batch)</div>
           <table style="width:100%;border-collapse:collapse;font-size:12px;color:#111827;">
             <thead>
