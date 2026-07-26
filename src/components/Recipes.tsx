@@ -6,13 +6,12 @@ import {
   FileText,
   Search,
   ArrowLeft,
-  Download,
   Plus,
   FileDown,
 } from 'lucide-react';
-import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+
 
 const COMPANY_NAME = 'Urban Delights';
 const COMPANY_ADDRESS =
@@ -270,15 +269,8 @@ const Recipes = ({
                   Add
                 </Button>
 
-                <Button
-                  size="sm"
-                  onClick={exportRecipesToExcel}
-                  variant="outline"
-                  className="border-green-600 text-green-700 hover:bg-green-50 whitespace-nowrap flex-1 sm:flex-none text-xs sm:text-sm h-9"
-                >
-                  <Download className="h-4 w-4 mr-1" />
-                  Excel
-                </Button>
+
+
 
                 <Button
                   size="sm"
