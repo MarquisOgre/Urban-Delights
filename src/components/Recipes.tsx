@@ -6,13 +6,12 @@ import {
   FileText,
   Search,
   ArrowLeft,
-  Download,
   Plus,
   FileDown,
 } from 'lucide-react';
-import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+
 
 const COMPANY_NAME = 'Urban Delights';
 const COMPANY_ADDRESS =
@@ -86,80 +85,12 @@ const Recipes = ({
     .filter(recipe => !recipe.is_hidden)
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  /* ---------------- Export Excel ---------------- */
-  const exportRecipesToExcel = () => {
-    const workbook = XLSX.utils.book_new();
+  /* ---------------- HTML escaping (PDF safety) ---------------- */
+  const esc = (value: unknown) =>
+    String(value ?? '').replace(/[&<>"']/g, ch =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch] as string)
+    );
 
-    visibleRecipes.forEach(recipe => {
-      const { totalCost, finalCost } = calculateRecipeCost(
-        recipe,
-        masterIngredients
-      );
-
-      const recipeData: any[][] = [
-        ['Recipe Name', recipe.name],
-        [''],
-        ['Ingredients', 'Qty', 'Unit', 'Price', 'Amount'],
-      ];
-
-      recipe.ingredients.forEach(ingredient => {
-        const masterIngredient = masterIngredients.find(
-          mi => mi.name === ingredient.ingredient_name
-        );
-        const pricePerKg = masterIngredient?.price_per_kg || 0;
-        const amount = (ingredient.quantity * pricePerKg) / 1000;
-
-        recipeData.push([
-          ingredient.ingredient_name,
-          ingredient.quantity,
-          ingredient.unit,
-          `₹${pricePerKg}/kg`,
-          `₹${amount.toFixed(2)}`,
-        ]);
-      });
-
-      recipeData.push(['']);
-      recipeData.push(['Raw Material Cost', `₹${totalCost.toFixed(2)}`]);
-      recipeData.push([
-        'Overheads',
-        `₹${(finalCost - totalCost).toFixed(2)}`,
-      ]);
-      recipeData.push(['Final Cost', `₹${finalCost.toFixed(2)}`]);
-      recipeData.push([
-        'Selling Price',
-        `₹${recipe.selling_price.toFixed(2)}`,
-      ]);
-
-      recipeData.push(['']);
-      recipeData.push(['Preparation Method']);
-      recipeData.push([recipe.preparation || 'N/A']);
-
-      if (recipe.calories || recipe.protein || recipe.fat || recipe.carbs) {
-        recipeData.push(['']);
-        recipeData.push(['Nutrition (per 100g)']);
-        if (recipe.calories) recipeData.push(['Calories', recipe.calories]);
-        if (recipe.protein) recipeData.push(['Protein (g)', recipe.protein]);
-        if (recipe.fat) recipeData.push(['Fat (g)', recipe.fat]);
-        if (recipe.carbs) recipeData.push(['Carbs (g)', recipe.carbs]);
-      }
-
-      recipeData.push(['']);
-      recipeData.push(['Storage']);
-      recipeData.push([recipe.storage || 'N/A']);
-      if (recipe.shelf_life) {
-        recipeData.push(['Shelf Life', recipe.shelf_life]);
-      }
-
-      const worksheet = XLSX.utils.aoa_to_sheet(recipeData);
-      const sheetName = recipe.name
-        .replace(/[\\/:*?"<>|]/g, '_')
-        .substring(0, 31);
-
-      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-    });
-
-    XLSX.writeFile(workbook, 'All Recipes.xlsx');
-  };
 
   /* ---------------- Export PDF (All Recipes, 2 per page) ---------------- */
   const exportRecipesToPDF = async () => {
@@ -190,8 +121,9 @@ const Recipes = ({
           const amount = (ing.quantity * pricePerKg) / 1000;
           return `
             <tr>
-              <td style="padding:6px 8px;border-bottom:1px solid #eee;">${ing.ingredient_name}</td>
-              <td style="padding:6px 8px;border-bottom:1px solid #eee;white-space:nowrap;">${ing.quantity} ${ing.unit}</td>
+              <td style="padding:6px 8px;border-bottom:1px solid #eee;">${esc(ing.ingredient_name)}</td>
+              <td style="padding:6px 8px;border-bottom:1px solid #eee;white-space:nowrap;">${esc(ing.quantity)} ${esc(ing.unit)}</td>
+
               <td style="padding:6px 8px;border-bottom:1px solid #eee;white-space:nowrap;">₹${pricePerKg}/kg</td>
               <td style="padding:6px 8px;border-bottom:1px solid #eee;white-space:nowrap;text-align:right;">₹${amount.toFixed(2)}</td>
             </tr>`;
@@ -200,7 +132,7 @@ const Recipes = ({
 
       return `
         <div style="padding:12px 16px;border:3px solid #c2410c;border-radius:8px;margin-bottom:14px;">
-          <div style="font-size:18px;font-weight:700;color:#1f2937;margin-bottom:2px;">${recipe.name}</div>
+          <div style="font-size:18px;font-weight:700;color:#1f2937;margin-bottom:2px;">${esc(recipe.name)}</div>
           <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Ingredients & Costs (1 KG Batch)</div>
           <table style="width:100%;border-collapse:collapse;font-size:12px;color:#111827;">
             <thead>
@@ -338,15 +270,8 @@ const Recipes = ({
                   Add
                 </Button>
 
-                <Button
-                  size="sm"
-                  onClick={exportRecipesToExcel}
-                  variant="outline"
-                  className="border-green-600 text-green-700 hover:bg-green-50 whitespace-nowrap flex-1 sm:flex-none text-xs sm:text-sm h-9"
-                >
-                  <Download className="h-4 w-4 mr-1" />
-                  Excel
-                </Button>
+
+
 
                 <Button
                   size="sm"
