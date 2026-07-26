@@ -86,80 +86,12 @@ const Recipes = ({
     .filter(recipe => !recipe.is_hidden)
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  /* ---------------- Export Excel ---------------- */
-  const exportRecipesToExcel = () => {
-    const workbook = XLSX.utils.book_new();
+  /* ---------------- HTML escaping (PDF safety) ---------------- */
+  const esc = (value: unknown) =>
+    String(value ?? '').replace(/[&<>"']/g, ch =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch] as string)
+    );
 
-    visibleRecipes.forEach(recipe => {
-      const { totalCost, finalCost } = calculateRecipeCost(
-        recipe,
-        masterIngredients
-      );
-
-      const recipeData: any[][] = [
-        ['Recipe Name', recipe.name],
-        [''],
-        ['Ingredients', 'Qty', 'Unit', 'Price', 'Amount'],
-      ];
-
-      recipe.ingredients.forEach(ingredient => {
-        const masterIngredient = masterIngredients.find(
-          mi => mi.name === ingredient.ingredient_name
-        );
-        const pricePerKg = masterIngredient?.price_per_kg || 0;
-        const amount = (ingredient.quantity * pricePerKg) / 1000;
-
-        recipeData.push([
-          ingredient.ingredient_name,
-          ingredient.quantity,
-          ingredient.unit,
-          `₹${pricePerKg}/kg`,
-          `₹${amount.toFixed(2)}`,
-        ]);
-      });
-
-      recipeData.push(['']);
-      recipeData.push(['Raw Material Cost', `₹${totalCost.toFixed(2)}`]);
-      recipeData.push([
-        'Overheads',
-        `₹${(finalCost - totalCost).toFixed(2)}`,
-      ]);
-      recipeData.push(['Final Cost', `₹${finalCost.toFixed(2)}`]);
-      recipeData.push([
-        'Selling Price',
-        `₹${recipe.selling_price.toFixed(2)}`,
-      ]);
-
-      recipeData.push(['']);
-      recipeData.push(['Preparation Method']);
-      recipeData.push([recipe.preparation || 'N/A']);
-
-      if (recipe.calories || recipe.protein || recipe.fat || recipe.carbs) {
-        recipeData.push(['']);
-        recipeData.push(['Nutrition (per 100g)']);
-        if (recipe.calories) recipeData.push(['Calories', recipe.calories]);
-        if (recipe.protein) recipeData.push(['Protein (g)', recipe.protein]);
-        if (recipe.fat) recipeData.push(['Fat (g)', recipe.fat]);
-        if (recipe.carbs) recipeData.push(['Carbs (g)', recipe.carbs]);
-      }
-
-      recipeData.push(['']);
-      recipeData.push(['Storage']);
-      recipeData.push([recipe.storage || 'N/A']);
-      if (recipe.shelf_life) {
-        recipeData.push(['Shelf Life', recipe.shelf_life]);
-      }
-
-      const worksheet = XLSX.utils.aoa_to_sheet(recipeData);
-      const sheetName = recipe.name
-        .replace(/[\\/:*?"<>|]/g, '_')
-        .substring(0, 31);
-
-      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-    });
-
-    XLSX.writeFile(workbook, 'All Recipes.xlsx');
-  };
 
   /* ---------------- Export PDF (All Recipes, 2 per page) ---------------- */
   const exportRecipesToPDF = async () => {
