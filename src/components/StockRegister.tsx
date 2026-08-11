@@ -1115,8 +1115,33 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
             {/* Raw Material Entry Form */}
             <Card>
               <CardHeader>
-                <CardTitle>Add Raw Material Entry</CardTitle>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <CardTitle>Add Raw Material Entry</CardTitle>
+                  <div className="flex flex-wrap gap-2">
+                    <input
+                      ref={rmFileRef}
+                      type="file"
+                      accept=".xlsx,.xls,.csv"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) importRawMaterialEntries(f);
+                        e.target.value = "";
+                      }}
+                    />
+                    <Button variant="outline" size="sm" onClick={() => rmFileRef.current?.click()}>
+                      <Upload className="h-4 w-4 mr-1" /> Import
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={exportRawMaterialEntries}>
+                      <Download className="h-4 w-4 mr-1" /> Export
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={downloadRmDummy}>
+                      <FileSpreadsheet className="h-4 w-4 mr-1" /> Dummy (All Ingredients)
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
+
               <CardContent>
                 <div className="grid grid-cols-2 sm:grid-cols-[180px_1fr_100px_100px_100px_120px_auto] gap-3 sm:gap-4 items-end w-full">
                   {/* Date */}
