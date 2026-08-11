@@ -16,6 +16,8 @@ import { cn } from "@/lib/utils";
 import { fetchMasterIngredients, fetchRecipesWithIngredients, type MasterIngredient, type RecipeWithIngredients } from "@/services/database";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import StockExcelDialog from "@/components/StockExcelDialog";
+
 
 interface PodiEntry {
   id: string;
@@ -896,29 +898,19 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
               <CardHeader>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <CardTitle>Add Podi Entry</CardTitle>
-                  <div className="flex flex-wrap gap-2">
-                    <input
-                      ref={podiFileRef}
-                      type="file"
-                      accept=".xlsx,.xls,.csv"
-                      className="hidden"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) importPodiEntries(f);
-                        e.target.value = "";
-                      }}
-                    />
-                    <Button variant="outline" size="sm" onClick={() => podiFileRef.current?.click()}>
-                      <Upload className="h-4 w-4 mr-1" /> Import
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={exportPodiEntries}>
-                      <Download className="h-4 w-4 mr-1" /> Export
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={downloadPodiDummy}>
-                      <FileSpreadsheet className="h-4 w-4 mr-1" /> Dummy (All Podis)
-                    </Button>
-                  </div>
+                  <StockExcelDialog
+                    inputId="podi-excel-input"
+                    title="Excel Bulk Import"
+                    description="Import podi stock entries from an Excel file. Download the current month's entries or a template with all podis."
+                    entityLabel="Podi Entries"
+                    templateLabel="All Podis"
+                    requiredColumns={["Date (dd/mm/yyyy)", "Podi Name (required)", "Opening (number)", "Production (number)", "Sales (number)"]}
+                    onExport={exportPodiEntries}
+                    onDownloadTemplate={downloadPodiDummy}
+                    onImport={importPodiEntries}
+                  />
                 </div>
+
               </CardHeader>
 
               <CardContent>
@@ -1117,28 +1109,18 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
               <CardHeader>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <CardTitle>Add Raw Material Entry</CardTitle>
-                  <div className="flex flex-wrap gap-2">
-                    <input
-                      ref={rmFileRef}
-                      type="file"
-                      accept=".xlsx,.xls,.csv"
-                      className="hidden"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) importRawMaterialEntries(f);
-                        e.target.value = "";
-                      }}
-                    />
-                    <Button variant="outline" size="sm" onClick={() => rmFileRef.current?.click()}>
-                      <Upload className="h-4 w-4 mr-1" /> Import
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={exportRawMaterialEntries}>
-                      <Download className="h-4 w-4 mr-1" /> Export
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={downloadRmDummy}>
-                      <FileSpreadsheet className="h-4 w-4 mr-1" /> Dummy (All Ingredients)
-                    </Button>
-                  </div>
+                  <StockExcelDialog
+                    inputId="rm-excel-input"
+                    title="Excel Bulk Import"
+                    description="Import raw material entries from an Excel file. Download the current month's entries or a template with all ingredients."
+                    entityLabel="Raw Materials"
+                    templateLabel="All Ingredients"
+                    requiredColumns={["Date (dd/mm/yyyy)", "Ingredient (required)", "Opening (number)", "Purchased (number)", "Used (number)"]}
+                    onExport={exportRawMaterialEntries}
+                    onDownloadTemplate={downloadRmDummy}
+                    onImport={importRawMaterialEntries}
+                  />
+
                 </div>
               </CardHeader>
 
