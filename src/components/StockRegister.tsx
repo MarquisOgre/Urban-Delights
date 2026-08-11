@@ -894,8 +894,33 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
             {/* Podi Entry Form */}
             <Card>
               <CardHeader>
-                <CardTitle>Add Podi Entry</CardTitle>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <CardTitle>Add Podi Entry</CardTitle>
+                  <div className="flex flex-wrap gap-2">
+                    <input
+                      ref={podiFileRef}
+                      type="file"
+                      accept=".xlsx,.xls,.csv"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) importPodiEntries(f);
+                        e.target.value = "";
+                      }}
+                    />
+                    <Button variant="outline" size="sm" onClick={() => podiFileRef.current?.click()}>
+                      <Upload className="h-4 w-4 mr-1" /> Import
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={exportPodiEntries}>
+                      <Download className="h-4 w-4 mr-1" /> Export
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={downloadPodiDummy}>
+                      <FileSpreadsheet className="h-4 w-4 mr-1" /> Dummy (All Podis)
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
+
               <CardContent>
                 <div className="grid grid-cols-2 sm:grid-cols-[180px_1fr_100px_100px_100px_120px_auto] gap-3 sm:gap-4 items-end w-full">
                   {/* Date */}
