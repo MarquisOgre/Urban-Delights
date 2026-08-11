@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { format, isSameMonth } from "date-fns";
-import { CalendarIcon, Printer, Plus, ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { CalendarIcon, Printer, Plus, ArrowLeft, Pencil, Trash2, Upload, Download, FileSpreadsheet } from "lucide-react";
+import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -519,6 +520,185 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
     setDeletingRmEntry(null);
   };
 
+  // ===== Import / Export / Dummy helpers =====
+  const podiFileRef = useRef<HTMLInputElement>(null);
+  const rmFileRef = useRef<HTMLInputElement>(null);
+
+  const downloadSheet = (rows: any[], sheetName: string, fileName: string) => {
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    XLSX.writeFile(wb, fileName);
+  };
+
+  const parseCell = (v: any): number => {
+    const n = parseFloat(String(v ?? "").replace(/,/g, ""));
+    return isNaN(n) ? 0 : n;
+  };
+
+  const parseDateCell = (v: any): Date => {
+    if (v instanceof Date) return v;
+    if (typeof v === "number") return new Date(Math.round((v - 25569) * 86400 * 1000));
+    const s = String(v ?? "").trim();
+    const dmy = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+    if (dmy) return new Date(Number(dmy[3]), Number(dmy[2]) - 1, Number(dmy[1]));
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? selectedDate : d;
+  };
+
+  const readRows = (file: File): Promise<any[]> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const wb = XLSX.read(e.target?.result, { type: "array", cellDates: true });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          resolve(XLSX.utils.sheet_to_json(ws, { defval: "" }));
+        } catch (err) {
+          reject(err);
+        }
+      };
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(file);
+    });
+
+  const exportPodiEntries = () => {
+    if (filteredPodiEntries.length === 0) {
+      toast.error("No podi entries to export for this month");
+      return;
+    }
+    downloadSheet(
+      filteredPodiEntries.map((e) => ({
+        Date: format(e.date, "dd/MM/yyyy"),
+        "Podi Name": e.podiName,
+        Opening: e.openingStock,
+        Production: e.production,
+        Sales: e.sales,
+        Closing: e.closingStock,
+      })),
+      "Podi Register",
+      `Podi-Register-${format(selectedMonth, "MMM-yyyy")}.xlsx`
+    );
+  };
+
+  const downloadPodiDummy = () => {
+    downloadSheet(
+      recipes.map((r) => ({
+        Date: format(selectedDate, "dd/MM/yyyy"),
+        "Podi Name": r.name,
+        Opening: getLastPodiClosingStock(r.name),
+        Production: 0,
+        Sales: 0,
+      })),
+      "Podi Template",
+      `Podi-Template-${format(selectedDate, "dd-MM-yyyy")}.xlsx`
+    );
+    toast.success("Template with all podis downloaded");
+  };
+
+  const importPodiEntries = async (file: File) => {
+    try {
+      const rows = await readRows(file);
+      const payload = rows
+        .filter((r) => String(r["Podi Name"] ?? r["podi_name"] ?? "").trim())
+        .map((r) => {
+          const opening = parseCell(r["Opening"] ?? r["Opening Stock"]);
+          const production = parseCell(r["Production"]);
+          const sales = parseCell(r["Sales"]);
+          return {
+            entry_date: format(parseDateCell(r["Date"]), "yyyy-MM-dd"),
+            podi_name: String(r["Podi Name"] ?? r["podi_name"]).trim(),
+            opening_stock: opening,
+            production,
+            sales,
+            closing_stock: opening + production - sales,
+          };
+        });
+
+      if (payload.length === 0) {
+        toast.error("No valid rows found in file");
+        return;
+      }
+
+      const { error } = await supabase.from("podi_stock_entries").insert(payload);
+      if (error) throw error;
+      await fetchStockEntries();
+      toast.success(`Imported ${payload.length} podi entries`);
+    } catch (error) {
+      console.error("Error importing podi entries:", error);
+      toast.error("Failed to import file");
+    }
+  };
+
+  const exportRawMaterialEntries = () => {
+    if (filteredRawMaterialEntries.length === 0) {
+      toast.error("No raw material entries to export for this month");
+      return;
+    }
+    downloadSheet(
+      filteredRawMaterialEntries.map((e) => ({
+        Date: format(e.date, "dd/MM/yyyy"),
+        Ingredient: e.ingredient,
+        Opening: e.opening,
+        Purchased: e.purchased,
+        Used: e.used,
+        Closing: e.closing,
+      })),
+      "Raw Materials",
+      `Raw-Materials-${format(selectedMonth, "MMM-yyyy")}.xlsx`
+    );
+  };
+
+  const downloadRmDummy = () => {
+    downloadSheet(
+      masterIngredients.map((ing) => ({
+        Date: format(selectedDate, "dd/MM/yyyy"),
+        Ingredient: ing.name,
+        Opening: getLastRawMaterialClosingStock(ing.name),
+        Purchased: 0,
+        Used: 0,
+      })),
+      "Raw Material Template",
+      `Raw-Material-Template-${format(selectedDate, "dd-MM-yyyy")}.xlsx`
+    );
+    toast.success("Template with all ingredients downloaded");
+  };
+
+  const importRawMaterialEntries = async (file: File) => {
+    try {
+      const rows = await readRows(file);
+      const payload = rows
+        .filter((r) => String(r["Ingredient"] ?? r["ingredient"] ?? "").trim())
+        .map((r) => {
+          const opening = parseCell(r["Opening"]);
+          const purchased = parseCell(r["Purchased"]);
+          const used = parseCell(r["Used"]);
+          return {
+            entry_date: format(parseDateCell(r["Date"]), "yyyy-MM-dd"),
+            ingredient: String(r["Ingredient"] ?? r["ingredient"]).trim(),
+            opening,
+            purchased,
+            used,
+            closing: opening + purchased - used,
+          };
+        });
+
+      if (payload.length === 0) {
+        toast.error("No valid rows found in file");
+        return;
+      }
+
+      const { error } = await supabase.from("raw_material_entries").insert(payload);
+      if (error) throw error;
+      await fetchStockEntries();
+      toast.success(`Imported ${payload.length} raw material entries`);
+    } catch (error) {
+      console.error("Error importing raw material entries:", error);
+      toast.error("Failed to import file");
+    }
+  };
+
+
   const handlePrint = () => {
     const currentMonth = format(selectedMonth, "MMMM yyyy");
     const printContent = `
@@ -714,8 +894,33 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
             {/* Podi Entry Form */}
             <Card>
               <CardHeader>
-                <CardTitle>Add Podi Entry</CardTitle>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <CardTitle>Add Podi Entry</CardTitle>
+                  <div className="flex flex-wrap gap-2">
+                    <input
+                      ref={podiFileRef}
+                      type="file"
+                      accept=".xlsx,.xls,.csv"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) importPodiEntries(f);
+                        e.target.value = "";
+                      }}
+                    />
+                    <Button variant="outline" size="sm" onClick={() => podiFileRef.current?.click()}>
+                      <Upload className="h-4 w-4 mr-1" /> Import
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={exportPodiEntries}>
+                      <Download className="h-4 w-4 mr-1" /> Export
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={downloadPodiDummy}>
+                      <FileSpreadsheet className="h-4 w-4 mr-1" /> Dummy (All Podis)
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
+
               <CardContent>
                 <div className="grid grid-cols-2 sm:grid-cols-[180px_1fr_100px_100px_100px_120px_auto] gap-3 sm:gap-4 items-end w-full">
                   {/* Date */}
@@ -910,8 +1115,33 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
             {/* Raw Material Entry Form */}
             <Card>
               <CardHeader>
-                <CardTitle>Add Raw Material Entry</CardTitle>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <CardTitle>Add Raw Material Entry</CardTitle>
+                  <div className="flex flex-wrap gap-2">
+                    <input
+                      ref={rmFileRef}
+                      type="file"
+                      accept=".xlsx,.xls,.csv"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) importRawMaterialEntries(f);
+                        e.target.value = "";
+                      }}
+                    />
+                    <Button variant="outline" size="sm" onClick={() => rmFileRef.current?.click()}>
+                      <Upload className="h-4 w-4 mr-1" /> Import
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={exportRawMaterialEntries}>
+                      <Download className="h-4 w-4 mr-1" /> Export
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={downloadRmDummy}>
+                      <FileSpreadsheet className="h-4 w-4 mr-1" /> Dummy (All Ingredients)
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
+
               <CardContent>
                 <div className="grid grid-cols-2 sm:grid-cols-[180px_1fr_100px_100px_100px_120px_auto] gap-3 sm:gap-4 items-end w-full">
                   {/* Date */}
