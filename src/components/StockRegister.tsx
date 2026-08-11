@@ -1107,28 +1107,18 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
               <CardHeader>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <CardTitle>Add Raw Material Entry</CardTitle>
-                  <div className="flex flex-wrap gap-2">
-                    <input
-                      ref={rmFileRef}
-                      type="file"
-                      accept=".xlsx,.xls,.csv"
-                      className="hidden"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) importRawMaterialEntries(f);
-                        e.target.value = "";
-                      }}
-                    />
-                    <Button variant="outline" size="sm" onClick={() => rmFileRef.current?.click()}>
-                      <Upload className="h-4 w-4 mr-1" /> Import
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={exportRawMaterialEntries}>
-                      <Download className="h-4 w-4 mr-1" /> Export
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={downloadRmDummy}>
-                      <FileSpreadsheet className="h-4 w-4 mr-1" /> Dummy (All Ingredients)
-                    </Button>
-                  </div>
+                  <StockExcelDialog
+                    inputId="rm-excel-input"
+                    title="Excel Bulk Import"
+                    description="Import raw material entries from an Excel file. Download the current month's entries or a template with all ingredients."
+                    entityLabel="Raw Materials"
+                    templateLabel="All Ingredients"
+                    requiredColumns={["Date (dd/mm/yyyy)", "Ingredient (required)", "Opening (number)", "Purchased (number)", "Used (number)"]}
+                    onExport={exportRawMaterialEntries}
+                    onDownloadTemplate={downloadRmDummy}
+                    onImport={importRawMaterialEntries}
+                  />
+
                 </div>
               </CardHeader>
 
