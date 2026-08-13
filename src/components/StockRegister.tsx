@@ -779,7 +779,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                   <td>${entry.opening}</td>
                   <td>${entry.purchased}</td>
                   <td>${entry.used}</td>
-                  <td>${entry.closing.toFixed(1)}</td>
+                  <td>${Math.round(entry.closing)}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -1268,7 +1268,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                             <td className="p-2">{entry.opening}</td>
                             <td className="p-2">{entry.purchased}</td>
                             <td className="p-2">{entry.used}</td>
-                            <td className="p-2 font-medium">{entry.closing.toFixed(1)}</td>
+                            <td className="p-2 font-medium">{Math.round(entry.closing)}</td>
                             <td className="p-2">
                               <div className="flex gap-2">
                                 <Button variant="ghost" size="sm" onClick={() => openEditRmDialog(entry)}>
@@ -1376,7 +1376,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
               </div>
               <div>
                 <Label>Closing (g)</Label>
-                <Input type="number" value={calculateEditRmClosing().toFixed(1)} disabled />
+                <Input type="number" value={Math.round(calculateEditRmClosing())} disabled />
               </div>
             </div>
             <DialogFooter>
