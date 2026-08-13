@@ -755,10 +755,10 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                 <th>Sl.No</th>
                 <th>Date</th>
                 <th>Ingredient</th>
-                <th>Opening (kg)</th>
-                <th>Purchased (kg)</th>
-                <th>Used (kg)</th>
-                <th>Closing (kg)</th>
+                <th>Opening (g)</th>
+                <th>Purchased (g)</th>
+                <th>Used (g)</th>
+                <th>Closing (g)</th>
               </tr>
             </thead>
             <tbody>
@@ -962,7 +962,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
 
                   {/* Opening Stock */}
                   <div className="min-w-0">
-                    <Label htmlFor="podiOpeningStock" className="text-xs sm:text-sm">Opening</Label>
+                    <Label htmlFor="podiOpeningStock" className="text-xs sm:text-sm">Opening (g)</Label>
                     <Input
                       id="podiOpeningStock"
                       type="number"
@@ -998,7 +998,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
 
                   {/* Closing Stock */}
                   <div className="min-w-0">
-                    <Label htmlFor="podiClosingStock" className="text-xs sm:text-sm">Closing</Label>
+                    <Label htmlFor="podiClosingStock" className="text-xs sm:text-sm">Closing (g)</Label>
                     <Input
                       id="podiClosingStock"
                       type="number"
@@ -1081,25 +1081,25 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
               <Card className="bg-blue-50 border-blue-200">
                 <CardContent className="pt-4">
                   <p className="text-sm text-blue-600 font-medium">Total Opening</p>
-                  <p className="text-lg sm:text-2xl font-bold text-blue-800">{rmSummary.totalOpening.toFixed(2)} kg</p>
+                  <p className="text-lg sm:text-2xl font-bold text-blue-800">{rmSummary.totalOpening.toFixed(0)} g</p>
                 </CardContent>
               </Card>
               <Card className="bg-green-50 border-green-200">
                 <CardContent className="pt-4">
                   <p className="text-sm text-green-600 font-medium">Total Purchased</p>
-                  <p className="text-lg sm:text-2xl font-bold text-green-800">{rmSummary.totalPurchased.toFixed(2)} kg</p>
+                  <p className="text-lg sm:text-2xl font-bold text-green-800">{rmSummary.totalPurchased.toFixed(0)} g</p>
                 </CardContent>
               </Card>
               <Card className="bg-orange-50 border-orange-200">
                 <CardContent className="pt-4">
                   <p className="text-sm text-orange-600 font-medium">Total Used</p>
-                  <p className="text-lg sm:text-2xl font-bold text-orange-800">{rmSummary.totalUsed.toFixed(2)} kg</p>
+                  <p className="text-lg sm:text-2xl font-bold text-orange-800">{rmSummary.totalUsed.toFixed(0)} g</p>
                 </CardContent>
               </Card>
               <Card className="bg-purple-50 border-purple-200">
                 <CardContent className="pt-4">
                   <p className="text-sm text-purple-600 font-medium">Total Closing</p>
-                  <p className="text-lg sm:text-2xl font-bold text-purple-800">{rmSummary.totalClosing.toFixed(2)} kg</p>
+                  <p className="text-lg sm:text-2xl font-bold text-purple-800">{rmSummary.totalClosing.toFixed(0)} g</p>
                 </CardContent>
               </Card>
             </div>
@@ -1115,7 +1115,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                     description="Import raw material entries from an Excel file. Download the current month's entries or a template with all ingredients."
                     entityLabel="Raw Materials"
                     templateLabel="All Ingredients"
-                    requiredColumns={["Date (dd/mm/yyyy)", "Ingredient (required)", "Opening (number)", "Purchased (number)", "Used (number)"]}
+                    requiredColumns={["Date (dd/mm/yyyy)", "Ingredient (required)", "Opening (grams)", "Purchased (grams)", "Used (grams)"]}
                     onExport={exportRawMaterialEntries}
                     onDownloadTemplate={downloadRmDummy}
                     onImport={importRawMaterialEntries}
@@ -1173,7 +1173,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
 
                   {/* Opening */}
                   <div className="min-w-0">
-                    <Label htmlFor="rmOpening" className="text-xs sm:text-sm">Opening</Label>
+                    <Label htmlFor="rmOpening" className="text-xs sm:text-sm">Opening (g)</Label>
                     <Input
                       id="rmOpening"
                       type="number"
@@ -1185,7 +1185,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
 
                   {/* Purchased */}
                   <div className="min-w-0">
-                    <Label htmlFor="rmPurchased" className="text-xs sm:text-sm">Purchased</Label>
+                    <Label htmlFor="rmPurchased" className="text-xs sm:text-sm">Purchased (g)</Label>
                     <Input
                       id="rmPurchased"
                       type="number"
@@ -1197,7 +1197,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
 
                   {/* Used */}
                   <div className="min-w-0">
-                    <Label htmlFor="rmUsed" className="text-xs sm:text-sm">Used</Label>
+                    <Label htmlFor="rmUsed" className="text-xs sm:text-sm">Used (g)</Label>
                     <Input
                       id="rmUsed"
                       type="number"
@@ -1209,7 +1209,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
 
                   {/* Closing */}
                   <div className="min-w-0">
-                    <Label htmlFor="rmClosing" className="text-xs sm:text-sm">Closing</Label>
+                    <Label htmlFor="rmClosing" className="text-xs sm:text-sm">Closing (g)</Label>
                     <Input
                       id="rmClosing"
                       type="number"
@@ -1243,10 +1243,10 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                           <th className="text-left p-2 font-medium">Sl.No</th>
                           <th className="text-left p-2 font-medium">Date</th>
                           <th className="text-left p-2 font-medium">Ingredient</th>
-                          <th className="text-left p-2 font-medium">Opening (kg)</th>
-                          <th className="text-left p-2 font-medium">Purchased (kg)</th>
-                          <th className="text-left p-2 font-medium">Used (kg)</th>
-                          <th className="text-left p-2 font-medium">Closing (kg)</th>
+                          <th className="text-left p-2 font-medium">Opening (g)</th>
+                          <th className="text-left p-2 font-medium">Purchased (g)</th>
+                          <th className="text-left p-2 font-medium">Used (g)</th>
+                          <th className="text-left p-2 font-medium">Closing (g)</th>
                           <th className="text-left p-2 font-medium">Actions</th>
                         </tr>
                       </thead>
@@ -1354,19 +1354,19 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                 </Popover>
               </div>
               <div>
-                <Label>Opening (kg)</Label>
+                <Label>Opening (g)</Label>
                 <Input type="number" value={editRmOpening} onChange={(e) => setEditRmOpening(e.target.value)} />
               </div>
               <div>
-                <Label>Purchased (kg)</Label>
+                <Label>Purchased (g)</Label>
                 <Input type="number" value={editRmPurchased} onChange={(e) => setEditRmPurchased(e.target.value)} />
               </div>
               <div>
-                <Label>Used (kg)</Label>
+                <Label>Used (g)</Label>
                 <Input type="number" value={editRmUsed} onChange={(e) => setEditRmUsed(e.target.value)} />
               </div>
               <div>
-                <Label>Closing (kg)</Label>
+                <Label>Closing (g)</Label>
                 <Input type="number" value={calculateEditRmClosing().toFixed(1)} disabled />
               </div>
             </div>
