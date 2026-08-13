@@ -962,7 +962,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
 
                   {/* Opening Stock */}
                   <div className="min-w-0">
-                    <Label htmlFor="podiOpeningStock" className="text-xs sm:text-sm">Opening (g)</Label>
+                    <Label htmlFor="podiOpeningStock" className="text-xs sm:text-sm">Opening</Label>
                     <Input
                       id="podiOpeningStock"
                       type="number"
@@ -998,7 +998,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
 
                   {/* Closing Stock */}
                   <div className="min-w-0">
-                    <Label htmlFor="podiClosingStock" className="text-xs sm:text-sm">Closing (g)</Label>
+                    <Label htmlFor="podiClosingStock" className="text-xs sm:text-sm">Closing</Label>
                     <Input
                       id="podiClosingStock"
                       type="number"
