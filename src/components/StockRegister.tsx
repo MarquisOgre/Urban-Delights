@@ -83,8 +83,17 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
   const [editRmUsed, setEditRmUsed] = useState<string>("");
 
   // Filtered entries for display
-  const filteredPodiEntries = podiEntries.filter(entry => isSameMonth(entry.date, selectedMonth));
-  const filteredRawMaterialEntries = rawMaterialEntries.filter(entry => isSameMonth(entry.date, selectedMonth));
+  const byName = (a: string, b: string) => a.localeCompare(b, undefined, { sensitivity: "base" });
+
+  const filteredPodiEntries = podiEntries
+    .filter(entry => isSameMonth(entry.date, selectedMonth))
+    .sort((a, b) => byName(a.podiName, b.podiName) || a.date.getTime() - b.date.getTime());
+  const filteredRawMaterialEntries = rawMaterialEntries
+    .filter(entry => isSameMonth(entry.date, selectedMonth))
+    .sort((a, b) => byName(a.ingredient, b.ingredient) || a.date.getTime() - b.date.getTime());
+
+  const sortedRecipes = [...recipes].sort((a, b) => byName(a.name, b.name));
+  const sortedMasterIngredients = [...masterIngredients].sort((a, b) => byName(a.name, b.name));
 
   // Calculate monthly summaries
   const podiSummary = {
@@ -585,7 +594,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
 
   const downloadPodiDummy = () => {
     downloadSheet(
-      recipes.map((r) => ({
+      sortedRecipes.map((r) => ({
         Date: format(selectedDate, "dd/MM/yyyy"),
         "Podi Name": r.name,
         Opening: getLastPodiClosingStock(r.name),
@@ -653,7 +662,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
 
   const downloadRmDummy = () => {
     downloadSheet(
-      masterIngredients.map((ing) => ({
+      sortedMasterIngredients.map((ing) => ({
         Date: format(selectedDate, "dd/MM/yyyy"),
         Ingredient: ing.name,
         Opening: getLastRawMaterialClosingStock(ing.name),
@@ -951,7 +960,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                         <SelectValue placeholder="Select podi" />
                       </SelectTrigger>
                       <SelectContent>
-                        {recipes.map((recipe) => (
+                        {sortedRecipes.map((recipe) => (
                           <SelectItem key={recipe.id} value={recipe.name}>
                             {recipe.name}
                           </SelectItem>
@@ -1162,7 +1171,7 @@ const StockRegisterComponent = ({ onBackToDashboard }: { onBackToDashboard: () =
                         <SelectValue placeholder="Select ingredient" />
                       </SelectTrigger>
                       <SelectContent>
-                        {masterIngredients.map((ing) => (
+                        {sortedMasterIngredients.map((ing) => (
                           <SelectItem key={ing.id} value={ing.name}>
                             {ing.name}
                           </SelectItem>
