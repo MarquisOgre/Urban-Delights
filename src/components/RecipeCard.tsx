@@ -255,9 +255,10 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
             {/* Preparation & Info */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900">Preparation Method</h3>
-              <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded">
+              <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap leading-relaxed">
                 {recipe.preparation || "No preparation method available"}
               </p>
+
               
               <h3 className="text-lg font-semibold text-gray-900">Nutrition (per 100g)</h3>
               <div className="grid grid-cols-2 gap-4 text-sm">
