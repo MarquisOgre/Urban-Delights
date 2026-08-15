@@ -1,6 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
-import { HARDCODED_MASTER_INGREDIENTS, HARDCODED_RECIPES } from '@/data/hardcodedData';
 
 export type MasterIngredient = Database['public']['Tables']['master_ingredients']['Row'];
 export type Recipe = Database['public']['Tables']['recipes']['Row'];
@@ -33,35 +32,34 @@ export interface NewIngredient {
   unit: string;
 }
 
-// ✅ Export all master ingredients (hardcoded)
 export const getAllIngredients = async (): Promise<Pick<MasterIngredient, 'name' | 'brand' | 'price_per_kg'>[]> => {
-  return HARDCODED_MASTER_INGREDIENTS.map(i => ({
-    name: i.name,
-    brand: i.brand,
-    price_per_kg: i.price_per_kg,
-  }));
+  const { data, error } = await supabase
+    .from('master_ingredients')
+    .select('name, brand, price_per_kg')
+    .order('name');
+  if (error) throw error;
+  return data || [];
 };
 
-// Return hardcoded master ingredients
 export const fetchMasterIngredients = async (): Promise<MasterIngredient[]> => {
-  return HARDCODED_MASTER_INGREDIENTS as MasterIngredient[];
+  const { data, error } = await supabase
+    .from('master_ingredients')
+    .select('*')
+    .order('name');
+  if (error) throw error;
+  return (data || []) as MasterIngredient[];
 };
 
-// Return hardcoded recipes
 export const fetchRecipesWithIngredients = async (): Promise<RecipeWithIngredients[]> => {
-  return HARDCODED_RECIPES.map(recipe => ({
+  const { data, error } = await supabase
+    .from('recipes')
+    .select('*')
+    .order('name');
+  if (error) throw error;
+  return (data || []).map(recipe => ({
     ...recipe,
-    description: recipe.description || null,
-    preparation: recipe.preparation || null,
-    shelf_life: recipe.shelf_life || null,
-    storage: recipe.storage || null,
-    calories: recipe.calories || null,
-    protein: recipe.protein || null,
-    fat: recipe.fat || null,
-    carbs: recipe.carbs || null,
-    is_hidden: recipe.is_hidden || null,
-    yield_output: recipe.yield_output || null,
-  })) as RecipeWithIngredients[];
+    ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
+  })) as unknown as RecipeWithIngredients[];
 };
 
 export const calculateSellingPrice = (finalCost: number): number => {
