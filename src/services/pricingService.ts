@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { HARDCODED_PRICING } from '@/data/hardcodedData';
 
 export interface RecipePricing {
   id: string;
@@ -11,9 +10,13 @@ export interface RecipePricing {
   updated_at: string;
 }
 
-// Return hardcoded pricing data
 export const fetchRecipePricing = async (): Promise<RecipePricing[]> => {
-  return HARDCODED_PRICING as RecipePricing[];
+  const { data, error } = await supabase
+    .from('recipe_pricing')
+    .select('*')
+    .order('recipe_name');
+  if (error) throw error;
+  return (data || []) as RecipePricing[];
 };
 
 export const updateRecipePrice = async (id: string, price: number): Promise<void> => {
