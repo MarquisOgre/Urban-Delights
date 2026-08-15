@@ -59,7 +59,7 @@ export const fetchRecipesWithIngredients = async (): Promise<RecipeWithIngredien
   return (data || []).map(recipe => ({
     ...recipe,
     ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
-  })) as RecipeWithIngredients[];
+  })) as unknown as RecipeWithIngredients[];
 };
 
 export const calculateSellingPrice = (finalCost: number): number => {
