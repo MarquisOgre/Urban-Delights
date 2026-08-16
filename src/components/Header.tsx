@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, ChefHat, PlusCircle, Package, DollarSign, ClipboardList, Warehouse, RefreshCw, LogOut } from 'lucide-react';
+import { Menu, X, ChefHat, PlusCircle, Package, DollarSign, ClipboardList, Warehouse, RefreshCw, LogOut, LogIn } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -15,17 +16,21 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, onRefresh }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { signOut } = useAuth();
+  const { signOut, session } = useAuth();
+  const navigate = useNavigate();
+  const isAuthed = !!session;
 
-  const navigationItems = [
-    { key: 'order-dashboard', label: 'Orders', icon: ClipboardList },
-    { key: 'recipes', label: 'Recipes', icon: ChefHat },
-    { key: 'add-recipe', label: 'Add Recipe', icon: PlusCircle },
-    { key: 'ingredients', label: 'Ingredients', icon: Package },
-    { key: 'pricing', label: 'Pricing Manager', icon: DollarSign },
-    { key: 'indent', label: 'Indent', icon: ClipboardList },
-    { key: 'stock-register', label: 'Stock Register', icon: Warehouse },
+  const allNavigationItems = [
+    { key: 'order-dashboard', label: 'Orders', icon: ClipboardList, authOnly: true },
+    { key: 'recipes', label: 'Recipes', icon: ChefHat, authOnly: false },
+    { key: 'add-recipe', label: 'Add Recipe', icon: PlusCircle, authOnly: true },
+    { key: 'ingredients', label: 'Ingredients', icon: Package, authOnly: false },
+    { key: 'pricing', label: 'Pricing Manager', icon: DollarSign, authOnly: false },
+    { key: 'indent', label: 'Indent', icon: ClipboardList, authOnly: false },
+    { key: 'stock-register', label: 'Stock Register', icon: Warehouse, authOnly: false },
   ];
+
+  const navigationItems = allNavigationItems.filter((item) => isAuthed || !item.authOnly);
 
   const handleNavClick = (key: string) => {
     setCurrentView && setCurrentView(key);
@@ -79,10 +84,17 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, onRefresh 
                 </button>
               );
             })}
-            <Button variant="ghost" size="sm" onClick={signOut} className="text-orange-800 hover:bg-orange-100">
-              <LogOut className="h-4 w-4 mr-1" />
-              Logout
-            </Button>
+            {isAuthed ? (
+              <Button variant="ghost" size="sm" onClick={signOut} className="text-orange-800 hover:bg-orange-100">
+                <LogOut className="h-4 w-4 mr-1" />
+                Logout
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" onClick={() => navigate('/auth')} className="text-orange-800 border-orange-300 hover:bg-orange-100">
+                <LogIn className="h-4 w-4 mr-1" />
+                Login
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu */}
@@ -117,13 +129,23 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, onRefresh 
                       </button>
                     );
                   })}
-                  <button
-                    onClick={() => { setMobileMenuOpen(false); signOut(); }}
-                    className="px-4 py-3 text-sm font-medium rounded-md transition-colors flex items-center gap-3 bg-gray-100 text-gray-700 hover:bg-orange-100 hover:text-orange-600"
-                  >
-                    <LogOut className="h-5 w-5" />
-                    Logout
-                  </button>
+                  {isAuthed ? (
+                    <button
+                      onClick={() => { setMobileMenuOpen(false); signOut(); }}
+                      className="px-4 py-3 text-sm font-medium rounded-md transition-colors flex items-center gap-3 bg-gray-100 text-gray-700 hover:bg-orange-100 hover:text-orange-600"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      Logout
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => { setMobileMenuOpen(false); navigate('/auth'); }}
+                      className="px-4 py-3 text-sm font-medium rounded-md transition-colors flex items-center gap-3 bg-orange-600 text-white"
+                    >
+                      <LogIn className="h-5 w-5" />
+                      Login
+                    </button>
+                  )}
                 </div>
               </SheetContent>
             </Sheet>
