@@ -6,18 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import BackendDashboard from "./pages/BackendDashboard";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
-import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { AuthProvider } from "@/hooks/use-auth";
 
 const queryClient = new QueryClient();
-
-const Protected = ({ children }: { children: React.ReactNode }) => {
-  const { session, loading } = useAuth();
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center text-gray-500">Loading...</div>;
-  }
-  if (!session) return <Auth />;
-  return <>{children}</>;
-};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -27,7 +18,8 @@ const App = () => (
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Protected><BackendDashboard /></Protected>} />
+            <Route path="/" element={<BackendDashboard />} />
+            <Route path="/auth" element={<Auth />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
