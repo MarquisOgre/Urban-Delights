@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, ChefHat, PlusCircle, Package, DollarSign, ClipboardList, Warehouse, RefreshCw } from 'lucide-react';
+import { Menu, X, ChefHat, PlusCircle, Package, DollarSign, ClipboardList, Warehouse, RefreshCw, LogOut } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
@@ -14,6 +15,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, onRefresh }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { signOut } = useAuth();
 
   const navigationItems = [
     { key: 'order-dashboard', label: 'Orders', icon: ClipboardList },
@@ -77,6 +79,10 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, onRefresh 
                 </button>
               );
             })}
+            <Button variant="ghost" size="sm" onClick={signOut} className="text-orange-800 hover:bg-orange-100">
+              <LogOut className="h-4 w-4 mr-1" />
+              Logout
+            </Button>
           </div>
 
           {/* Mobile Menu */}
@@ -111,6 +117,13 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, onRefresh 
                       </button>
                     );
                   })}
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); signOut(); }}
+                    className="px-4 py-3 text-sm font-medium rounded-md transition-colors flex items-center gap-3 bg-gray-100 text-gray-700 hover:bg-orange-100 hover:text-orange-600"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    Logout
+                  </button>
                 </div>
               </SheetContent>
             </Sheet>
