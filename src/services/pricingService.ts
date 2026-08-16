@@ -46,3 +46,14 @@ export const updateRecipeEnabled = async (id: string, isEnabled: boolean): Promi
     throw error;
   }
 };
+
+export const createPricingForRecipe = async (recipeName: string, quantityTypes: string[]): Promise<void> => {
+  const rows = quantityTypes.map((quantity_type) => ({
+    recipe_name: recipeName,
+    quantity_type,
+    price: 0,
+    is_enabled: true,
+  }));
+  const { error } = await supabase.from('recipe_pricing').insert(rows);
+  if (error) throw error;
+};
