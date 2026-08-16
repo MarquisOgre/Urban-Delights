@@ -151,6 +151,37 @@ const PricingManager: React.FC<{ onBackToDashboard: () => void }> = ({ onBackToD
         </Button>
       </div>
 
+      {/* Add new recipe to pricing */}
+      <Card>
+        <CardHeader className="p-3 pb-2">
+          <CardTitle className="text-sm sm:text-base">Add Recipe to Pricing</CardTitle>
+        </CardHeader>
+        <CardContent className="p-3 pt-0 flex flex-col sm:flex-row gap-2">
+          <Select value={newRecipeName} onValueChange={setNewRecipeName}>
+            <SelectTrigger className="sm:w-72">
+              <SelectValue placeholder="Select a recipe" />
+            </SelectTrigger>
+            <SelectContent className="bg-white z-50">
+              {recipes
+                .filter(r => !pricing.some(p => p.recipe_name === r.name))
+                .map(r => (
+                  <SelectItem key={r.id} value={r.name}>{r.name}</SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            onClick={addRecipeToPricing}
+            disabled={!newRecipeName || isAdding}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add
+          </Button>
+        </CardContent>
+      </Card>
+
+
       {/* Mobile Card Layout */}
       <div className="block sm:hidden space-y-3">
         {recipes.map((recipe) => {
