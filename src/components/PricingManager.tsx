@@ -3,9 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Save, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Save, Eye, EyeOff, ArrowLeft, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { fetchRecipePricing, updateRecipePrice, updateRecipeEnabled } from '@/services/pricingService';
+import { fetchRecipePricing, updateRecipePrice, updateRecipeEnabled, createPricingForRecipe } from '@/services/pricingService';
 import { fetchRecipesWithIngredients } from '@/services/database';
 import type { RecipePricing } from '@/services/pricingService';
 import type { RecipeWithIngredients } from '@/services/database';
@@ -23,7 +24,25 @@ const PricingManager: React.FC<{ onBackToDashboard: () => void }> = ({ onBackToD
   const [recipes, setRecipes] = useState<RecipeWithIngredients[]>([]);
   const [editingPrice, setEditingPrice] = useState<{ [key: string]: number }>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [newRecipeName, setNewRecipeName] = useState('');
+  const [isAdding, setIsAdding] = useState(false);
   const { toast } = useToast();
+
+  const addRecipeToPricing = async () => {
+    if (!newRecipeName) return;
+    try {
+      setIsAdding(true);
+      await createPricingForRecipe(newRecipeName, QUANTITY_OPTIONS);
+      setNewRecipeName('');
+      await loadData();
+      toast({ title: 'Added', description: `${newRecipeName} added to pricing` });
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to add recipe to pricing', variant: 'destructive' });
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
 
   useEffect(() => {
     loadData();
