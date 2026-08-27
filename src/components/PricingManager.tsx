@@ -21,6 +21,8 @@ const QUANTITY_OPTIONS = [
 ];
 
 const PricingManager: React.FC<{ onBackToDashboard: () => void }> = ({ onBackToDashboard }) => {
+  const { session } = useAuth();
+  const isAuthed = !!session;
   const [pricing, setPricing] = useState<RecipePricing[]>([]);
   const [recipes, setRecipes] = useState<RecipeWithIngredients[]>([]);
   const [editingPrice, setEditingPrice] = useState<{ [key: string]: number }>({});

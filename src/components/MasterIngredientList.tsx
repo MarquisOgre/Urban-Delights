@@ -20,6 +20,8 @@ interface MasterIngredientListProps {
 }
 
 const MasterIngredientList = ({ masterIngredients, onRefresh, onBackToDashboard }: MasterIngredientListProps) => {
+  const { session } = useAuth();
+  const isAuthed = !!session;
   const [searchTerm, setSearchTerm] = useState("");
   const [newIngredientName, setNewIngredientName] = useState("");
   const [newIngredientPrice, setNewIngredientPrice] = useState<number>(0);
