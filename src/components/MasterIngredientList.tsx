@@ -158,8 +158,9 @@ const MasterIngredientList = ({ masterIngredients, onRefresh, onBackToDashboard 
             />
           </div>
           
-          <ExcelBulkIngredients onRefresh={onRefresh} />
+          {isAuthed && <ExcelBulkIngredients onRefresh={onRefresh} />}
           
+          {isAuthed && (
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-orange-600 hover:bg-orange-700">
@@ -210,6 +211,7 @@ const MasterIngredientList = ({ masterIngredients, onRefresh, onBackToDashboard 
               </div>
             </DialogContent>
           </Dialog>
+          )}
         </div>
 
         <Button 

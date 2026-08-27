@@ -18,11 +18,20 @@ import OrderForm from '@/components/OrderForm';
 import OrdersList from '@/components/OrdersList';
 import Header from '@/components/Header';
 import { fetchMasterIngredients, fetchRecipesWithIngredients } from '@/services/database';
+import { useAuth } from '@/hooks/use-auth';
 
 const BackendDashboard: React.FC = () => {
   const [currentView, setCurrentView] = useState('main');
+  const { session } = useAuth();
+  const isAuthed = !!session;
+  const authOnlyViews = ['order-dashboard', 'create-order', 'orders', 'manage-recipes', 'add-recipe'];
 
-  const viewOrder = ['main', 'order-dashboard', 'create-order', 'orders', 'recipes', 'manage-recipes', 'ingredients', 'add-recipe', 'pricing', 'indent', 'stock-register'];
+  const allViewOrder = ['main', 'order-dashboard', 'create-order', 'orders', 'recipes', 'manage-recipes', 'ingredients', 'add-recipe', 'pricing', 'indent', 'stock-register'];
+  const viewOrder = allViewOrder.filter(v => isAuthed || !authOnlyViews.includes(v));
+
+  React.useEffect(() => {
+    if (!isAuthed && authOnlyViews.includes(currentView)) setCurrentView('main');
+  }, [isAuthed, currentView]);
 
   const swipeHandlers = React.useMemo(() => ({
     onSwipeLeft: () => {
@@ -60,7 +69,7 @@ const BackendDashboard: React.FC = () => {
     }
   };
 
-  const backendButtons = [
+  const allBackendButtons = [
     { title: 'Orders', description: 'Manage orders and invoices', icon: ShoppingCart, color: 'bg-blue-500', key: 'order-dashboard' },
     { title: 'Recipes', description: 'View all recipes and their details', icon: ChefHat, color: 'bg-orange-500', key: 'recipes' },
     { title: 'Manage Recipes', description: 'Manage recipe visibility and settings', icon: ChefHat, color: 'bg-orange-600', key: 'manage-recipes' },
@@ -70,6 +79,8 @@ const BackendDashboard: React.FC = () => {
     { title: 'Indent', description: 'Cost calculator and ingredient planning', icon: FileText, color: 'bg-indigo-500', key: 'indent' },
     { title: 'Stock Register', description: 'Track inventory and stock levels', icon: Archive, color: 'bg-red-500', key: 'stock-register' },
   ];
+
+  const backendButtons = allBackendButtons.filter(b => isAuthed || !authOnlyViews.includes(b.key));
 
   const renderContent = () => {
     if (currentView === 'main') {
@@ -103,6 +114,8 @@ const BackendDashboard: React.FC = () => {
         </div>
       );
     }
+
+    if (!isAuthed && authOnlyViews.includes(currentView)) return null;
 
     switch (currentView) {
       case 'order-dashboard':
