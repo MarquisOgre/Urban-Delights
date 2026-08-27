@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,8 @@ interface MasterIngredientListProps {
 }
 
 const MasterIngredientList = ({ masterIngredients, onRefresh, onBackToDashboard }: MasterIngredientListProps) => {
+  const { session } = useAuth();
+  const isAuthed = !!session;
   const [searchTerm, setSearchTerm] = useState("");
   const [newIngredientName, setNewIngredientName] = useState("");
   const [newIngredientPrice, setNewIngredientPrice] = useState<number>(0);
@@ -158,8 +161,9 @@ const MasterIngredientList = ({ masterIngredients, onRefresh, onBackToDashboard 
             />
           </div>
           
-          <ExcelBulkIngredients onRefresh={onRefresh} />
+          {isAuthed && <ExcelBulkIngredients onRefresh={onRefresh} />}
           
+          {isAuthed && (
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-orange-600 hover:bg-orange-700">
@@ -210,6 +214,7 @@ const MasterIngredientList = ({ masterIngredients, onRefresh, onBackToDashboard 
               </div>
             </DialogContent>
           </Dialog>
+          )}
         </div>
 
         <Button 

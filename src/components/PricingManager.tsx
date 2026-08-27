@@ -1,3 +1,4 @@
+import { useAuth } from '@/hooks/use-auth';
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +21,8 @@ const QUANTITY_OPTIONS = [
 ];
 
 const PricingManager: React.FC<{ onBackToDashboard: () => void }> = ({ onBackToDashboard }) => {
+  const { session } = useAuth();
+  const isAuthed = !!session;
   const [pricing, setPricing] = useState<RecipePricing[]>([]);
   const [recipes, setRecipes] = useState<RecipeWithIngredients[]>([]);
   const [editingPrice, setEditingPrice] = useState<{ [key: string]: number }>({});
@@ -152,6 +155,7 @@ const PricingManager: React.FC<{ onBackToDashboard: () => void }> = ({ onBackToD
       </div>
 
       {/* Add new recipe to pricing */}
+      {isAuthed && (
       <Card>
         <CardHeader className="p-3 pb-2">
           <CardTitle className="text-sm sm:text-base">Add Recipe to Pricing</CardTitle>
@@ -180,6 +184,7 @@ const PricingManager: React.FC<{ onBackToDashboard: () => void }> = ({ onBackToD
           </Button>
         </CardContent>
       </Card>
+      )}
 
 
       {/* Mobile Card Layout */}
