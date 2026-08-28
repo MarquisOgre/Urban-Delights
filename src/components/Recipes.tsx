@@ -102,7 +102,7 @@ const Recipes = ({
     );
 
 
-  /* ---------------- Export PDF (All Recipes, 2 per page) ---------------- */
+  /* ---------------- Export PDF (All Recipes, 1 per page) ---------------- */
   const exportRecipesToPDF = async () => {
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
