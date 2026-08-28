@@ -9,30 +9,48 @@ import { Plus, Trash2, Save, ArrowLeft } from "lucide-react";
 import { addRecipeWithIngredients, calculateIngredientCostFromPartial, calculateSellingPrice, type MasterIngredient, type NewIngredient } from "@/services/database";
 import { useToast } from "@/hooks/use-toast";
 
+export interface AddRecipeInitialData {
+  name?: string;
+  description?: string;
+  preparation?: string;
+  shelf_life?: string;
+  storage?: string;
+  yield_output?: number;
+  calories?: number | null;
+  protein?: number | null;
+  fat?: number | null;
+  carbs?: number | null;
+  ingredients?: NewIngredient[];
+}
+
 interface AddRecipeProps {
   masterIngredients: MasterIngredient[];
   onRecipeAdded: () => void;
   onBackToDashboard: () => void;
+  initialData?: AddRecipeInitialData;
 }
 
-const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard }: AddRecipeProps) => {
-  const [recipeName, setRecipeName] = useState("");
-  const [description, setDescription] = useState("");
-  const [preparation, setPreparation] = useState("");
+const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard, initialData }: AddRecipeProps) => {
+  const [recipeName, setRecipeName] = useState(initialData?.name ?? "");
+  const [description, setDescription] = useState(initialData?.description ?? "");
+  const [preparation, setPreparation] = useState(initialData?.preparation ?? "");
   const [overheads, setOverheads] = useState<number>(100);
-  const [ingredients, setIngredients] = useState<NewIngredient[]>([
-    { ingredient_name: "", quantity: 0, unit: "g" }
-  ]);
+  const [ingredients, setIngredients] = useState<NewIngredient[]>(
+    initialData?.ingredients?.length
+      ? initialData.ingredients
+      : [{ ingredient_name: "", quantity: 0, unit: "g" }]
+  );
   const [nutrition, setNutrition] = useState({
-    calories: 0,
-    protein: 0,
-    fat: 0,
-    carbs: 0
+    calories: initialData?.calories ?? 0,
+    protein: initialData?.protein ?? 0,
+    fat: initialData?.fat ?? 0,
+    carbs: initialData?.carbs ?? 0
   });
-  const [yieldOutput, setYieldOutput] = useState<number>(1000); // Default 1000g = 1kg
+  const [yieldOutput, setYieldOutput] = useState<number>(initialData?.yield_output || 1000);
   const [autoCalculatePrice, setAutoCalculatePrice] = useState(true);
   const [manualSellingPrice, setManualSellingPrice] = useState<number>(0);
   const { toast } = useToast();
+
 
   // Calculate selling price automatically
   const totalCost = ingredients.reduce((sum, ingredient) => {
