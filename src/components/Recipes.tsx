@@ -280,6 +280,15 @@ const Recipes = ({
                   Add
                 </Button>
 
+                <ImportRecipeDialog
+                  masterIngredients={masterIngredients}
+                  onImported={recipe => {
+                    setImportedRecipe(recipe);
+                    setShowAddRecipe(true);
+                  }}
+                />
+
+
 
 
 
