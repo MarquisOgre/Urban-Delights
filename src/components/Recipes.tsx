@@ -141,26 +141,26 @@ const Recipes = ({
         .join('');
 
       return `
-        <div style="padding:12px 16px;border:3px solid #c2410c;border-radius:8px;margin-bottom:14px;">
-          <div style="font-size:18px;font-weight:700;color:#1f2937;margin-bottom:2px;">${esc(recipe.name)}</div>
-          <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Ingredients & Costs (1 KG Batch)</div>
-          <table style="width:100%;border-collapse:collapse;font-size:12px;color:#111827;">
+        <div style="padding:16px 20px;border:3px solid #c2410c;border-radius:8px;margin-bottom:14px;">
+          <div style="font-size:26px;font-weight:700;color:#1f2937;margin-bottom:4px;">${esc(recipe.name)}</div>
+          <div style="font-size:17px;color:#6b7280;margin-bottom:12px;">Ingredients & Costs (1 KG Batch)</div>
+          <table style="width:100%;border-collapse:collapse;font-size:17px;color:#111827;">
             <thead>
               <tr style="background:#ea580c;color:#fff;text-align:left;">
-                <th style="padding:6px 8px;">Ingredient</th>
-                <th style="padding:6px 8px;">Qty</th>
-                <th style="padding:6px 8px;">Price</th>
-                <th style="padding:6px 8px;text-align:right;">Amount</th>
+                <th style="padding:8px 10px;">Ingredient</th>
+                <th style="padding:8px 10px;">Qty</th>
+                <th style="padding:8px 10px;">Price</th>
+                <th style="padding:8px 10px;text-align:right;">Amount</th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
           </table>
-          <div style="margin-top:8px;font-size:12px;display:flex;justify-content:flex-end;">
-            <table style="font-size:12px;">
-              <tr><td style="padding:2px 12px 2px 0;color:#374151;">Raw Material Cost:</td><td style="text-align:right;">₹${totalCost.toFixed(2)}</td></tr>
-              <tr><td style="padding:2px 12px 2px 0;color:#374151;">Overheads:</td><td style="text-align:right;">₹${overheads.toFixed(2)}</td></tr>
-              <tr><td style="padding:2px 12px 2px 0;color:#c2410c;font-weight:700;">Final Cost:</td><td style="text-align:right;color:#c2410c;font-weight:700;">₹${finalCost.toFixed(2)}</td></tr>
-              <tr><td style="padding:2px 12px 2px 0;color:#15803d;font-weight:700;">Selling Price:</td><td style="text-align:right;color:#15803d;font-weight:700;">₹${Math.round(recipe.selling_price)}</td></tr>
+          <div style="margin-top:12px;font-size:17px;display:flex;justify-content:flex-end;">
+            <table style="font-size:17px;">
+              <tr><td style="padding:3px 14px 3px 0;color:#374151;">Raw Material Cost:</td><td style="text-align:right;">₹${totalCost.toFixed(2)}</td></tr>
+              <tr><td style="padding:3px 14px 3px 0;color:#374151;">Overheads:</td><td style="text-align:right;">₹${overheads.toFixed(2)}</td></tr>
+              <tr><td style="padding:3px 14px 3px 0;color:#c2410c;font-weight:700;">Final Cost:</td><td style="text-align:right;color:#c2410c;font-weight:700;">₹${finalCost.toFixed(2)}</td></tr>
+              <tr><td style="padding:3px 14px 3px 0;color:#15803d;font-weight:700;">Selling Price:</td><td style="text-align:right;color:#15803d;font-weight:700;">₹${Math.round(recipe.selling_price)}</td></tr>
             </table>
           </div>
         </div>`;
@@ -168,22 +168,17 @@ const Recipes = ({
 
     const headerHtml = `
       <div style="display:flex;justify-content:center;align-items:center;padding:8px 0 12px;margin-bottom:14px;">
-        <img src="/logo.png" style="height:48px;object-fit:contain;" crossorigin="anonymous" />
+        <img src="/logo.png" style="height:60px;object-fit:contain;" crossorigin="anonymous" />
       </div>`;
 
-    const footerHtml = `
-      <div style="border-top:1px solid #eee;margin-top:10px;padding-top:6px;text-align:center;font-size:10px;color:#6b7280;">
-        ${COMPANY_ADDRESS}
-      </div>`;
-
-    const totalPages = Math.ceil(visibleRecipes.length / 2);
+    const totalPages = visibleRecipes.length;
 
     for (let p = 0; p < totalPages; p++) {
-      const pair = visibleRecipes.slice(p * 2, p * 2 + 2);
+      const recipe = visibleRecipes[p];
 
       container.innerHTML = `
         <div style="padding:20px;">
-          ${pair.map(r => `${headerHtml}${renderRecipeBlock(r)}`).join('')}
+          ${headerHtml}${renderRecipeBlock(recipe)}
         </div>`;
 
 
@@ -208,11 +203,18 @@ const Recipes = ({
 
       const imgData = canvas.toDataURL('image/png');
       const availableWidth = pageWidth - margin * 2;
-      const imgHeight = (canvas.height * availableWidth) / canvas.width;
-      const renderHeight = Math.min(imgHeight, pageHeight - margin * 2);
+      const availableHeight = pageHeight - margin * 2 - 6;
+      // Preserve aspect ratio; scale down to fit the page if too tall
+      let renderWidth = availableWidth;
+      let renderHeight = (canvas.height * availableWidth) / canvas.width;
+      if (renderHeight > availableHeight) {
+        renderHeight = availableHeight;
+        renderWidth = (canvas.width * availableHeight) / canvas.height;
+      }
+      const offsetX = margin + (availableWidth - renderWidth) / 2;
 
       if (p > 0) pdf.addPage();
-      pdf.addImage(imgData, 'PNG', margin, margin, availableWidth, renderHeight);
+      pdf.addImage(imgData, 'PNG', offsetX, margin, renderWidth, renderHeight);
 
       // page number
       pdf.setFontSize(8);
@@ -225,6 +227,7 @@ const Recipes = ({
     document.body.removeChild(container);
     pdf.save('All Recipes - Ingredients & Cost.pdf');
   };
+
 
 
   /* ---------------- UI ---------------- */
