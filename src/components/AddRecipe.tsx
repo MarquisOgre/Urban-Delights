@@ -125,8 +125,9 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard, initia
       preparation: preparation,
       overheads: overheads,
       yield_output: yieldOutput,
-      shelf_life: "6 months in sealed packaging, away from moisture and sunlight",
-      storage: "Store in a cool, dry place in an airtight container after opening",
+      shelf_life: initialData?.shelf_life || "6 months in sealed packaging, away from moisture and sunlight",
+      storage: initialData?.storage || "Store in a cool, dry place in an airtight container after opening",
+
       calories: nutrition.calories || null,
       protein: nutrition.protein || null,
       fat: nutrition.fat || null,
