@@ -36,6 +36,8 @@ const loadImageDataUrl = (src: string): Promise<string | null> =>
 
 import RecipeCard from '@/components/RecipeCard';
 import AddRecipe from '@/components/AddRecipe';
+import ImportRecipeDialog, { type ImportedRecipe } from '@/components/ImportRecipeDialog';
+
 import {
   type MasterIngredient,
   type RecipeWithIngredients,
@@ -57,20 +59,28 @@ const Recipes = ({
 }: RecipesProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddRecipe, setShowAddRecipe] = useState(false);
+  const [importedRecipe, setImportedRecipe] = useState<ImportedRecipe | null>(null);
 
   /* ---------------- Add Recipe Screen ---------------- */
   if (showAddRecipe) {
     return (
       <AddRecipe
+        key={importedRecipe?.name ?? 'blank'}
         masterIngredients={masterIngredients}
+        initialData={importedRecipe ?? undefined}
         onRecipeAdded={() => {
           onRecipeUpdated();
           setShowAddRecipe(false);
+          setImportedRecipe(null);
         }}
-        onBackToDashboard={() => setShowAddRecipe(false)}
+        onBackToDashboard={() => {
+          setShowAddRecipe(false);
+          setImportedRecipe(null);
+        }}
       />
     );
   }
+
 
   /* ---------------- Filtering ---------------- */
   const filteredRecipes = recipes.filter(
@@ -269,6 +279,15 @@ const Recipes = ({
                   <Plus className="h-4 w-4 mr-1" />
                   Add
                 </Button>
+
+                <ImportRecipeDialog
+                  masterIngredients={masterIngredients}
+                  onImported={recipe => {
+                    setImportedRecipe(recipe);
+                    setShowAddRecipe(true);
+                  }}
+                />
+
 
 
 
