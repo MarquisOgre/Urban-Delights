@@ -36,6 +36,8 @@ const loadImageDataUrl = (src: string): Promise<string | null> =>
 
 import RecipeCard from '@/components/RecipeCard';
 import AddRecipe from '@/components/AddRecipe';
+import ImportRecipeDialog, { type ImportedRecipe } from '@/components/ImportRecipeDialog';
+
 import {
   type MasterIngredient,
   type RecipeWithIngredients,
