@@ -57,20 +57,28 @@ const Recipes = ({
 }: RecipesProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddRecipe, setShowAddRecipe] = useState(false);
+  const [importedRecipe, setImportedRecipe] = useState<ImportedRecipe | null>(null);
 
   /* ---------------- Add Recipe Screen ---------------- */
   if (showAddRecipe) {
     return (
       <AddRecipe
+        key={importedRecipe?.name ?? 'blank'}
         masterIngredients={masterIngredients}
+        initialData={importedRecipe ?? undefined}
         onRecipeAdded={() => {
           onRecipeUpdated();
           setShowAddRecipe(false);
+          setImportedRecipe(null);
         }}
-        onBackToDashboard={() => setShowAddRecipe(false)}
+        onBackToDashboard={() => {
+          setShowAddRecipe(false);
+          setImportedRecipe(null);
+        }}
       />
     );
   }
+
 
   /* ---------------- Filtering ---------------- */
   const filteredRecipes = recipes.filter(
