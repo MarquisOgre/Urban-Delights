@@ -23,7 +23,6 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, onRefresh 
   const allNavigationItems = [
     { key: 'order-dashboard', label: 'Orders', icon: ClipboardList, authOnly: true },
     { key: 'recipes', label: 'Recipes', icon: ChefHat, authOnly: false },
-    { key: 'add-recipe', label: 'Add Recipe', icon: PlusCircle, authOnly: true },
     { key: 'ingredients', label: 'Ingredients', icon: Package, authOnly: false },
     { key: 'pricing', label: 'Pricing Manager', icon: DollarSign, authOnly: false },
     { key: 'indent', label: 'Indent', icon: ClipboardList, authOnly: false },
