@@ -194,22 +194,14 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
         <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto mx-2 sm:mx-auto">
           <DialogHeader>
             <DialogTitle className="text-xl sm:text-2xl text-orange-700">{recipe.name}</DialogTitle>
-            <DialogDescription>
-              Complete recipe details for {desiredQty}KG Batch
-            </DialogDescription>
           </DialogHeader>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Ingredients & Costs */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Ingredients & Costs ({desiredQty}KG Batch)</h3>
               <div ref={ingredientsRef} className="bg-white p-4 space-y-4">
-                <div>
-                  <h2 className="text-xl font-bold text-orange-700">{recipe.name}</h2>
-                  <p className="text-sm text-gray-600">Complete recipe details for {desiredQty}KG Batch</p>
-                </div>
-                <h3 className="text-base font-semibold text-gray-900">Ingredients &amp; Costs ({desiredQty}KG Batch)</h3>
                 <div className="space-y-2">
+
                   {scaledIngredients.map((ingredient, index) => {
                     const masterIngredient = masterIngredients.find(mi => mi.name === ingredient.ingredient_name);
                     const pricePerKg = masterIngredient?.price_per_kg || 0;
