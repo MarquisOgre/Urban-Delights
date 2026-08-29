@@ -58,11 +58,12 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard, initia
     return sum + calculateIngredientCostFromPartial(ingredient, masterIngredients);
   }, 0);
   
-  // Calculate cost per 1 kg based on yield
+  // Cost per 1 kg based on yield; overheads are a flat ₹ amount per kg
   const yieldInKg = yieldOutput / 1000;
   const costPerKg = yieldInKg > 0 ? totalCost / yieldInKg : 0;
-  const overheadsPerKg = yieldInKg > 0 ? overheads / yieldInKg : 0;
+  const overheadsPerKg = overheads;
   const finalCostPerKg = costPerKg + overheadsPerKg;
+
   
   const calculatedSellingPrice = calculateSellingPrice(finalCostPerKg);
   const displaySellingPrice = autoCalculatePrice ? calculatedSellingPrice : manualSellingPrice;
@@ -271,14 +272,9 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard, initia
         </div>
 
 
-          {/* Cost Preview */}
           <div className="bg-blue-50 p-4 rounded-lg border">
-            <h4 className="font-semibold text-blue-800 mb-2">Cost Preview (Per 1 Kg)</h4>
             <div className="space-y-1 text-sm">
-              <div className="flex justify-between text-muted-foreground">
-                <span>Total Raw Material Cost (for {yieldOutput}g yield):</span>
-                <span>₹{totalCost.toFixed(2)}</span>
-              </div>
+
               <div className="flex justify-between">
                 <span>Raw Material Cost (per kg):</span>
                 <span>₹{costPerKg.toFixed(2)}</span>
