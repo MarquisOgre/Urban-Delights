@@ -58,11 +58,12 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard, initia
     return sum + calculateIngredientCostFromPartial(ingredient, masterIngredients);
   }, 0);
   
-  // Calculate cost per 1 kg based on yield
+  // Cost per 1 kg based on yield; overheads are a flat ₹ amount per kg
   const yieldInKg = yieldOutput / 1000;
   const costPerKg = yieldInKg > 0 ? totalCost / yieldInKg : 0;
-  const overheadsPerKg = yieldInKg > 0 ? overheads / yieldInKg : 0;
+  const overheadsPerKg = overheads;
   const finalCostPerKg = costPerKg + overheadsPerKg;
+
   
   const calculatedSellingPrice = calculateSellingPrice(finalCostPerKg);
   const displaySellingPrice = autoCalculatePrice ? calculatedSellingPrice : manualSellingPrice;
