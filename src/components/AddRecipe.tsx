@@ -272,14 +272,9 @@ const AddRecipe = ({ masterIngredients, onRecipeAdded, onBackToDashboard, initia
         </div>
 
 
-          {/* Cost Preview */}
           <div className="bg-blue-50 p-4 rounded-lg border">
-            <h4 className="font-semibold text-blue-800 mb-2">Cost Preview (Per 1 Kg)</h4>
             <div className="space-y-1 text-sm">
-              <div className="flex justify-between text-muted-foreground">
-                <span>Total Raw Material Cost (for {yieldOutput}g yield):</span>
-                <span>₹{totalCost.toFixed(2)}</span>
-              </div>
+
               <div className="flex justify-between">
                 <span>Raw Material Cost (per kg):</span>
                 <span>₹{costPerKg.toFixed(2)}</span>
