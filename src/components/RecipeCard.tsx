@@ -142,21 +142,37 @@ const RecipeCard = ({ recipe, masterIngredients, onRecipeUpdated }: RecipeCardPr
             </div>
             
             <div className="flex justify-between items-center text-xs sm:text-sm">
-              <span className="text-gray-600">Cost:</span>
-              <span className="font-semibold text-red-600 flex items-center">
+              <span className="text-gray-600">Raw Material Cost:</span>
+              <span className="font-semibold flex items-center">
                 <IndianRupee size={12} />
-                {scaledFinalCost.toFixed(2)}
-                {desiredQty !== 1 && <span className="text-[10px] ml-1">({desiredQty}kg)</span>}
+                {scaledTotalCost.toFixed(2)}
               </span>
             </div>
-            
+
             <div className="flex justify-between items-center text-xs sm:text-sm">
-              <span className="text-gray-600">Selling:</span>
-              <span className="font-semibold text-green-600 flex items-center">
+              <span className="text-gray-600">Overheads:</span>
+              <span className="font-semibold flex items-center">
                 <IndianRupee size={12} />
+                {(recipe.overheads * desiredQty).toFixed(2)}
+              </span>
+            </div>
+
+            <div className="flex justify-between items-center text-sm sm:text-base font-bold text-orange-700">
+              <span>Final Cost:</span>
+              <span className="flex items-center">
+                <IndianRupee size={13} />
+                {scaledFinalCost.toFixed(2)}
+              </span>
+            </div>
+
+            <div className="flex justify-between items-center text-sm sm:text-base font-bold text-green-700">
+              <span>Selling Price:</span>
+              <span className="flex items-center">
+                <IndianRupee size={13} />
                 {Math.round(recipe.selling_price * desiredQty)}
               </span>
             </div>
+
             
             <div className="flex justify-between items-center text-xs sm:text-sm">
               <span className="text-gray-600">Ingredients:</span>
