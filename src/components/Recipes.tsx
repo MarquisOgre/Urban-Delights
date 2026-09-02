@@ -175,10 +175,10 @@ const Recipes = ({
         <img src="/logo.png" style="height:60px;object-fit:contain;" crossorigin="anonymous" />
       </div>`;
 
-    const totalPages = visibleRecipes.length;
+    const totalPages = recipesToExport.length;
 
     for (let p = 0; p < totalPages; p++) {
-      const recipe = visibleRecipes[p];
+      const recipe = recipesToExport[p];
 
       container.innerHTML = `
         <div style="padding:20px;">
