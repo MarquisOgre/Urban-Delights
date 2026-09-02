@@ -60,6 +60,8 @@ const Recipes = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddRecipe, setShowAddRecipe] = useState(false);
   const [importedRecipe, setImportedRecipe] = useState<ImportedRecipe | null>(null);
+  const [selectedRecipeIds, setSelectedRecipeIds] = useState<Set<string>>(new Set());
+  const [showPdfExport, setShowPdfExport] = useState(false);
 
   /* ---------------- Add Recipe Screen ---------------- */
   if (showAddRecipe) {
