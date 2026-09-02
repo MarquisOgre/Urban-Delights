@@ -349,6 +349,81 @@ const Recipes = ({
           </div>
         )}
       </div>
+
+      {/* ================= PDF EXPORT SELECTION DIALOG ================= */}
+      <Dialog open={showPdfExport} onOpenChange={setShowPdfExport}>
+        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-orange-800">Export PDF — Select Recipes</DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center justify-between py-2 border-y">
+            <span className="text-sm text-gray-600">
+              {selectedRecipeIds.size} of {visibleRecipes.length} selected
+            </span>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setSelectedRecipeIds(new Set(visibleRecipes.map(r => r.id)))}
+                className="h-7 text-xs"
+              >
+                Select All
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setSelectedRecipeIds(new Set())}
+                className="h-7 text-xs"
+              >
+                Clear
+              </Button>
+            </div>
+          </div>
+          <div className="space-y-1 py-2">
+            {visibleRecipes.map(recipe => (
+              <label
+                key={recipe.id}
+                className="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-gray-50 cursor-pointer"
+              >
+                <Checkbox
+                  checked={selectedRecipeIds.has(recipe.id)}
+                  onCheckedChange={checked => {
+                    setSelectedRecipeIds(prev => {
+                      const next = new Set(prev);
+                      if (checked) next.add(recipe.id);
+                      else next.delete(recipe.id);
+                      return next;
+                    });
+                  }}
+                />
+                <span className="text-sm text-gray-800">{recipe.name}</span>
+              </label>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowPdfExport(false)}
+              className="text-xs sm:text-sm"
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              disabled={selectedRecipeIds.size === 0}
+              onClick={() => {
+                const selected = visibleRecipes.filter(r => selectedRecipeIds.has(r.id));
+                setShowPdfExport(false);
+                exportRecipesToPDF(selected);
+              }}
+              className="bg-orange-600 hover:bg-orange-700 text-white text-xs sm:text-sm"
+            >
+              <FileDown className="h-4 w-4 mr-1" />
+              Export {selectedRecipeIds.size} {selectedRecipeIds.size === 1 ? 'Recipe' : 'Recipes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
