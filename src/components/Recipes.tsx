@@ -301,12 +301,15 @@ const Recipes = ({
 
                 <Button
                   size="sm"
-                  onClick={exportRecipesToPDF}
+                  onClick={() => {
+                    setSelectedRecipeIds(new Set(visibleRecipes.map(r => r.id)));
+                    setShowPdfExport(true);
+                  }}
                   variant="outline"
                   className="border-red-600 text-red-700 hover:bg-red-50 whitespace-nowrap flex-1 sm:flex-none text-xs sm:text-sm h-9"
                 >
                   <FileDown className="h-4 w-4 mr-1" />
-                  PDF
+                  Export PDF
                 </Button>
 
 
