@@ -48,7 +48,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBackToDashboard, onOrderCreated
     return p ? p.price : 0;
   };
 
-  const updateItem = (index: number, field: keyof FormItem, value: string | number) => {
+  const updateItem = (index: number, field: keyof FormItem, value: string | number | boolean) => {
     const updated = [...items];
     updated[index] = { ...updated[index], [field]: value };
 
@@ -60,6 +60,33 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBackToDashboard, onOrderCreated
       updated[index].amount = getPrice(updated[index].recipe_name, value as string);
     }
 
+    setItems(updated);
+  };
+
+  const selectProduct = (index: number, value: string) => {
+    if (value === CUSTOM_OPTION) {
+      const updated = [...items];
+      updated[index] = { recipe_name: '', quantity_type: '', amount: 0, customProduct: true, customQuantity: true };
+      setItems(updated);
+      return;
+    }
+    const updated = [...items];
+    updated[index] = { recipe_name: value, quantity_type: '', amount: 0, customProduct: false, customQuantity: false };
+    setItems(updated);
+  };
+
+  const selectQuantity = (index: number, value: string) => {
+    const updated = [...items];
+    if (value === CUSTOM_OPTION) {
+      updated[index] = { ...updated[index], quantity_type: '', customQuantity: true };
+    } else {
+      updated[index] = {
+        ...updated[index],
+        quantity_type: value,
+        customQuantity: false,
+        amount: getPrice(updated[index].recipe_name, value),
+      };
+    }
     setItems(updated);
   };
 
