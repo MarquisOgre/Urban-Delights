@@ -189,25 +189,48 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
               <div key={index} className="flex flex-wrap items-end gap-2 p-3 bg-muted rounded-lg">
                 <div className="flex-1 min-w-[150px]">
                   <label className="text-xs text-muted-foreground">Product</label>
-                  <Select value={item.recipe_name} onValueChange={(v) => updateItem(index, 'recipe_name', v)}>
-                    <SelectTrigger><SelectValue placeholder="Select product" /></SelectTrigger>
-                    <SelectContent>
-                      {recipeNames.map(name => (
-                        <SelectItem key={name} value={name}>{name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {item.customProduct ? (
+                    <div className="flex gap-1">
+                      <Input
+                        value={item.recipe_name}
+                        onChange={(e) => updateItem(index, 'recipe_name', e.target.value)}
+                        placeholder="Type product name"
+                      />
+                      <Button variant="outline" size="icon" type="button" onClick={() => selectProduct(index, '')}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Select value={item.recipe_name} onValueChange={(v) => selectProduct(index, v)}>
+                      <SelectTrigger><SelectValue placeholder="Select product" /></SelectTrigger>
+                      <SelectContent>
+                        {recipeNames.map(name => (
+                          <SelectItem key={name} value={name}>{name}</SelectItem>
+                        ))}
+                        <SelectItem value={CUSTOM_OPTION}>Custom…</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
                 <div className="w-[140px]">
                   <label className="text-xs text-muted-foreground">Quantity</label>
-                  <Select value={item.quantity_type} onValueChange={(v) => updateItem(index, 'quantity_type', v)} disabled={!item.recipe_name}>
-                    <SelectTrigger><SelectValue placeholder="Select qty" /></SelectTrigger>
-                    <SelectContent>
-                      {getQuantityTypes(item.recipe_name).map(qt => (
-                        <SelectItem key={qt.quantity_type} value={qt.quantity_type}>{qt.quantity_type}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {item.customQuantity ? (
+                    <Input
+                      value={item.quantity_type}
+                      onChange={(e) => updateItem(index, 'quantity_type', e.target.value)}
+                      placeholder="e.g. 750g"
+                    />
+                  ) : (
+                    <Select value={item.quantity_type} onValueChange={(v) => selectQuantity(index, v)} disabled={!item.recipe_name}>
+                      <SelectTrigger><SelectValue placeholder="Select qty" /></SelectTrigger>
+                      <SelectContent>
+                        {getQuantityTypes(item.recipe_name).map(qt => (
+                          <SelectItem key={qt.quantity_type} value={qt.quantity_type}>{qt.quantity_type}</SelectItem>
+                        ))}
+                        <SelectItem value={CUSTOM_OPTION}>Custom…</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
                 <div className="w-[100px]">
                   <label className="text-xs text-muted-foreground">Amount (₹)</label>
