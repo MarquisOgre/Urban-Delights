@@ -16,10 +16,23 @@ export interface Order {
   payment_status: string | null;
   order_date: string | null;
   total_amount: number;
+  discount_percent?: number | null;
+  tax_rate?: number | null;
+  notes?: string | null;
   created_at: string;
   updated_at: string;
   items?: OrderItem[];
 }
+
+export const computeTotal = (
+  items: OrderItem[],
+  discountPercent: number = 0,
+  taxRate: number = 0
+): number => {
+  const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
+  const afterDiscount = subtotal - (subtotal * (discountPercent || 0)) / 100;
+  return afterDiscount + (afterDiscount * (taxRate || 0)) / 100;
+};
 
 export const fetchOrders = async (): Promise<Order[]> => {
   const { data: orders, error } = await supabase
@@ -49,9 +62,12 @@ export const createOrder = async (
   customerName: string,
   phoneNumber: string,
   address: string,
-  items: OrderItem[]
+  items: OrderItem[],
+  discountPercent: number = 0,
+  taxRate: number = 0,
+  notes: string = ''
 ): Promise<void> => {
-  const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
+  const totalAmount = computeTotal(items, discountPercent, taxRate);
 
   const { data: order, error: orderError } = await supabase
     .from('orders')
@@ -60,6 +76,9 @@ export const createOrder = async (
       phone_number: phoneNumber,
       address: address,
       total_amount: totalAmount,
+      discount_percent: discountPercent,
+      tax_rate: taxRate,
+      notes: notes || null,
       status: 'received',
       payment_status: 'unpaid',
       order_date: new Date().toISOString().split('T')[0],
@@ -118,9 +137,12 @@ export const updateOrder = async (
   customerName: string,
   phoneNumber: string,
   address: string,
-  items: OrderItem[]
+  items: OrderItem[],
+  discountPercent: number = 0,
+  taxRate: number = 0,
+  notes: string = ''
 ): Promise<void> => {
-  const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
+  const totalAmount = computeTotal(items, discountPercent, taxRate);
 
   const { error: orderError } = await supabase
     .from('orders')
@@ -129,6 +151,9 @@ export const updateOrder = async (
       phone_number: phoneNumber,
       address: address,
       total_amount: totalAmount,
+      discount_percent: discountPercent,
+      tax_rate: taxRate,
+      notes: notes || null,
       updated_at: new Date().toISOString(),
     })
     .eq('id', id);
