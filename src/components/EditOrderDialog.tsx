@@ -134,7 +134,13 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
       toast({ title: 'Please fill all customer details', variant: 'destructive' });
       return;
     }
-    const validItems = items.filter(item => item.recipe_name && item.quantity_type && item.amount > 0);
+    const validItems: OrderItem[] = items
+      .filter(item => item.recipe_name.trim() && item.quantity_type.trim() && item.amount > 0)
+      .map(item => ({
+        recipe_name: item.recipe_name.trim(),
+        quantity_type: item.quantity_type.trim(),
+        amount: item.amount,
+      }));
     if (validItems.length === 0) {
       toast({ title: 'Please add at least one product', variant: 'destructive' });
       return;
