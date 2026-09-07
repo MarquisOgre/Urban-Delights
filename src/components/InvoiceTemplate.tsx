@@ -1,11 +1,10 @@
 import React from 'react';
-import { Order } from '@/services/orderService';
+import { Order, formatInvoiceNumber } from '@/services/orderService';
 import { quantityToKg } from '@/services/pricingService';
 
 interface InvoiceTemplateProps { order: Order; }
 const ORANGE = '#ea580c';
-const formatInvoiceNo = (num: number) => `INV-${String(num).padStart(3, '0')}`;
-const formatRupee = (amount: number) => `\u20B9${Number(amount || 0).toFixed(2)}`;
+const formatRupee = (amount: number) => `₹${Number(amount || 0).toFixed(2)}`;
 const formatRate = (amount: number, quantityType: string) => {
   const kg = quantityToKg(quantityType);
   if (kg <= 0) return '—';
@@ -43,7 +42,7 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
         </div>
         <div style={{ textAlign: 'right' }}>
           <p style={{ fontWeight: 'bold', fontSize: '13px', margin: '0 0 6px 0', textDecoration: 'underline' }}>Invoice Details:</p>
-          <p style={{ fontSize: '13px', margin: '0 0 3px 0' }}><strong>Invoice #:</strong> {formatInvoiceNo(order.invoice_number)}</p>
+          <p style={{ fontSize: '13px', margin: '0 0 3px 0' }}><strong>Invoice #:</strong> {formatInvoiceNumber(order.invoice_number, order.order_date)}</p>
           <p style={{ fontSize: '13px', margin: '0 0 3px 0' }}><strong>Date:</strong> {order.order_date || new Date().toLocaleDateString('en-IN')}</p>
           <p style={{ fontSize: '13px', margin: 0 }}><strong>Status:</strong>{' '}<span style={{ color: order.payment_status === 'paid' ? '#16a34a' : '#dc2626', fontWeight: 'bold' }}>{(order.payment_status || 'unpaid').charAt(0).toUpperCase() + (order.payment_status || 'unpaid').slice(1)}</span></p>
         </div>
