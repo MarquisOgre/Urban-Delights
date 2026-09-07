@@ -82,15 +82,11 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard }) => {
 
   const getOrderDateStamp = (orderDate: string | null) => {
     if (!orderDate) return '000000';
-
-    // order_date is stored as YYYY-MM-DD. Build the stamp directly so the
-    // filename is based on the order date without timezone shifting.
     const match = orderDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
     if (match) {
       const [, year, month, day] = match;
       return `${day}${month}${year.slice(-2)}`;
     }
-
     const parsedDate = new Date(orderDate);
     if (Number.isNaN(parsedDate.getTime())) return '000000';
     return `${String(parsedDate.getDate()).padStart(2, '0')}${String(parsedDate.getMonth() + 1).padStart(2, '0')}${String(parsedDate.getFullYear()).slice(-2)}`;
@@ -121,15 +117,10 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard }) => {
         toast({ title: 'Please allow pop-ups to print the invoice', variant: 'destructive' });
         return;
       }
-
-      const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
-        .map(node => node.outerHTML)
-        .join('\n');
-
+      const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style')).map(node => node.outerHTML).join('\n');
       printWindow.document.open();
       printWindow.document.write(`<!DOCTYPE html><html><head><title>Invoice ${formatInvoiceNo(order.invoice_number)}</title>${styles}<style>@page{size:A4;margin:0}html,body{margin:0;padding:0;background:#fff}body{display:flex;justify-content:center}.print-wrapper{width:794px}.print-wrapper #invoice-print{margin:0!important;left:auto!important;position:relative!important}</style></head><body><div class="print-wrapper">${element.outerHTML}</div></body></html>`);
       printWindow.document.close();
-
       await new Promise(resolve => setTimeout(resolve, 700));
       printWindow.focus();
       printWindow.print();
@@ -137,9 +128,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard }) => {
     } catch (error) {
       console.error('Error printing invoice:', error);
       toast({ title: 'Failed to print invoice', variant: 'destructive' });
-    } finally {
-      setPrintingOrder(null);
-    }
+    } finally { setPrintingOrder(null); }
   };
 
   return (
