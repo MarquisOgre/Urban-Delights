@@ -64,6 +64,11 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard }) => {
     return kg > 0 ? amount / kg : 0;
   };
 
+  const getTotalQuantity = (order: Order) => {
+    const totalKg = (order.items || []).reduce((sum, item) => sum + quantityToKg(item.quantity_type), 0);
+    return `${totalKg.toFixed(3)} Kgs`;
+  };
+
   const generateInvoicePDF = async (order: Order) => {
     setPrintingOrder(order);
     await new Promise(resolve => setTimeout(resolve, 300));
@@ -110,6 +115,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard }) => {
                         <div className="min-w-[410px]">
                           <div className="grid grid-cols-[minmax(170px,1fr)_70px_90px_90px] gap-x-2 border-b pb-1 mb-1 text-xs font-semibold text-muted-foreground"><span>Product</span><span>Qty</span><span className="text-right">Rate (₹/Kg)</span><span className="text-right">Amount (₹)</span></div>
                           {(order.items || []).map((item, i) => { const rate = getRatePerKg(Number(item.amount || 0), item.quantity_type); return <div key={i} className="grid grid-cols-[minmax(170px,1fr)_70px_90px_90px] gap-x-2 text-xs py-0.5"><span>{item.recipe_name}</span><span>{item.quantity_type}</span><span className="text-right">{rate > 0 ? rate.toFixed(2) : '—'}</span><span className="text-right">{formatRupee(item.amount)}</span></div>; })}
+                          {(order.items || []).length > 0 && <div className="grid grid-cols-[minmax(170px,1fr)_70px_90px_90px] gap-x-2 border-t mt-1 pt-1 text-xs font-semibold"><span>Total Quantity</span><span>{getTotalQuantity(order)}</span><span></span><span></span></div>}
                         </div>
                       </TableCell>
                       <TableCell className="align-top whitespace-nowrap">{formatRupee(totals.subtotal)}</TableCell>
