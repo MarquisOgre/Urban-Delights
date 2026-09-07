@@ -140,7 +140,8 @@ export const updateOrder = async (
   items: OrderItem[],
   discountPercent: number = 0,
   taxRate: number = 0,
-  notes: string = ''
+  notes: string = '',
+  orderDate?: string
 ): Promise<void> => {
   const totalAmount = computeTotal(items, discountPercent, taxRate);
 
@@ -154,13 +155,13 @@ export const updateOrder = async (
       discount_percent: discountPercent,
       tax_rate: taxRate,
       notes: notes || null,
+      ...(orderDate ? { order_date: orderDate } : {}),
       updated_at: new Date().toISOString(),
     })
     .eq('id', id);
 
   if (orderError) throw orderError;
 
-  // Delete existing items and re-insert
   const { error: delError } = await supabase
     .from('order_items')
     .delete()
