@@ -44,14 +44,22 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
       setPhoneNumber(order.phone_number);
       setAddress(order.address);
       setItems(
-        (order.items || []).map(item => ({
-          recipe_name: item.recipe_name,
-          quantity_type: item.quantity_type,
-          amount: item.amount,
-        }))
+        (order.items || []).map(item => {
+          const known = pricing.some(p => p.recipe_name === item.recipe_name && p.is_enabled);
+          const knownQty = pricing.some(
+            p => p.recipe_name === item.recipe_name && p.quantity_type === item.quantity_type && p.is_enabled
+          );
+          return {
+            recipe_name: item.recipe_name,
+            quantity_type: item.quantity_type,
+            amount: item.amount,
+            customProduct: pricing.length > 0 && !known,
+            customQuantity: pricing.length > 0 && !knownQty,
+          };
+        })
       );
     }
-  }, [order, open]);
+  }, [order, open, pricing]);
 
   const recipeNames = [...new Set(pricing.filter(p => p.is_enabled).map(p => p.recipe_name))].sort();
 
