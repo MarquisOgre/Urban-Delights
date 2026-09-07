@@ -29,22 +29,22 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
 
   return (
     <div id="invoice-print" style={{ width: '794px', height: '1123px', background: '#fff', fontFamily: 'Arial, Helvetica, sans-serif', color: '#222', padding: '40px 50px', boxSizing: 'border-box', position: 'relative', display: 'flex', flexDirection: 'column' }}>
-      <div className="text-center pb-6 mb-6" style={{ borderBottom: `2px solid ${ORANGE}` }}>
-        <div className="flex justify-center mb-4"><img src="/logo.png" alt="Logo" className="h-16 w-auto object-contain" /></div>
-        <p className="text-sm text-slate-600 mt-2">Premium Spices & Condiments</p>
+      <div className="text-center" style={{ borderBottom: `2px solid ${ORANGE}`, paddingBottom: '10px', marginBottom: '16px' }}>
+        <div className="flex justify-center" style={{ marginBottom: '2px' }}><img src="/logo.png" alt="Logo" className="h-16 w-auto object-contain" /></div>
+        <p className="text-sm text-slate-600" style={{ margin: 0 }}>Premium Spices & Condiments</p>
       </div>
-      <h1 style={{ textAlign: 'center', fontSize: '28px', fontWeight: 'bold', letterSpacing: '3px', color: '#1e293b', margin: '0 0 24px 0' }}>INVOICE</h1>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '28px' }}>
+      <h1 style={{ textAlign: 'center', fontSize: '28px', fontWeight: 'bold', letterSpacing: '3px', color: '#1e293b', margin: '0 0 14px 0' }}>INVOICE</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '18px' }}>
         <div>
-          <p style={{ fontWeight: 'bold', fontSize: '13px', margin: '0 0 8px 0' }}>Bill To:</p>
-          <p style={{ fontWeight: 'bold', fontSize: '15px', margin: '0 0 4px 0' }}>{order.customer_name}</p>
-          <p style={{ fontSize: '13px', color: '#555', margin: '0 0 2px 0' }}>{order.phone_number}</p>
+          <p style={{ fontWeight: 'bold', fontSize: '13px', margin: '0 0 6px 0' }}>Bill To:</p>
+          <p style={{ fontWeight: 'bold', fontSize: '15px', margin: '0 0 3px 0' }}>{order.customer_name}</p>
+          <p style={{ fontSize: '13px', color: '#555', margin: '0 0 1px 0' }}>{order.phone_number}</p>
           <p style={{ fontSize: '13px', color: '#555', margin: 0 }}>{order.address}</p>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <p style={{ fontWeight: 'bold', fontSize: '13px', margin: '0 0 8px 0', textDecoration: 'underline' }}>Invoice Details:</p>
-          <p style={{ fontSize: '13px', margin: '0 0 4px 0' }}><strong>Invoice #:</strong> {formatInvoiceNo(order.invoice_number)}</p>
-          <p style={{ fontSize: '13px', margin: '0 0 4px 0' }}><strong>Date:</strong> {order.order_date || new Date().toLocaleDateString('en-IN')}</p>
+          <p style={{ fontWeight: 'bold', fontSize: '13px', margin: '0 0 6px 0', textDecoration: 'underline' }}>Invoice Details:</p>
+          <p style={{ fontSize: '13px', margin: '0 0 3px 0' }}><strong>Invoice #:</strong> {formatInvoiceNo(order.invoice_number)}</p>
+          <p style={{ fontSize: '13px', margin: '0 0 3px 0' }}><strong>Date:</strong> {order.order_date || new Date().toLocaleDateString('en-IN')}</p>
           <p style={{ fontSize: '13px', margin: 0 }}><strong>Status:</strong>{' '}<span style={{ color: order.payment_status === 'paid' ? '#16a34a' : '#dc2626', fontWeight: 'bold' }}>{(order.payment_status || 'unpaid').charAt(0).toUpperCase() + (order.payment_status || 'unpaid').slice(1)}</span></p>
         </div>
       </div>
