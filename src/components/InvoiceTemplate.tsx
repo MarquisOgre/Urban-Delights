@@ -28,8 +28,6 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
   const taxAmount = (taxableAmount * taxRate) / 100;
   const calculatedTotal = taxableAmount + taxAmount;
 
-  // Use the same calculation/order data represented by the order form.
-  // Fall back to the stored total only when there are no line items.
   const totalAmount = (order.items || []).length > 0
     ? calculatedTotal
     : Number(order.total_amount || 0);
@@ -145,34 +143,13 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
             <th style={{ textAlign: 'left', padding: '10px 8px', fontWeight: 'bold' }}>
               Description
             </th>
-            <th
-              style={{
-                textAlign: 'center',
-                padding: '10px 8px',
-                fontWeight: 'bold',
-                width: '70px',
-              }}
-            >
+            <th style={{ textAlign: 'center', padding: '10px 8px', fontWeight: 'bold', width: '70px' }}>
               Qty
             </th>
-            <th
-              style={{
-                textAlign: 'right',
-                padding: '10px 8px',
-                fontWeight: 'bold',
-                width: '110px',
-              }}
-            >
+            <th style={{ textAlign: 'right', padding: '10px 8px', fontWeight: 'bold', width: '110px' }}>
               Rate (\u20B9)
             </th>
-            <th
-              style={{
-                textAlign: 'right',
-                padding: '10px 8px',
-                fontWeight: 'bold',
-                width: '120px',
-              }}
-            >
+            <th style={{ textAlign: 'right', padding: '10px 8px', fontWeight: 'bold', width: '120px' }}>
               Amount (\u20B9)
             </th>
           </tr>
@@ -197,70 +174,26 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '40px' }}>
         <div style={{ width: '280px' }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              padding: '6px 0',
-              fontSize: '13px',
-            }}
-          >
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: '13px' }}>
             <span>Subtotal:</span>
             <span>{formatRupee(itemSubtotal)}</span>
           </div>
 
           {discountPercent > 0 && (
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '6px 0',
-                fontSize: '13px',
-              }}
-            >
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: '13px' }}>
               <span>Discount ({discountPercent}%):</span>
               <span>-{formatRupee(discountAmount)}</span>
             </div>
           )}
 
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              padding: '6px 0',
-              fontSize: '13px',
-            }}
-          >
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: '13px' }}>
             <span>Tax ({taxRate}%):</span>
             <span>{formatRupee(taxAmount)}</span>
           </div>
 
-          <div
-            style={{
-              borderTop: `2px solid ${ORANGE}`,
-              display: 'flex',
-              justifyContent: 'space-between',
-              padding: '10px 0 6px 0',
-              fontSize: '16px',
-              fontWeight: 'bold',
-            }}
-          >
+          <div style={{ borderTop: `2px solid ${ORANGE}`, display: 'flex', justifyContent: 'space-between', padding: '10px 0 6px 0', fontSize: '16px', fontWeight: 'bold' }}>
             <span>Total:</span>
             <span>{formatRupee(totalAmount)}</span>
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              padding: '4px 0',
-              fontSize: '13px',
-              color: isPaid ? '#16a34a' : '#dc2626',
-              fontWeight: 'bold',
-            }}
-          >
-            <span>{isPaid ? 'Paid:' : 'Balance:'}</span>
-            <span>{formatRupee(isPaid ? totalAmount : totalAmount)}</span>
           </div>
         </div>
       </div>
@@ -273,19 +206,13 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
         }}
       >
         <div className="text-center">
-          <div
-            className="flex justify-center gap-8 text-sm text-slate-600"
-            style={{ flexWrap: 'wrap' }}
-          >
+          <div className="flex justify-center gap-8 text-sm text-slate-600" style={{ flexWrap: 'wrap' }}>
             <span>📍 #202, RK Residency, Ravalkole, Medchal</span>
             <span>📞 +91 8500 60 6000</span>
             <span>📧 support@urbandelights.com</span>
           </div>
         </div>
-        <p
-          className="text-center text-xs text-slate-500"
-          style={{ marginTop: '16px', marginBottom: 0 }}
-        >
+        <p className="text-center text-xs text-slate-500" style={{ marginTop: '16px', marginBottom: 0 }}>
           This is a computer-generated invoice and does not require a signature.
         </p>
       </div>
