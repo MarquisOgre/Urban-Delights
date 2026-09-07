@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Printer, Pencil, Trash2 } from 'lucide-react';
+import { ArrowLeft, Printer, Download, Pencil, Trash2 } from 'lucide-react';
 import { fetchOrders, updateOrderStatus, updatePaymentStatus, deleteOrder, Order } from '@/services/orderService';
 import { useToast } from '@/hooks/use-toast';
 import { quantityToKg } from '@/services/pricingService';
@@ -69,12 +69,20 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard }) => {
     return `${totalKg.toFixed(3)} Kgs`;
   };
 
-  const generateInvoicePDF = async (order: Order) => {
+  const prepareInvoice = async (order: Order) => {
     setPrintingOrder(order);
     await new Promise(resolve => setTimeout(resolve, 300));
     const element = invoiceRef.current;
-    if (!element) { setPrintingOrder(null); return; }
+    if (!element) {
+      setPrintingOrder(null);
+      throw new Error('Invoice could not be rendered.');
+    }
+    return element;
+  };
+
+  const downloadInvoicePDF = async (order: Order) => {
     try {
+      const element = await prepareInvoice(order);
       const canvas = await html2canvas(element, { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' });
       const pdf = new jsPDF('p', 'mm', 'a4');
       const imgData = canvas.toDataURL('image/png');
@@ -83,9 +91,38 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard }) => {
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       pdf.save(`invoice-${formatInvoiceNo(order.invoice_number)}.pdf`);
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      toast({ title: 'Failed to generate invoice', variant: 'destructive' });
+      console.error('Error downloading invoice:', error);
+      toast({ title: 'Failed to download invoice', variant: 'destructive' });
     } finally { setPrintingOrder(null); }
+  };
+
+  const printInvoice = async (order: Order) => {
+    try {
+      const element = await prepareInvoice(order);
+      const printWindow = window.open('', '_blank', 'width=900,height=1200');
+      if (!printWindow) {
+        toast({ title: 'Please allow pop-ups to print the invoice', variant: 'destructive' });
+        return;
+      }
+
+      const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+        .map(node => node.outerHTML)
+        .join('\n');
+
+      printWindow.document.open();
+      printWindow.document.write(`<!DOCTYPE html><html><head><title>Invoice ${formatInvoiceNo(order.invoice_number)}</title>${styles}<style>@page{size:A4;margin:0}html,body{margin:0;padding:0;background:#fff}body{display:flex;justify-content:center}.print-wrapper{width:794px}.print-wrapper #invoice-print{margin:0!important;left:auto!important;position:relative!important}</style></head><body><div class="print-wrapper">${element.outerHTML}</div></body></html>`);
+      printWindow.document.close();
+
+      await new Promise(resolve => setTimeout(resolve, 700));
+      printWindow.focus();
+      printWindow.print();
+      printWindow.onafterprint = () => printWindow.close();
+    } catch (error) {
+      console.error('Error printing invoice:', error);
+      toast({ title: 'Failed to print invoice', variant: 'destructive' });
+    } finally {
+      setPrintingOrder(null);
+    }
   };
 
   return (
@@ -124,7 +161,12 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard }) => {
                       <TableCell className="font-medium align-top whitespace-nowrap">{formatRupee(totals.total)}</TableCell>
                       <TableCell className="align-top"><Select value={order.status} onValueChange={v => handleStatusChange(order.id, v)}><SelectTrigger className="w-[130px] h-8 text-xs"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="received">Received</SelectItem><SelectItem value="order_sent">Order Sent</SelectItem></SelectContent></Select></TableCell>
                       <TableCell className="align-top"><Select value={order.payment_status || 'unpaid'} onValueChange={v => handlePaymentChange(order.id, v)}><SelectTrigger className="w-[110px] h-8 text-xs"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="unpaid">Unpaid</SelectItem><SelectItem value="paid">Paid</SelectItem></SelectContent></Select></TableCell>
-                      <TableCell className="align-top"><div className="flex gap-1"><Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => generateInvoicePDF(order)}><Printer className="h-4 w-4" /></Button><Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setEditingOrder(order)}><Pencil className="h-4 w-4" /></Button><Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(order.id)}><Trash2 className="h-4 w-4" /></Button></div></TableCell>
+                      <TableCell className="align-top"><div className="flex gap-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" title="Print Invoice" aria-label="Print Invoice" onClick={() => printInvoice(order)}><Printer className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" title="Download Invoice PDF" aria-label="Download Invoice PDF" onClick={() => downloadInvoicePDF(order)}><Download className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit Order" aria-label="Edit Order" onClick={() => setEditingOrder(order)}><Pencil className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" title="Delete Order" aria-label="Delete Order" onClick={() => handleDelete(order.id)}><Trash2 className="h-4 w-4" /></Button>
+                      </div></TableCell>
                     </TableRow>;
                   })}
                 </TableBody>
