@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, X } from 'lucide-react';
-import { Order, OrderItem, updateOrder } from '@/services/orderService';
+import { Order, OrderItem, updateOrder, formatInvoiceNumber } from '@/services/orderService';
 import { fetchRecipePricing, RecipePricing, amountFromQuantityAndRate, ratePerKg } from '@/services/pricingService';
 import { useToast } from '@/hooks/use-toast';
 
@@ -202,7 +202,7 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Order {order ? `INV-${String(order.invoice_number).padStart(3, '0')}` : ''}</DialogTitle>
+          <DialogTitle>Edit Order {order ? formatInvoiceNumber(order.invoice_number, order.order_date) : ''}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
