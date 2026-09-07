@@ -34,6 +34,17 @@ export const computeTotal = (
   return afterDiscount + (afterDiscount * (taxRate || 0)) / 100;
 };
 
+/**
+ * Formats the numeric order serial consistently everywhere in the app.
+ * The database continues to store the serial as a number; only its display
+ * format is changed. Example: 1 -> US-2026-001.
+ */
+export const formatInvoiceNumber = (num: number, orderDate?: string | null): string => {
+  const dateMatch = orderDate?.match(/^(\d{4})-/);
+  const year = dateMatch?.[1] || String(new Date().getFullYear());
+  return `US-${year}-${String(Number(num) || 0).padStart(3, '0')}`;
+};
+
 // Reuse the lowest available invoice number. For example, if 001, 002 and 004
 // exist, the next order receives 003. If no gap exists, the next number is used.
 const getNextAvailableInvoiceNumber = async (): Promise<number> => {
