@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Printer, Download, Pencil, Trash2 } from 'lucide-react';
-import { fetchOrders, updateOrderStatus, updatePaymentStatus, deleteOrder, Order } from '@/services/orderService';
+import { fetchOrders, updateOrderStatus, updatePaymentStatus, deleteOrder, Order, formatInvoiceNumber } from '@/services/orderService';
 import { useToast } from '@/hooks/use-toast';
 import { quantityToKg } from '@/services/pricingService';
 import jsPDF from 'jspdf';
@@ -47,7 +46,6 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard }) => {
     catch { toast({ title: 'Failed to delete order', variant: 'destructive' }); }
   };
 
-  const formatInvoiceNo = (num: number) => `INV-${String(num).padStart(3, '0')}`;
   const formatRupee = (amount: number) => `₹${Number(amount || 0).toFixed(2)}`;
 
   const getOrderTotals = (order: Order) => {
@@ -102,7 +100,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard }) => {
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       const dateStamp = getOrderDateStamp(order.order_date);
-      pdf.save(`UrbanDelights-${formatInvoiceNo(order.invoice_number)}-${dateStamp}.pdf`);
+      pdf.save(`UrbanDelights-${formatInvoiceNumber(order.invoice_number, order.order_date)}-${dateStamp}.pdf`);
     } catch (error) {
       console.error('Error downloading invoice:', error);
       toast({ title: 'Failed to download invoice', variant: 'destructive' });
@@ -119,7 +117,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard }) => {
       }
       const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style')).map(node => node.outerHTML).join('\n');
       printWindow.document.open();
-      printWindow.document.write(`<!DOCTYPE html><html><head><title>Invoice ${formatInvoiceNo(order.invoice_number)}</title>${styles}<style>@page{size:A4;margin:0}html,body{margin:0;padding:0;background:#fff}body{display:flex;justify-content:center}.print-wrapper{width:794px}.print-wrapper #invoice-print{margin:0!important;left:auto!important;position:relative!important}</style></head><body><div class="print-wrapper">${element.outerHTML}</div></body></html>`);
+      printWindow.document.write(`<!DOCTYPE html><html><head><title>Invoice ${formatInvoiceNumber(order.invoice_number, order.order_date)}</title>${styles}<style>@page{size:A4;margin:0}html,body{margin:0;padding:0;background:#fff}body{display:flex;justify-content:center}.print-wrapper{width:794px}.print-wrapper #invoice-print{margin:0!important;left:auto!important;position:relative!important}</style></head><body><div class="print-wrapper">${element.outerHTML}</div></body></html>`);
       printWindow.document.close();
       await new Promise(resolve => setTimeout(resolve, 700));
       printWindow.focus();
@@ -151,7 +149,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard }) => {
                   {orders.map(order => {
                     const totals = getOrderTotals(order);
                     return <TableRow key={order.id}>
-                      <TableCell className="font-medium align-top">{formatInvoiceNo(order.invoice_number)}</TableCell>
+                      <TableCell className="font-medium align-top">{formatInvoiceNumber(order.invoice_number, order.order_date)}</TableCell>
                       <TableCell className="align-top">{order.customer_name}</TableCell>
                       <TableCell className="align-top whitespace-nowrap">{order.phone_number}</TableCell>
                       <TableCell className="align-top p-2">
