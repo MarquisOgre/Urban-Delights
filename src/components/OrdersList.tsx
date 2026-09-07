@@ -89,7 +89,12 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard }) => {
       const pdfWidth = 210;
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`invoice-${formatInvoiceNo(order.invoice_number)}.pdf`);
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, '0');
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const yy = String(today.getFullYear()).slice(-2);
+      const dateStamp = `${dd}${mm}${yy}`;
+      pdf.save(`UrbanDelights-${formatInvoiceNo(order.invoice_number)}-${dateStamp}.pdf`);
     } catch (error) {
       console.error('Error downloading invoice:', error);
       toast({ title: 'Failed to download invoice', variant: 'destructive' });
