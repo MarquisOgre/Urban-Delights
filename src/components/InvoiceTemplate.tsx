@@ -1,5 +1,6 @@
 import React from 'react';
 import { Order } from '@/services/orderService';
+import { quantityToKg } from '@/services/pricingService';
 
 interface InvoiceTemplateProps {
   order: Order;
@@ -12,6 +13,13 @@ const formatInvoiceNo = (num: number) =>
 
 const formatRupee = (amount: number) =>
   `\u20B9${Number(amount || 0).toFixed(2)}`;
+
+const formatRate = (amount: number, quantityType: string) => {
+  const kg = quantityToKg(quantityType);
+  if (kg <= 0) return '—';
+  const rate = Number(amount || 0) / kg;
+  return `${Number.isInteger(rate) ? rate.toFixed(0) : rate.toFixed(2)}/Kg`;
+};
 
 const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
   const discountPercent = Number(order.discount_percent) || 0;
@@ -45,127 +53,59 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
         flexDirection: 'column',
       }}
     >
-      <div
-        className="text-center pb-6 mb-6"
-        style={{ borderBottom: `2px solid ${ORANGE}` }}
-      >
+      <div className="text-center pb-6 mb-6" style={{ borderBottom: `2px solid ${ORANGE}` }}>
         <div className="flex justify-center mb-4">
-          <img
-            src="/logo.png"
-            alt="Logo"
-            className="h-16 w-auto object-contain"
-          />
+          <img src="/logo.png" alt="Logo" className="h-16 w-auto object-contain" />
         </div>
-        <p className="text-sm text-slate-600 mt-2">
-          Premium Spices & Condiments
-        </p>
+        <p className="text-sm text-slate-600 mt-2">Premium Spices & Condiments</p>
       </div>
 
       <h1
         style={{
-          textAlign: 'center',
-          fontSize: '28px',
-          fontWeight: 'bold',
-          letterSpacing: '3px',
-          color: '#1e293b',
-          margin: '0 0 24px 0',
+          textAlign: 'center', fontSize: '28px', fontWeight: 'bold', letterSpacing: '3px',
+          color: '#1e293b', margin: '0 0 24px 0',
         }}
       >
         INVOICE
       </h1>
 
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginBottom: '28px',
-        }}
-      >
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '28px' }}>
         <div>
-          <p style={{ fontWeight: 'bold', fontSize: '13px', margin: '0 0 8px 0' }}>
-            Bill To:
-          </p>
-          <p style={{ fontWeight: 'bold', fontSize: '15px', margin: '0 0 4px 0' }}>
-            {order.customer_name}
-          </p>
-          <p style={{ fontSize: '13px', color: '#555', margin: '0 0 2px 0' }}>
-            {order.phone_number}
-          </p>
-          <p style={{ fontSize: '13px', color: '#555', margin: 0 }}>
-            {order.address}
-          </p>
+          <p style={{ fontWeight: 'bold', fontSize: '13px', margin: '0 0 8px 0' }}>Bill To:</p>
+          <p style={{ fontWeight: 'bold', fontSize: '15px', margin: '0 0 4px 0' }}>{order.customer_name}</p>
+          <p style={{ fontSize: '13px', color: '#555', margin: '0 0 2px 0' }}>{order.phone_number}</p>
+          <p style={{ fontSize: '13px', color: '#555', margin: 0 }}>{order.address}</p>
         </div>
 
         <div style={{ textAlign: 'right' }}>
-          <p
-            style={{
-              fontWeight: 'bold',
-              fontSize: '13px',
-              margin: '0 0 8px 0',
-              textDecoration: 'underline',
-            }}
-          >
-            Invoice Details:
-          </p>
-          <p style={{ fontSize: '13px', margin: '0 0 4px 0' }}>
-            <strong>Invoice #:</strong> {formatInvoiceNo(order.invoice_number)}
-          </p>
-          <p style={{ fontSize: '13px', margin: '0 0 4px 0' }}>
-            <strong>Date:</strong> {order.order_date || new Date().toLocaleDateString('en-IN')}
-          </p>
+          <p style={{ fontWeight: 'bold', fontSize: '13px', margin: '0 0 8px 0', textDecoration: 'underline' }}>Invoice Details:</p>
+          <p style={{ fontSize: '13px', margin: '0 0 4px 0' }}><strong>Invoice #:</strong> {formatInvoiceNo(order.invoice_number)}</p>
+          <p style={{ fontSize: '13px', margin: '0 0 4px 0' }}><strong>Date:</strong> {order.order_date || new Date().toLocaleDateString('en-IN')}</p>
           <p style={{ fontSize: '13px', margin: 0 }}>
             <strong>Status:</strong>{' '}
-            <span
-              style={{
-                color: order.payment_status === 'paid' ? '#16a34a' : '#dc2626',
-                fontWeight: 'bold',
-              }}
-            >
+            <span style={{ color: order.payment_status === 'paid' ? '#16a34a' : '#dc2626', fontWeight: 'bold' }}>
               {(order.payment_status || 'unpaid').charAt(0).toUpperCase() + (order.payment_status || 'unpaid').slice(1)}
             </span>
           </p>
         </div>
       </div>
 
-      <table
-        style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          marginBottom: '24px',
-          fontSize: '13px',
-        }}
-      >
+      <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '24px', fontSize: '13px' }}>
         <thead>
           <tr style={{ borderBottom: `2px solid ${ORANGE}` }}>
-            <th style={{ textAlign: 'left', padding: '10px 8px', fontWeight: 'bold' }}>
-              Description
-            </th>
-            <th style={{ textAlign: 'center', padding: '10px 8px', fontWeight: 'bold', width: '100px' }}>
-              Qty
-            </th>
-            <th style={{ textAlign: 'right', padding: '10px 8px', fontWeight: 'bold', width: '110px' }}>
-              Rate (₹)
-            </th>
-            <th style={{ textAlign: 'right', padding: '10px 8px', fontWeight: 'bold', width: '120px' }}>
-              Amount (₹)
-            </th>
+            <th style={{ textAlign: 'left', padding: '10px 8px', fontWeight: 'bold' }}>Description</th>
+            <th style={{ textAlign: 'left', padding: '10px 8px', fontWeight: 'bold', width: '100px' }}>Qty</th>
+            <th style={{ textAlign: 'left', padding: '10px 8px', fontWeight: 'bold', width: '120px' }}>Rate (₹)</th>
+            <th style={{ textAlign: 'left', padding: '10px 8px', fontWeight: 'bold', width: '130px' }}>Amount (₹)</th>
           </tr>
         </thead>
         <tbody>
           {(order.items || []).map((item, i) => (
             <tr key={i} style={{ borderBottom: `1px solid ${ORANGE}` }}>
-              <td style={{ padding: '12px 8px' }}>
-                {item.recipe_name}
-              </td>
-              <td style={{ padding: '12px 8px', textAlign: 'center' }}>
-                {item.quantity_type}
-              </td>
-              <td style={{ padding: '12px 8px', textAlign: 'right' }}>
-                {formatRupee(item.amount)}
-              </td>
-              <td style={{ padding: '12px 8px', textAlign: 'right' }}>
-                {formatRupee(item.amount)}
-              </td>
+              <td style={{ padding: '12px 8px' }}>{item.recipe_name}</td>
+              <td style={{ padding: '12px 8px' }}>{item.quantity_type}</td>
+              <td style={{ padding: '12px 8px' }}>{formatRate(Number(item.amount || 0), item.quantity_type)}</td>
+              <td style={{ padding: '12px 8px' }}>{Number(item.amount || 0).toFixed(2)}</td>
             </tr>
           ))}
         </tbody>
@@ -174,36 +114,23 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '40px' }}>
         <div style={{ width: '280px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: '13px' }}>
-            <span>Subtotal:</span>
-            <span>{formatRupee(itemSubtotal)}</span>
+            <span>Subtotal:</span><span>{formatRupee(itemSubtotal)}</span>
           </div>
-
           {discountPercent > 0 && (
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: '13px' }}>
-              <span>Discount ({discountPercent}%):</span>
-              <span>-{formatRupee(discountAmount)}</span>
+              <span>Discount ({discountPercent}%):</span><span>-{formatRupee(discountAmount)}</span>
             </div>
           )}
-
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: '13px' }}>
-            <span>Tax ({taxRate}%):</span>
-            <span>{formatRupee(taxAmount)}</span>
+            <span>Tax ({taxRate}%):</span><span>{formatRupee(taxAmount)}</span>
           </div>
-
           <div style={{ borderTop: `2px solid ${ORANGE}`, display: 'flex', justifyContent: 'space-between', padding: '10px 0 6px 0', fontSize: '16px', fontWeight: 'bold' }}>
-            <span>Total:</span>
-            <span>{formatRupee(totalAmount)}</span>
+            <span>Total:</span><span>{formatRupee(totalAmount)}</span>
           </div>
         </div>
       </div>
 
-      <div
-        style={{
-          marginTop: 'auto',
-          borderTop: `2px solid ${ORANGE}`,
-          paddingTop: '20px',
-        }}
-      >
+      <div style={{ marginTop: 'auto', borderTop: `2px solid ${ORANGE}`, paddingTop: '20px' }}>
         <div className="text-center">
           <div className="flex justify-center gap-8 text-sm text-slate-600" style={{ flexWrap: 'wrap' }}>
             <span>📍 #202, RK Residency, Ravalkole, Medchal</span>
