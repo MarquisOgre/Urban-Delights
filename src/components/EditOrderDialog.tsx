@@ -40,6 +40,7 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
   const [customerName, setCustomerName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [address, setAddress] = useState('');
+  const [orderDate, setOrderDate] = useState('');
   const [items, setItems] = useState<FormItem[]>([]);
   const [pricing, setPricing] = useState<RecipePricing[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -56,6 +57,7 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
       setCustomerName(order.customer_name);
       setPhoneNumber(order.phone_number);
       setAddress(order.address);
+      setOrderDate(order.order_date || new Date().toISOString().split('T')[0]);
       setDiscountPercent(Number(order.discount_percent) || 0);
       setTaxRate(Number(order.tax_rate) || 0);
       setNotes(order.notes || '');
@@ -184,7 +186,7 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
 
     setSubmitting(true);
     try {
-      await updateOrder(order.id, customerName, phoneNumber, address, validItems, discountPercent, taxRate, notes);
+      await updateOrder(order.id, customerName, phoneNumber, address, validItems, discountPercent, taxRate, notes, orderDate);
       toast({ title: 'Order updated successfully' });
       onUpdated();
       onClose();
@@ -204,9 +206,10 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div><label className="text-sm font-medium">Customer Name</label><Input value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Enter name" /></div>
             <div><label className="text-sm font-medium">Phone Number</label><Input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="Enter phone" /></div>
+            <div><label className="text-sm font-medium">Order Date</label><Input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} /></div>
           </div>
           <div><label className="text-sm font-medium">Address</label><Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Enter address" /></div>
 
