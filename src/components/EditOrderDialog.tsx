@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, X } from 'lucide-react';
 import { Order, OrderItem, updateOrder } from '@/services/orderService';
@@ -25,6 +26,15 @@ interface FormItem {
 
 const CUSTOM_OPTION = '__custom__';
 
+const TAX_OPTIONS = [
+  { value: '0', label: '0% (No Tax)' },
+  { value: '5', label: '5% GST' },
+  { value: '12', label: '12% GST' },
+  { value: '18', label: '18% GST' },
+  { value: '28', label: '28% GST' },
+];
+
+
 const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose, onUpdated }) => {
   const { toast } = useToast();
   const [customerName, setCustomerName] = useState('');
@@ -33,6 +43,10 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
   const [items, setItems] = useState<FormItem[]>([]);
   const [pricing, setPricing] = useState<RecipePricing[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [discountPercent, setDiscountPercent] = useState(0);
+  const [taxRate, setTaxRate] = useState(0);
+  const [notes, setNotes] = useState('');
+
 
   useEffect(() => {
     fetchRecipePricing().then(setPricing).catch(console.error);
@@ -43,6 +57,9 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
       setCustomerName(order.customer_name);
       setPhoneNumber(order.phone_number);
       setAddress(order.address);
+      setDiscountPercent(Number(order.discount_percent) || 0);
+      setTaxRate(Number(order.tax_rate) || 0);
+      setNotes(order.notes || '');
       setItems(
         (order.items || []).map(item => {
           const known = pricing.some(p => p.recipe_name === item.recipe_name && p.is_enabled);
@@ -126,7 +143,10 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
     setItems(updated);
   };
 
-  const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
+  const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
+  const discountAmount = (subtotal * discountPercent) / 100;
+  const taxAmount = ((subtotal - discountAmount) * taxRate) / 100;
+  const totalAmount = subtotal - discountAmount + taxAmount;
 
   const handleSubmit = async () => {
     if (!order) return;
@@ -148,7 +168,7 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
 
     setSubmitting(true);
     try {
-      await updateOrder(order.id, customerName, phoneNumber, address, validItems);
+      await updateOrder(order.id, customerName, phoneNumber, address, validItems, discountPercent, taxRate, notes);
       toast({ title: 'Order updated successfully' });
       onUpdated();
       onClose();
@@ -254,9 +274,51 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
             ))}
           </div>
 
-          <div className="flex items-center justify-between pt-4 border-t">
-            <div className="text-lg font-bold">Total: ₹{totalAmount.toFixed(2)}</div>
+          {/* Discount, Tax & Notes */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="text-sm font-medium">Discount (%)</label>
+              <Input
+                type="number"
+                value={discountPercent}
+                onChange={(e) => setDiscountPercent(Number(e.target.value))}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Tax Rate (%)</label>
+              <Select value={String(taxRate)} onValueChange={(v) => setTaxRate(Number(v))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {TAX_OPTIONS.map(o => (
+                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Notes</label>
+              <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Add a note (optional)" />
+            </div>
           </div>
+
+          {/* Totals */}
+          <div className="rounded-lg border bg-muted/40 p-4 space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Subtotal:</span><span>₹{subtotal.toFixed(2)}</span>
+            </div>
+            {discountPercent > 0 && (
+              <div className="flex justify-between text-sm">
+                <span>Discount ({discountPercent}%):</span><span>-₹{discountAmount.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-sm">
+              <span>Tax ({taxRate}%):</span><span>₹{taxAmount.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-bold text-lg border-t pt-2">
+              <span>Total:</span><span>₹{totalAmount.toFixed(2)}</span>
+            </div>
+          </div>
+
         </div>
 
         <DialogFooter>
