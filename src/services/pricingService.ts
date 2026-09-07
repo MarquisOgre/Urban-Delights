@@ -10,6 +10,32 @@ export interface RecipePricing {
   updated_at: string;
 }
 
+/** Convert a quantity such as "1 Kg", "250grms", "200 g" or "1.6 Kg" to kilograms. */
+export const quantityToKg = (quantityType: string): number => {
+  const value = String(quantityType || '').trim().toLowerCase().replace(/,/g, '');
+  const match = value.match(/(\d+(?:\.\d+)?)\s*(kg|kgs|kilogram|kilograms|g|gm|gms|gram|grams|grm|grms)\b/);
+
+  if (!match) return 0;
+
+  const quantity = Number(match[1]);
+  const unit = match[2];
+
+  if (!Number.isFinite(quantity) || quantity <= 0) return 0;
+  return unit.startsWith('k') ? quantity : quantity / 1000;
+};
+
+/** Convert a package price into its equivalent rate per kilogram. */
+export const ratePerKg = (price: number, quantityType: string): number => {
+  const kg = quantityToKg(quantityType);
+  return kg > 0 ? Number(price || 0) / kg : 0;
+};
+
+/** Calculate an amount from a quantity and a per-kg rate. */
+export const amountFromQuantityAndRate = (quantityType: string, rate: number): number => {
+  const kg = quantityToKg(quantityType);
+  return kg > 0 ? kg * Number(rate || 0) : 0;
+};
+
 export const fetchRecipePricing = async (): Promise<RecipePricing[]> => {
   const { data, error } = await supabase
     .from('recipe_pricing')
