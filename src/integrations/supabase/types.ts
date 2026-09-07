@@ -108,12 +108,15 @@ export type Database = {
           address: string
           created_at: string
           customer_name: string
+          discount_percent: number
           id: string
           invoice_number: number
+          notes: string | null
           order_date: string | null
           payment_status: string | null
           phone_number: string
           status: string
+          tax_rate: number
           total_amount: number
           updated_at: string
           user_id: string | null
@@ -122,12 +125,15 @@ export type Database = {
           address: string
           created_at?: string
           customer_name: string
+          discount_percent?: number
           id?: string
           invoice_number?: number
+          notes?: string | null
           order_date?: string | null
           payment_status?: string | null
           phone_number: string
           status?: string
+          tax_rate?: number
           total_amount?: number
           updated_at?: string
           user_id?: string | null
@@ -136,12 +142,15 @@ export type Database = {
           address?: string
           created_at?: string
           customer_name?: string
+          discount_percent?: number
           id?: string
           invoice_number?: number
+          notes?: string | null
           order_date?: string | null
           payment_status?: string | null
           phone_number?: string
           status?: string
+          tax_rate?: number
           total_amount?: number
           updated_at?: string
           user_id?: string | null
