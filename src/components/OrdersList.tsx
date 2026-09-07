@@ -80,6 +80,22 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard }) => {
     return element;
   };
 
+  const getOrderDateStamp = (orderDate: string | null) => {
+    if (!orderDate) return '000000';
+
+    // order_date is stored as YYYY-MM-DD. Build the stamp directly so the
+    // filename is based on the order date without timezone shifting.
+    const match = orderDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+      const [, year, month, day] = match;
+      return `${day}${month}${year.slice(-2)}`;
+    }
+
+    const parsedDate = new Date(orderDate);
+    if (Number.isNaN(parsedDate.getTime())) return '000000';
+    return `${String(parsedDate.getDate()).padStart(2, '0')}${String(parsedDate.getMonth() + 1).padStart(2, '0')}${String(parsedDate.getFullYear()).slice(-2)}`;
+  };
+
   const downloadInvoicePDF = async (order: Order) => {
     try {
       const element = await prepareInvoice(order);
@@ -89,11 +105,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard }) => {
       const pdfWidth = 210;
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      const today = new Date();
-      const dd = String(today.getDate()).padStart(2, '0');
-      const mm = String(today.getMonth() + 1).padStart(2, '0');
-      const yy = String(today.getFullYear()).slice(-2);
-      const dateStamp = `${dd}${mm}${yy}`;
+      const dateStamp = getOrderDateStamp(order.order_date);
       pdf.save(`UrbanDelights-${formatInvoiceNo(order.invoice_number)}-${dateStamp}.pdf`);
     } catch (error) {
       console.error('Error downloading invoice:', error);
