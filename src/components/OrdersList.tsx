@@ -143,7 +143,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard }) => {
               <Table>
                 <TableHeader><TableRow>
                   <TableHead>Invoice #</TableHead><TableHead>Customer</TableHead><TableHead>Phone</TableHead>
-                  <TableHead className="min-w-[430px]">Items</TableHead><TableHead>Subtotal</TableHead><TableHead>Discount</TableHead><TableHead>Tax</TableHead><TableHead>Total</TableHead>
+                  <TableHead className="min-w-[470px]">Items</TableHead><TableHead>Subtotal</TableHead><TableHead>Discount</TableHead><TableHead>Tax</TableHead><TableHead>Total</TableHead>
                   <TableHead>Order Status</TableHead><TableHead>Payment</TableHead><TableHead>Actions</TableHead>
                 </TableRow></TableHeader>
                 <TableBody>
@@ -154,10 +154,10 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard }) => {
                       <TableCell className="align-top">{order.customer_name}</TableCell>
                       <TableCell className="align-top whitespace-nowrap">{order.phone_number}</TableCell>
                       <TableCell className="align-top p-2">
-                        <div className="min-w-[410px]">
-                          <div className="grid grid-cols-[minmax(170px,1fr)_70px_90px_90px] gap-x-2 border-b pb-1 mb-1 text-xs font-semibold text-muted-foreground"><span>Product</span><span>Qty</span><span className="text-right">Rate (₹/Kg)</span><span className="text-right">Amount (₹)</span></div>
-                          {(order.items || []).map((item, i) => { const rate = getRatePerKg(Number(item.amount || 0), item.quantity_type); return <div key={i} className="grid grid-cols-[minmax(170px,1fr)_70px_90px_90px] gap-x-2 text-xs py-0.5"><span>{item.recipe_name}</span><span>{item.quantity_type}</span><span className="text-right">{rate > 0 ? rate.toFixed(2) : '—'}</span><span className="text-right">{formatRupee(item.amount)}</span></div>; })}
-                          {(order.items || []).length > 0 && <div className="grid grid-cols-[minmax(170px,1fr)_70px_90px_90px] gap-x-2 border-t mt-1 pt-1 text-xs font-semibold"><span>Total Quantity</span><span>{getTotalQuantity(order)}</span><span></span><span></span></div>}
+                        <div className="min-w-[450px]">
+                          <div className="grid grid-cols-[35px_minmax(155px,1fr)_65px_90px_90px] gap-x-2 border-b pb-1 mb-1 text-xs font-semibold text-muted-foreground"><span className="text-center">S.No.</span><span>Product</span><span>Qty</span><span className="text-right">Rate (₹/Kg)</span><span className="text-right">Amount (₹)</span></div>
+                          {(order.items || []).map((item, i) => { const rate = getRatePerKg(Number(item.amount || 0), item.quantity_type); return <div key={i} className="grid grid-cols-[35px_minmax(155px,1fr)_65px_90px_90px] gap-x-2 text-xs py-0.5"><span className="text-center">{i + 1}</span><span>{item.recipe_name}</span><span>{item.quantity_type}</span><span className="text-right">{rate > 0 ? rate.toFixed(2) : '—'}</span><span className="text-right">{formatRupee(item.amount)}</span></div>; })}
+                          {(order.items || []).length > 0 && <div className="grid grid-cols-[35px_minmax(155px,1fr)_65px_90px_90px] gap-x-2 border-t mt-1 pt-1 text-xs font-semibold"><span></span><span>Total Quantity</span><span>{getTotalQuantity(order)}</span><span></span><span></span></div>}
                         </div>
                       </TableCell>
                       <TableCell className="align-top whitespace-nowrap">{formatRupee(totals.subtotal)}</TableCell>
