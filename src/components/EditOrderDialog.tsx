@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, X } from 'lucide-react';
 import { Order, OrderItem, updateOrder } from '@/services/orderService';
-import { fetchRecipePricing, RecipePricing } from '@/services/pricingService';
+import { fetchRecipePricing, RecipePricing, amountFromQuantityAndRate, ratePerKg } from '@/services/pricingService';
 import { useToast } from '@/hooks/use-toast';
 
 interface EditOrderDialogProps {
@@ -19,6 +19,7 @@ interface EditOrderDialogProps {
 interface FormItem {
   recipe_name: string;
   quantity_type: string;
+  rate: number;
   amount: number;
   customProduct?: boolean;
   customQuantity?: boolean;
@@ -34,7 +35,6 @@ const TAX_OPTIONS = [
   { value: '28', label: '28% GST' },
 ];
 
-
 const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose, onUpdated }) => {
   const { toast } = useToast();
   const [customerName, setCustomerName] = useState('');
@@ -46,7 +46,6 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
   const [discountPercent, setDiscountPercent] = useState(0);
   const [taxRate, setTaxRate] = useState(0);
   const [notes, setNotes] = useState('');
-
 
   useEffect(() => {
     fetchRecipePricing().then(setPricing).catch(console.error);
@@ -66,10 +65,12 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
           const knownQty = pricing.some(
             p => p.recipe_name === item.recipe_name && p.quantity_type === item.quantity_type && p.is_enabled
           );
+          const historicalRate = ratePerKg(Number(item.amount) || 0, item.quantity_type);
           return {
             recipe_name: item.recipe_name,
             quantity_type: item.quantity_type,
-            amount: item.amount,
+            rate: historicalRate,
+            amount: Number(item.amount) || 0,
             customProduct: pricing.length > 0 && !known,
             customQuantity: pricing.length > 0 && !knownQty,
           };
@@ -84,30 +85,41 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
     return pricing.filter(p => p.recipe_name === recipeName && p.is_enabled);
   };
 
-  const getPrice = (recipeName: string, quantityType: string): number => {
-    const p = pricing.find(pr => pr.recipe_name === recipeName && pr.quantity_type === quantityType);
-    return p ? p.price : 0;
+  const getPricing = (recipeName: string, quantityType: string): RecipePricing | undefined => {
+    return pricing.find(pr => pr.recipe_name === recipeName && pr.quantity_type === quantityType && pr.is_enabled);
   };
+
+  const recalculateAmount = (item: FormItem): FormItem => ({
+    ...item,
+    amount: amountFromQuantityAndRate(item.quantity_type, item.rate),
+  });
 
   const updateItem = (index: number, field: keyof FormItem, value: string | number | boolean) => {
     const updated = [...items];
-    updated[index] = { ...updated[index], [field]: value };
+    let next = { ...updated[index], [field]: value } as FormItem;
+
     if (field === 'recipe_name') {
-      updated[index].quantity_type = '';
-      updated[index].amount = 0;
+      next = { ...next, quantity_type: '', rate: 0, amount: 0 };
+    } else if (field === 'quantity_type' || field === 'rate') {
+      next = recalculateAmount(next);
     }
-    if (field === 'quantity_type') {
-      updated[index].amount = getPrice(updated[index].recipe_name, value as string);
-    }
+
+    updated[index] = next;
     setItems(updated);
   };
 
   const selectProduct = (index: number, value: string) => {
     const updated = [...items];
     if (value === CUSTOM_OPTION) {
-      updated[index] = { recipe_name: '', quantity_type: '', amount: 0, customProduct: true, customQuantity: true };
+      updated[index] = {
+        recipe_name: '', quantity_type: '', rate: 0, amount: 0,
+        customProduct: true, customQuantity: true,
+      };
     } else {
-      updated[index] = { recipe_name: value, quantity_type: '', amount: 0, customProduct: false, customQuantity: false };
+      updated[index] = {
+        recipe_name: value, quantity_type: '', rate: 0, amount: 0,
+        customProduct: false, customQuantity: false,
+      };
     }
     setItems(updated);
   };
@@ -115,31 +127,33 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
   const selectQuantity = (index: number, value: string) => {
     const updated = [...items];
     if (value === CUSTOM_OPTION) {
-      updated[index] = { ...updated[index], quantity_type: '', customQuantity: true };
+      updated[index] = { ...updated[index], quantity_type: '', amount: 0, customQuantity: true };
     } else {
+      const item = updated[index];
+      const p = getPricing(item.recipe_name, value);
+      const rate = p ? ratePerKg(p.price, value) : 0;
       updated[index] = {
-        ...updated[index],
+        ...item,
         quantity_type: value,
+        rate,
         customQuantity: false,
-        amount: getPrice(updated[index].recipe_name, value),
+        amount: amountFromQuantityAndRate(value, rate),
       };
     }
     setItems(updated);
   };
 
   const addItem = () => {
-    setItems([...items, { recipe_name: '', quantity_type: '', amount: 0 }]);
+    setItems([...items, { recipe_name: '', quantity_type: '', rate: 0, amount: 0 }]);
   };
 
   const removeItem = (index: number) => {
-    if (items.length > 1) {
-      setItems(items.filter((_, i) => i !== index));
-    }
+    if (items.length > 1) setItems(items.filter((_, i) => i !== index));
   };
 
   const clearItem = (index: number) => {
     const updated = [...items];
-    updated[index] = { recipe_name: '', quantity_type: '', amount: 0 };
+    updated[index] = { recipe_name: '', quantity_type: '', rate: 0, amount: 0 };
     setItems(updated);
   };
 
@@ -154,6 +168,7 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
       toast({ title: 'Please fill all customer details', variant: 'destructive' });
       return;
     }
+
     const validItems: OrderItem[] = items
       .filter(item => item.recipe_name.trim() && item.quantity_type.trim() && item.amount > 0)
       .map(item => ({
@@ -161,6 +176,7 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
         quantity_type: item.quantity_type.trim(),
         amount: item.amount,
       }));
+
     if (validItems.length === 0) {
       toast({ title: 'Please add at least one product', variant: 'destructive' });
       return;
@@ -182,150 +198,84 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Order {order ? `INV-${String(order.invoice_number).padStart(3, '0')}` : ''}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium">Customer Name</label>
-              <Input value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Enter name" />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Phone Number</label>
-              <Input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="Enter phone" />
-            </div>
+            <div><label className="text-sm font-medium">Customer Name</label><Input value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Enter name" /></div>
+            <div><label className="text-sm font-medium">Phone Number</label><Input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="Enter phone" /></div>
           </div>
-          <div>
-            <label className="text-sm font-medium">Address</label>
-            <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Enter address" />
-          </div>
+          <div><label className="text-sm font-medium">Address</label><Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Enter address" /></div>
 
           <div className="space-y-3">
             <h3 className="font-medium">Products</h3>
             {items.map((item, index) => (
-              <div key={index} className="flex flex-wrap items-end gap-2 p-3 bg-muted rounded-lg">
-                <div className="flex-1 min-w-[150px]">
+              <div key={index} className="grid grid-cols-1 sm:grid-cols-[minmax(180px,1fr)_140px_120px_120px_auto] items-end gap-2 p-3 bg-muted rounded-lg">
+                <div className="min-w-0">
                   <label className="text-xs text-muted-foreground">Product</label>
                   {item.customProduct ? (
                     <div className="flex gap-1">
-                      <Input
-                        value={item.recipe_name}
-                        onChange={(e) => updateItem(index, 'recipe_name', e.target.value)}
-                        placeholder="Type product name"
-                      />
-                      <Button variant="outline" size="icon" type="button" onClick={() => selectProduct(index, '')}>
-                        <X className="h-4 w-4" />
-                      </Button>
+                      <Input value={item.recipe_name} onChange={(e) => updateItem(index, 'recipe_name', e.target.value)} placeholder="Type product name" />
+                      <Button variant="outline" size="icon" type="button" onClick={() => selectProduct(index, '')}><X className="h-4 w-4" /></Button>
                     </div>
                   ) : (
                     <Select value={item.recipe_name} onValueChange={(v) => selectProduct(index, v)}>
                       <SelectTrigger><SelectValue placeholder="Select product" /></SelectTrigger>
-                      <SelectContent>
-                        {recipeNames.map(name => (
-                          <SelectItem key={name} value={name}>{name}</SelectItem>
-                        ))}
-                        <SelectItem value={CUSTOM_OPTION}>Custom…</SelectItem>
-                      </SelectContent>
+                      <SelectContent>{recipeNames.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}<SelectItem value={CUSTOM_OPTION}>Custom…</SelectItem></SelectContent>
                     </Select>
                   )}
                 </div>
-                <div className="w-[140px]">
+
+                <div>
                   <label className="text-xs text-muted-foreground">Quantity</label>
                   {item.customQuantity ? (
-                    <Input
-                      value={item.quantity_type}
-                      onChange={(e) => updateItem(index, 'quantity_type', e.target.value)}
-                      placeholder="e.g. 750g"
-                    />
+                    <Input value={item.quantity_type} onChange={(e) => updateItem(index, 'quantity_type', e.target.value)} placeholder="e.g. 750g" />
                   ) : (
                     <Select value={item.quantity_type} onValueChange={(v) => selectQuantity(index, v)} disabled={!item.recipe_name}>
                       <SelectTrigger><SelectValue placeholder="Select qty" /></SelectTrigger>
-                      <SelectContent>
-                        {getQuantityTypes(item.recipe_name).map(qt => (
-                          <SelectItem key={qt.quantity_type} value={qt.quantity_type}>{qt.quantity_type}</SelectItem>
-                        ))}
-                        <SelectItem value={CUSTOM_OPTION}>Custom…</SelectItem>
-                      </SelectContent>
+                      <SelectContent>{getQuantityTypes(item.recipe_name).map(qt => <SelectItem key={qt.quantity_type} value={qt.quantity_type}>{qt.quantity_type}</SelectItem>)}<SelectItem value={CUSTOM_OPTION}>Custom…</SelectItem></SelectContent>
                     </Select>
                   )}
                 </div>
-                <div className="w-[100px]">
-                  <label className="text-xs text-muted-foreground">Amount (₹)</label>
-                  <Input type="number" value={item.amount || ''} onChange={(e) => updateItem(index, 'amount', Number(e.target.value))} />
+
+                <div>
+                  <label className="text-xs text-muted-foreground">Rate (₹/Kg)</label>
+                  <Input type="number" min="0" step="0.01" value={item.rate || ''} onChange={(e) => updateItem(index, 'rate', Number(e.target.value))} placeholder="Per Kg" />
                 </div>
+
+                <div>
+                  <label className="text-xs text-muted-foreground">Amount (₹)</label>
+                  <Input value={item.amount ? item.amount.toFixed(2) : ''} readOnly className="bg-white" />
+                </div>
+
                 <div className="flex gap-1">
-                  <Button variant="outline" size="icon" type="button" onClick={addItem}>
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                  {index === 0 ? (
-                    <Button variant="outline" size="icon" type="button" onClick={() => clearItem(index)}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  ) : (
-                    <Button variant="outline" size="icon" type="button" onClick={() => removeItem(index)}>
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                  )}
+                  <Button variant="outline" size="icon" type="button" onClick={addItem}><Plus className="h-4 w-4" /></Button>
+                  {index === 0 ? <Button variant="outline" size="icon" type="button" onClick={() => clearItem(index)}><X className="h-4 w-4" /></Button> : <Button variant="outline" size="icon" type="button" onClick={() => removeItem(index)}><Trash2 className="h-4 w-4 text-red-500" /></Button>}
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Discount, Tax & Notes */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="text-sm font-medium">Discount (%)</label>
-              <Input
-                type="number"
-                value={discountPercent}
-                onChange={(e) => setDiscountPercent(Number(e.target.value))}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Tax Rate (%)</label>
-              <Select value={String(taxRate)} onValueChange={(v) => setTaxRate(Number(v))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {TAX_OPTIONS.map(o => (
-                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Notes</label>
-              <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Add a note (optional)" />
-            </div>
+            <div><label className="text-sm font-medium">Discount (%)</label><Input type="number" value={discountPercent} onChange={(e) => setDiscountPercent(Number(e.target.value))} /></div>
+            <div><label className="text-sm font-medium">Tax Rate (%)</label><Select value={String(taxRate)} onValueChange={(v) => setTaxRate(Number(v))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{TAX_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent></Select></div>
+            <div><label className="text-sm font-medium">Notes</label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Add a note (optional)" /></div>
           </div>
 
-          {/* Totals */}
           <div className="rounded-lg border bg-muted/40 p-4 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Subtotal:</span><span>₹{subtotal.toFixed(2)}</span>
-            </div>
-            {discountPercent > 0 && (
-              <div className="flex justify-between text-sm">
-                <span>Discount ({discountPercent}%):</span><span>-₹{discountAmount.toFixed(2)}</span>
-              </div>
-            )}
-            <div className="flex justify-between text-sm">
-              <span>Tax ({taxRate}%):</span><span>₹{taxAmount.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between font-bold text-lg border-t pt-2">
-              <span>Total:</span><span>₹{totalAmount.toFixed(2)}</span>
-            </div>
+            <div className="flex justify-between text-sm"><span>Subtotal:</span><span>₹{subtotal.toFixed(2)}</span></div>
+            {discountPercent > 0 && <div className="flex justify-between text-sm"><span>Discount ({discountPercent}%):</span><span>-₹{discountAmount.toFixed(2)}</span></div>}
+            <div className="flex justify-between text-sm"><span>Tax ({taxRate}%):</span><span>₹{taxAmount.toFixed(2)}</span></div>
+            <div className="flex justify-between font-bold text-lg border-t pt-2"><span>Total:</span><span>₹{totalAmount.toFixed(2)}</span></div>
           </div>
-
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSubmit} disabled={submitting} className="bg-orange-600 hover:bg-orange-700">
-            {submitting ? 'Updating...' : 'Update Order'}
-          </Button>
+          <Button onClick={handleSubmit} disabled={submitting} className="bg-orange-600 hover:bg-orange-700">{submitting ? 'Updating...' : 'Update Order'}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
