@@ -49,6 +49,7 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
       </div>
       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '24px', fontSize: '13px' }}>
         <thead><tr style={{ borderBottom: `2px solid ${ORANGE}` }}>
+          <th style={{ textAlign: 'center', padding: '10px 6px', fontWeight: 'bold', width: '40px' }}>S.No.</th>
           <th style={{ textAlign: 'left', padding: '10px 8px', fontWeight: 'bold' }}>Description</th>
           <th style={{ textAlign: 'left', padding: '10px 8px', fontWeight: 'bold', width: '100px' }}>Qty</th>
           <th style={{ textAlign: 'left', padding: '10px 8px', fontWeight: 'bold', width: '120px' }}>Rate (₹)</th>
@@ -56,12 +57,14 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
         </tr></thead>
         <tbody>
           {(order.items || []).map((item, i) => <tr key={i} style={{ borderBottom: `1px solid ${ORANGE}` }}>
+            <td style={{ padding: '12px 6px', textAlign: 'center' }}>{i + 1}</td>
             <td style={{ padding: '12px 8px' }}>{item.recipe_name}</td>
             <td style={{ padding: '12px 8px' }}>{item.quantity_type}</td>
             <td style={{ padding: '12px 8px' }}>{formatRate(Number(item.amount || 0), item.quantity_type)}</td>
             <td style={{ padding: '12px 8px' }}>{Number(item.amount || 0).toFixed(2)}</td>
           </tr>)}
           {(order.items || []).length > 0 && <tr style={{ borderTop: `2px solid ${ORANGE}` }}>
+            <td style={{ padding: '12px 6px' }}></td>
             <td style={{ padding: '12px 8px', fontWeight: 'bold' }}>Total Quantity</td>
             <td style={{ padding: '12px 8px', fontWeight: 'bold' }}>{formatTotalQuantity(order.items)}</td>
             <td colSpan={2} style={{ padding: '12px 8px' }}></td>
