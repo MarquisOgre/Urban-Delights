@@ -14,9 +14,6 @@ const formatRupee = (amount: number) =>
   `\u20B9${Number(amount || 0).toFixed(2)}`;
 
 const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
-  const paymentStatus = order.payment_status || 'unpaid';
-  const isPaid = paymentStatus === 'paid';
-
   const discountPercent = Number(order.discount_percent) || 0;
   const taxRate = Number(order.tax_rate) || 0;
   const itemSubtotal = (order.items || []).reduce(
@@ -120,11 +117,11 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
             <strong>Status:</strong>{' '}
             <span
               style={{
-                color: isPaid ? '#16a34a' : '#dc2626',
+                color: order.payment_status === 'paid' ? '#16a34a' : '#dc2626',
                 fontWeight: 'bold',
               }}
             >
-              {paymentStatus.charAt(0).toUpperCase() + paymentStatus.slice(1)}
+              {(order.payment_status || 'unpaid').charAt(0).toUpperCase() + (order.payment_status || 'unpaid').slice(1)}
             </span>
           </p>
         </div>
@@ -143,14 +140,14 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
             <th style={{ textAlign: 'left', padding: '10px 8px', fontWeight: 'bold' }}>
               Description
             </th>
-            <th style={{ textAlign: 'center', padding: '10px 8px', fontWeight: 'bold', width: '70px' }}>
+            <th style={{ textAlign: 'center', padding: '10px 8px', fontWeight: 'bold', width: '100px' }}>
               Qty
             </th>
             <th style={{ textAlign: 'right', padding: '10px 8px', fontWeight: 'bold', width: '110px' }}>
-              Rate (\u20B9)
+              Rate (₹)
             </th>
             <th style={{ textAlign: 'right', padding: '10px 8px', fontWeight: 'bold', width: '120px' }}>
-              Amount (\u20B9)
+              Amount (₹)
             </th>
           </tr>
         </thead>
@@ -158,9 +155,11 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
           {(order.items || []).map((item, i) => (
             <tr key={i} style={{ borderBottom: `1px solid ${ORANGE}` }}>
               <td style={{ padding: '12px 8px' }}>
-                {item.recipe_name} - {item.quantity_type}
+                {item.recipe_name}
               </td>
-              <td style={{ padding: '12px 8px', textAlign: 'center' }}>1</td>
+              <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                {item.quantity_type}
+              </td>
               <td style={{ padding: '12px 8px', textAlign: 'right' }}>
                 {formatRupee(item.amount)}
               </td>
