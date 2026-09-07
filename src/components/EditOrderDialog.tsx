@@ -19,7 +19,11 @@ interface FormItem {
   recipe_name: string;
   quantity_type: string;
   amount: number;
+  customProduct?: boolean;
+  customQuantity?: boolean;
 }
+
+const CUSTOM_OPTION = '__custom__';
 
 const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose, onUpdated }) => {
   const { toast } = useToast();
@@ -40,14 +44,22 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
       setPhoneNumber(order.phone_number);
       setAddress(order.address);
       setItems(
-        (order.items || []).map(item => ({
-          recipe_name: item.recipe_name,
-          quantity_type: item.quantity_type,
-          amount: item.amount,
-        }))
+        (order.items || []).map(item => {
+          const known = pricing.some(p => p.recipe_name === item.recipe_name && p.is_enabled);
+          const knownQty = pricing.some(
+            p => p.recipe_name === item.recipe_name && p.quantity_type === item.quantity_type && p.is_enabled
+          );
+          return {
+            recipe_name: item.recipe_name,
+            quantity_type: item.quantity_type,
+            amount: item.amount,
+            customProduct: pricing.length > 0 && !known,
+            customQuantity: pricing.length > 0 && !knownQty,
+          };
+        })
       );
     }
-  }, [order, open]);
+  }, [order, open, pricing]);
 
   const recipeNames = [...new Set(pricing.filter(p => p.is_enabled).map(p => p.recipe_name))].sort();
 
@@ -60,7 +72,7 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
     return p ? p.price : 0;
   };
 
-  const updateItem = (index: number, field: keyof FormItem, value: string | number) => {
+  const updateItem = (index: number, field: keyof FormItem, value: string | number | boolean) => {
     const updated = [...items];
     updated[index] = { ...updated[index], [field]: value };
     if (field === 'recipe_name') {
@@ -69,6 +81,31 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
     }
     if (field === 'quantity_type') {
       updated[index].amount = getPrice(updated[index].recipe_name, value as string);
+    }
+    setItems(updated);
+  };
+
+  const selectProduct = (index: number, value: string) => {
+    const updated = [...items];
+    if (value === CUSTOM_OPTION) {
+      updated[index] = { recipe_name: '', quantity_type: '', amount: 0, customProduct: true, customQuantity: true };
+    } else {
+      updated[index] = { recipe_name: value, quantity_type: '', amount: 0, customProduct: false, customQuantity: false };
+    }
+    setItems(updated);
+  };
+
+  const selectQuantity = (index: number, value: string) => {
+    const updated = [...items];
+    if (value === CUSTOM_OPTION) {
+      updated[index] = { ...updated[index], quantity_type: '', customQuantity: true };
+    } else {
+      updated[index] = {
+        ...updated[index],
+        quantity_type: value,
+        customQuantity: false,
+        amount: getPrice(updated[index].recipe_name, value),
+      };
     }
     setItems(updated);
   };
@@ -97,7 +134,13 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
       toast({ title: 'Please fill all customer details', variant: 'destructive' });
       return;
     }
-    const validItems = items.filter(item => item.recipe_name && item.quantity_type && item.amount > 0);
+    const validItems: OrderItem[] = items
+      .filter(item => item.recipe_name.trim() && item.quantity_type.trim() && item.amount > 0)
+      .map(item => ({
+        recipe_name: item.recipe_name.trim(),
+        quantity_type: item.quantity_type.trim(),
+        amount: item.amount,
+      }));
     if (validItems.length === 0) {
       toast({ title: 'Please add at least one product', variant: 'destructive' });
       return;
@@ -146,25 +189,48 @@ const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose,
               <div key={index} className="flex flex-wrap items-end gap-2 p-3 bg-muted rounded-lg">
                 <div className="flex-1 min-w-[150px]">
                   <label className="text-xs text-muted-foreground">Product</label>
-                  <Select value={item.recipe_name} onValueChange={(v) => updateItem(index, 'recipe_name', v)}>
-                    <SelectTrigger><SelectValue placeholder="Select product" /></SelectTrigger>
-                    <SelectContent>
-                      {recipeNames.map(name => (
-                        <SelectItem key={name} value={name}>{name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {item.customProduct ? (
+                    <div className="flex gap-1">
+                      <Input
+                        value={item.recipe_name}
+                        onChange={(e) => updateItem(index, 'recipe_name', e.target.value)}
+                        placeholder="Type product name"
+                      />
+                      <Button variant="outline" size="icon" type="button" onClick={() => selectProduct(index, '')}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Select value={item.recipe_name} onValueChange={(v) => selectProduct(index, v)}>
+                      <SelectTrigger><SelectValue placeholder="Select product" /></SelectTrigger>
+                      <SelectContent>
+                        {recipeNames.map(name => (
+                          <SelectItem key={name} value={name}>{name}</SelectItem>
+                        ))}
+                        <SelectItem value={CUSTOM_OPTION}>Custom…</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
                 <div className="w-[140px]">
                   <label className="text-xs text-muted-foreground">Quantity</label>
-                  <Select value={item.quantity_type} onValueChange={(v) => updateItem(index, 'quantity_type', v)} disabled={!item.recipe_name}>
-                    <SelectTrigger><SelectValue placeholder="Select qty" /></SelectTrigger>
-                    <SelectContent>
-                      {getQuantityTypes(item.recipe_name).map(qt => (
-                        <SelectItem key={qt.quantity_type} value={qt.quantity_type}>{qt.quantity_type}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {item.customQuantity ? (
+                    <Input
+                      value={item.quantity_type}
+                      onChange={(e) => updateItem(index, 'quantity_type', e.target.value)}
+                      placeholder="e.g. 750g"
+                    />
+                  ) : (
+                    <Select value={item.quantity_type} onValueChange={(v) => selectQuantity(index, v)} disabled={!item.recipe_name}>
+                      <SelectTrigger><SelectValue placeholder="Select qty" /></SelectTrigger>
+                      <SelectContent>
+                        {getQuantityTypes(item.recipe_name).map(qt => (
+                          <SelectItem key={qt.quantity_type} value={qt.quantity_type}>{qt.quantity_type}</SelectItem>
+                        ))}
+                        <SelectItem value={CUSTOM_OPTION}>Custom…</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
                 <div className="w-[100px]">
                   <label className="text-xs text-muted-foreground">Amount (₹)</label>
