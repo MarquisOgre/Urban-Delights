@@ -34,6 +34,30 @@ export const computeTotal = (
   return afterDiscount + (afterDiscount * (taxRate || 0)) / 100;
 };
 
+// Reuse the lowest available invoice number. For example, if 001, 002 and 004
+// exist, the next order receives 003. If no gap exists, the next number is used.
+const getNextAvailableInvoiceNumber = async (): Promise<number> => {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('invoice_number')
+    .order('invoice_number', { ascending: true });
+
+  if (error) throw error;
+
+  const usedNumbers = new Set(
+    (data || [])
+      .map(order => Number(order.invoice_number))
+      .filter(number => Number.isInteger(number) && number > 0)
+  );
+
+  let invoiceNumber = 1;
+  while (usedNumbers.has(invoiceNumber)) {
+    invoiceNumber += 1;
+  }
+
+  return invoiceNumber;
+};
+
 export const fetchOrders = async (): Promise<Order[]> => {
   const { data: orders, error } = await supabase
     .from('orders')
@@ -68,10 +92,12 @@ export const createOrder = async (
   notes: string = ''
 ): Promise<void> => {
   const totalAmount = computeTotal(items, discountPercent, taxRate);
+  const invoiceNumber = await getNextAvailableInvoiceNumber();
 
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert({
+      invoice_number: invoiceNumber,
       customer_name: customerName,
       phone_number: phoneNumber,
       address: address,
