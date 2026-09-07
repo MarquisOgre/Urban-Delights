@@ -19,7 +19,11 @@ interface FormItem {
   recipe_name: string;
   quantity_type: string;
   amount: number;
+  customProduct?: boolean;
+  customQuantity?: boolean;
 }
+
+const CUSTOM_OPTION = '__custom__';
 
 const EditOrderDialog: React.FC<EditOrderDialogProps> = ({ order, open, onClose, onUpdated }) => {
   const { toast } = useToast();
