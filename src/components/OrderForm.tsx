@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Plus, Trash2, X } from 'lucide-react';
@@ -23,6 +24,15 @@ interface FormItem {
 
 const CUSTOM_OPTION = '__custom__';
 
+const TAX_OPTIONS = [
+  { value: '0', label: '0% (No Tax)' },
+  { value: '5', label: '5% GST' },
+  { value: '12', label: '12% GST' },
+  { value: '18', label: '18% GST' },
+  { value: '28', label: '28% GST' },
+];
+
+
 const OrderForm: React.FC<OrderFormProps> = ({ onBackToDashboard, onOrderCreated }) => {
   const { toast } = useToast();
   const [customerName, setCustomerName] = useState('');
@@ -32,6 +42,10 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBackToDashboard, onOrderCreated
   const [pricing, setPricing] = useState<RecipePricing[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
+  const [discountPercent, setDiscountPercent] = useState(0);
+  const [taxRate, setTaxRate] = useState(0);
+  const [notes, setNotes] = useState('');
+
 
   useEffect(() => {
     fetchRecipePricing().then(setPricing).catch(console.error);
@@ -106,7 +120,10 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBackToDashboard, onOrderCreated
     setItems(updated);
   };
 
-  const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
+  const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
+  const discountAmount = (subtotal * discountPercent) / 100;
+  const taxAmount = ((subtotal - discountAmount) * taxRate) / 100;
+  const totalAmount = subtotal - discountAmount + taxAmount;
 
   const handleSubmit = async () => {
     if (!customerName.trim() || !phoneNumber.trim() || !address.trim()) {
@@ -128,7 +145,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBackToDashboard, onOrderCreated
 
     setSubmitting(true);
     try {
-      await createOrder(customerName, phoneNumber, address, validItems);
+      await createOrder(customerName, phoneNumber, address, validItems, discountPercent, taxRate, notes);
       setShowThankYou(true);
       setTimeout(() => {
         setShowThankYou(false);
@@ -258,9 +275,52 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBackToDashboard, onOrderCreated
             ))}
           </div>
 
-          {/* Total & Submit */}
-          <div className="flex items-center justify-between pt-4 border-t">
-            <div className="text-lg font-bold">Total: ₹{totalAmount.toFixed(2)}</div>
+          {/* Discount, Tax & Notes */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="text-sm font-medium">Discount (%)</label>
+              <Input
+                type="number"
+                value={discountPercent}
+                onChange={(e) => setDiscountPercent(Number(e.target.value))}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Tax Rate (%)</label>
+              <Select value={String(taxRate)} onValueChange={(v) => setTaxRate(Number(v))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {TAX_OPTIONS.map(o => (
+                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Notes</label>
+              <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Add a note (optional)" />
+            </div>
+          </div>
+
+          {/* Totals */}
+          <div className="rounded-lg border bg-muted/40 p-4 space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Subtotal:</span><span>₹{subtotal.toFixed(2)}</span>
+            </div>
+            {discountPercent > 0 && (
+              <div className="flex justify-between text-sm">
+                <span>Discount ({discountPercent}%):</span><span>-₹{discountAmount.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-sm">
+              <span>Tax ({taxRate}%):</span><span>₹{taxAmount.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-bold text-lg border-t pt-2">
+              <span>Total:</span><span>₹{totalAmount.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <div className="flex justify-end">
             <Button onClick={handleSubmit} disabled={submitting} className="bg-orange-600 hover:bg-orange-700">
               {submitting ? 'Submitting...' : 'Submit Order'}
             </Button>
