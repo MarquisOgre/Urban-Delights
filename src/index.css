@@ -53,6 +53,15 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --store-canvas: 38 100% 98%;
+    --store-hero: 42 100% 96%;
+    --store-soft: 30 100% 95%;
+    --store-primary: 19 94% 48%;
+    --store-price: 6 78% 42%;
+    --store-ink: 222 47% 11%;
+    --store-muted: 215 16% 40%;
+    --store-border: 27 84% 86%;
   }
 
   .dark {
@@ -91,6 +100,14 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    --store-canvas: 222 47% 8%;
+    --store-hero: 24 35% 13%;
+    --store-soft: 24 31% 17%;
+    --store-primary: 24 95% 59%;
+    --store-price: 42 96% 58%;
+    --store-ink: 210 40% 98%;
+    --store-muted: 215 20% 72%;
+    --store-border: 24 22% 25%;
   }
 }
 
