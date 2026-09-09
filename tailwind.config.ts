@@ -19,6 +19,16 @@ export default {
 		},
 		extend: {
 			colors: {
+				store: {
+					canvas: 'hsl(var(--store-canvas))',
+					hero: 'hsl(var(--store-hero))',
+					soft: 'hsl(var(--store-soft))',
+					primary: 'hsl(var(--store-primary))',
+					price: 'hsl(var(--store-price))',
+					ink: 'hsl(var(--store-ink))',
+					muted: 'hsl(var(--store-muted))',
+					border: 'hsl(var(--store-border))',
+				},
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
