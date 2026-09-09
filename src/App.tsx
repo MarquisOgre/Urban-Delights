@@ -7,6 +7,7 @@ import BackendDashboard from "./pages/BackendDashboard";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import { AuthProvider } from "@/hooks/use-auth";
+import Store from "./pages/Store";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<BackendDashboard />} />
+            <Route path="/store" element={<Store />} />
             <Route path="/auth" element={<Auth />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
