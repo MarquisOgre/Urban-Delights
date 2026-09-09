@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, ChefHat, PlusCircle, Package, DollarSign, ClipboardList, Warehouse, RefreshCw, LogOut, LogIn } from 'lucide-react';
+import { Menu, ChefHat, Package, DollarSign, ClipboardList, Warehouse, RefreshCw, LogOut, LogIn, ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
@@ -60,6 +60,10 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, onRefresh 
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-1 xl:space-x-2">
+            <Button variant="outline" size="sm" onClick={() => navigate('/store')} className="text-orange-800 border-orange-300 hover:bg-orange-100">
+              <ShoppingBag className="h-4 w-4 mr-1" />
+              Store
+            </Button>
             {onRefresh && (
               <Button variant="ghost" size="sm" onClick={handleRefresh} disabled={isRefreshing} className="text-orange-800 hover:bg-orange-100">
                 <RefreshCw className={`h-4 w-4 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -111,6 +115,9 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, onRefresh 
               </SheetTrigger>
               <SheetContent side="right" className="w-72 bg-white">
                 <div className="flex flex-col gap-2 mt-8">
+                  <Button variant="outline" className="justify-start border-orange-300 text-orange-800" onClick={() => { setMobileMenuOpen(false); navigate('/store'); }}>
+                    <ShoppingBag className="h-5 w-5" /> Store
+                  </Button>
                   {navigationItems.map((item) => {
                     const Icon = item.icon;
                     return (
