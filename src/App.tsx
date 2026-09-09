@@ -14,7 +14,7 @@ const queryClient = new QueryClient();
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  return session ? <>{children}</> : <Navigate to="/auth" replace />;
+  return session ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
 const HomeRoute = () => {
@@ -32,7 +32,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<HomeRoute />} />
-            <Route path="/auth" element={<Auth />} />
+            <Route path="/login" element={<Auth />} />
+            <Route path="/auth" element={<Navigate to="/login" replace />} />
             <Route path="/admin" element={<AdminRoute><BackendDashboard /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
