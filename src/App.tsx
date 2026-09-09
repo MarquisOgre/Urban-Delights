@@ -7,6 +7,7 @@ import BackendDashboard from "./pages/BackendDashboard";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Store from "./pages/Store";
+import LegalPage from "./pages/LegalPage";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,13 @@ const App = () => (
             <Route path="/login" element={<Auth />} />
             <Route path="/auth" element={<Navigate to="/login" replace />} />
             <Route path="/admin" element={<AdminRoute><BackendDashboard /></AdminRoute>} />
+            <Route path="/privacy-policy" element={<LegalPage />} />
+            <Route path="/terms-and-conditions" element={<LegalPage />} />
+            <Route path="/shipping-policy" element={<LegalPage />} />
+            <Route path="/returns-refunds" element={<LegalPage />} />
+            <Route path="/about-us" element={<LegalPage />} />
+            <Route path="/contact-us" element={<LegalPage />} />
+            <Route path="/faq" element={<LegalPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
