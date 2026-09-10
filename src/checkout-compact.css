@@ -1,0 +1,77 @@
+/* Compact desktop checkout: keep the three columns and footer in one viewport. */
+body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] {
+  padding-bottom: 1rem !important;
+}
+
+body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form {
+  gap: 1rem !important;
+}
+
+body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div {
+  min-height: 0 !important;
+}
+
+body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div > div:first-child {
+  padding-top: 1.1rem !important;
+  padding-bottom: .45rem !important;
+  padding-left: 1.35rem !important;
+  padding-right: 1.35rem !important;
+}
+
+body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div > div:nth-child(2) {
+  padding: 0 1.35rem 1.35rem !important;
+}
+
+body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div > div:first-child h2 {
+  font-size: 1.65rem !important;
+}
+
+body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] input,
+body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] textarea {
+  height: 2.9rem !important;
+}
+
+body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] textarea {
+  min-height: 4.5rem !important;
+}
+
+body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] label {
+  font-size: .88rem;
+}
+
+body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] .space-y-5 {
+  row-gap: .7rem !important;
+}
+
+/* Remove the duplicate Shipping row from the Payment column. */
+body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) .mb-4 {
+  display: none !important;
+}
+
+/* Remove the large artificial vertical spacer in Payment. */
+body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) [class~="min-h-[390px]"] {
+  min-height: 0 !important;
+  padding-top: .5rem !important;
+}
+
+body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) .space-y-4 {
+  row-gap: .7rem !important;
+}
+
+body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) .p-4 {
+  padding: .75rem !important;
+}
+
+body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) > div:nth-child(2) {
+  padding-bottom: 1.35rem !important;
+}
+
+body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) button[type="submit"] {
+  height: 2.9rem !important;
+}
+
+@media (max-width: 1023px) {
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form {
+    gap: .9rem !important;
+  }
+}
