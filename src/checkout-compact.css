@@ -13,9 +13,13 @@
   body:has(button[aria-label="Return to store"]) header {
     height: 80px !important;
     min-height: 80px !important;
-    padding: 0 4.8vw !important;
+    padding: 0 4.8vw 8px !important;
     border-bottom: 1px solid #e6e8e2 !important;
     background: rgba(250,251,248,.96) !important;
+  }
+
+  body:has(button[aria-label="Return to store"]) header button[aria-label="Urban Delights home"] > span {
+    display: none !important;
   }
 
   body:has(button[aria-label="Return to store"]) header h1 {
