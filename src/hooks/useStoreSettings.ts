@@ -14,39 +14,26 @@ export interface StoreSettings {
 }
 
 export const DEFAULT_PRODUCT_MEDIA: StoreProductMedia[] = [
-  { name: "Chicken Masala", imageUrl: "/assets/chicken-masala.jpg" },
-  { name: "Garam Masala", imageUrl: "/assets/garam-masala.jpg" },
-  { name: "Sambar Podi", imageUrl: "/assets/sambar-powder.jpg" },
-  { name: "Rasam Podi", imageUrl: "/assets/rasam-powder.jpg" },
-  { name: "Karvepaku Podi", imageUrl: "/assets/karvepaku-podi.jpg" },
-  { name: "Kobari Podi", imageUrl: "/assets/kobari-powder.jpg" },
-  { name: "Palli Podi", imageUrl: "/assets/palli-podi.jpg" },
-  { name: "Putnalu Podi", imageUrl: "/assets/putnalu-podi.jpg" },
-  { name: "Idly Podi", imageUrl: "/assets/idly-podi.jpg" },
+  { name: "Chicken Masala", imageUrl: "/assets/chicken-masala.jpg" }, { name: "Garam Masala", imageUrl: "/assets/garam-masala.jpg" }, { name: "Sambar Podi", imageUrl: "/assets/sambar-powder.jpg" }, { name: "Rasam Podi", imageUrl: "/assets/rasam-powder.jpg" }, { name: "Karvepaku Podi", imageUrl: "/assets/karvepaku-podi.jpg" }, { name: "Kobari Podi", imageUrl: "/assets/kobari-powder.jpg" }, { name: "Palli Podi", imageUrl: "/assets/palli-podi.jpg" }, { name: "Putnalu Podi", imageUrl: "/assets/putnalu-podi.jpg" }, { name: "Idly Podi", imageUrl: "/assets/idly-podi.jpg" },
 ];
 
 export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   logoUrl: "/logo.png", storeName: "Urban Delights", businessName: "Urban Delights", phone: "", email: "", address: "", gstNumber: "", upiId: "", upiPayeeName: "Urban Delights", upiQrCodeUrl: "",
-  freeShippingAbove: 999, shippingFee: 60, heroEyebrow: "SMALL-BATCH • SOUTH INDIAN FLAVOURS", heroTitle: "The taste of", heroTitleAccent: "home, ground fresh.",
-  heroDescription: "Authentic podis and masalas made in small batches with carefully selected ingredients — full of aroma, warmth and the flavours you grew up with.", heroImageUrl: "/hero.png",
+  freeShippingAbove: 999, shippingFee: 60, heroEyebrow: "SMALL-BATCH • SOUTH INDIAN FLAVOURS", heroTitle: "The taste of", heroTitleAccent: "home, ground fresh.", heroDescription: "Authentic podis and masalas made in small batches with carefully selected ingredients — full of aroma, warmth and the flavours you grew up with.", heroImageUrl: "/hero.png",
   heroPrimaryButtonText: "Shop our blends", heroSecondaryButtonText: "Why Urban Delights?", showHero: true, showBenefits: true, showCategories: true, showFeatured: true, showWhyUs: true,
   showFooterLinks: true, showAdminLogin: true, showBasket: true, footerCopyright: "Crafted with ❤️ by Dexorzo Creations.",
   footerLinks: [
-    { label: "About Us", path: "/about-us", enabled: true }, { label: "Shipping Policy", path: "/shipping-policy", enabled: true }, { label: "Returns & Refunds", path: "/returns-refunds", enabled: true },
-    { label: "Terms & Conditions", path: "/terms-and-conditions", enabled: true }, { label: "Privacy Policy", path: "/privacy-policy", enabled: true }, { label: "FAQs", path: "/faq", enabled: true },
+    { label: "About Us", path: "/about-us", enabled: true }, { label: "Shipping Policy", path: "/shipping-policy", enabled: true }, { label: "Returns & Refunds", path: "/returns-refunds", enabled: true }, { label: "Terms & Conditions", path: "/terms-and-conditions", enabled: true }, { label: "Privacy Policy", path: "/privacy-policy", enabled: true }, { label: "FAQs", path: "/faq", enabled: true },
   ],
-  featuredProductNames: ["Chicken Masala", "Garam Masala", "Sambar Podi", "Palli Podi"],
-  productMedia: DEFAULT_PRODUCT_MEDIA,
+  featuredProductNames: ["Chicken Masala", "Garam Masala", "Sambar Podi", "Palli Podi"], productMedia: DEFAULT_PRODUCT_MEDIA,
   categories: [
-    { title: "Masalas", subtitle: "Aromatic blends for everyday cooking", theme: "orange", imageUrl: "/hero.png", productNames: ["Chicken Masala", "Garam Masala", "Sambar Podi", "Rasam Podi"] },
-    { title: "Podis", subtitle: "Roasted South Indian favourites", theme: "green", imageUrl: "/hero.png", productNames: ["Karvepaku Podi", "Kobari Podi", "Palli Podi", "Putnalu Podi", "Idly Podi"] },
+    { title: "Masalas", subtitle: "Aromatic blends for everyday cooking", theme: "orange", imageUrl: "/hero.png", productNames: ["Chicken Masala", "Garam Masala", "Sambar Podi", "Rasam Podi"] }, { title: "Podis", subtitle: "Roasted South Indian favourites", theme: "green", imageUrl: "/hero.png", productNames: ["Karvepaku Podi", "Kobari Podi", "Palli Podi", "Putnalu Podi", "Idly Podi"] },
   ],
   benefits: [
     { icon: "truck", title: "Fast Delivery", subtitle: "Across India" }, { icon: "shield", title: "Quality Tested", subtitle: "Safe & Reliable" }, { icon: "leaf", title: "Thoughtfully Made", subtitle: "Small Batch" }, { icon: "cart", title: "Easy Ordering", subtitle: "Simple Checkout" },
   ],
   whyUs: [
-    { icon: "shield", title: "Quality You Can Trust", description: "Carefully selected ingredients and balanced recipes.", theme: "green" }, { icon: "sparkles", title: "Made for Everyday Meals", description: "Traditional flavour designed for modern kitchens.", theme: "orange" },
-    { icon: "check", title: "Honest Pricing", description: "Great food without unnecessary premium pricing.", theme: "gold" }, { icon: "cart", title: "Easy Ordering", description: "Choose your pack, add to basket and checkout.", theme: "rose" },
+    { icon: "shield", title: "Quality You Can Trust", description: "Carefully selected ingredients and balanced recipes.", theme: "green" }, { icon: "sparkles", title: "Made for Everyday Meals", description: "Traditional flavour designed for modern kitchens.", theme: "orange" }, { icon: "check", title: "Honest Pricing", description: "Great food without unnecessary premium pricing.", theme: "gold" }, { icon: "cart", title: "Easy Ordering", description: "Choose your pack, add to basket and checkout.", theme: "rose" },
   ],
 };
 
@@ -74,7 +61,7 @@ const mapSettings = (data: any): StoreSettings => {
 export const useStoreSettings = () => useQuery({ queryKey: [SETTING_TYPE], queryFn: async (): Promise<StoreSettings> => {
   const { data, error } = await supabase.from("settings" as any).select("setting_data").eq("setting_type", SETTING_TYPE).is("user_id", null).maybeSingle();
   if (error) throw error; return mapSettings(data);
-}, initialData: DEFAULT_STORE_SETTINGS, staleTime: 30_000 });
+}, initialData: DEFAULT_STORE_SETTINGS, staleTime: 0, refetchOnMount: "always", refetchOnWindowFocus: true });
 
 export const useSaveStoreSettings = () => {
   const qc = useQueryClient();
