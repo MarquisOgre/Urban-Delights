@@ -1,4 +1,4 @@
-/* Urban Delights checkout — sleek, compact, single-viewport desktop layout. */
+/* Urban Delights checkout — sleek, compact, responsive three-column layout. */
 @media (min-width: 1024px) {
   body:has(button[aria-label="Return to store"]) {
     overflow: hidden;
@@ -21,17 +21,15 @@
   body:has(button[aria-label="Return to store"]) header h1 {
     margin: 0;
     font-family: Georgia, "Times New Roman", serif !important;
-    font-size: 0 !important;
-    color: transparent !important;
+    font-size: 30px !important;
+    font-style: normal !important;
+    font-weight: 700 !important;
+    color: #2f6b45 !important;
+    letter-spacing: -.5px;
   }
 
   body:has(button[aria-label="Return to store"]) header h1::before {
-    content: "Urban Delights";
-    font-size: 30px;
-    font-style: italic;
-    font-weight: 700;
-    color: #176c50;
-    letter-spacing: -.5px;
+    content: none !important;
   }
 
   body:has(button[aria-label="Return to store"]) header button[aria-label="Return to store"] {
@@ -143,10 +141,6 @@
     border-top: 0 !important;
   }
 
-  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) > div:nth-child(2) .mb-4 {
-    display: none !important;
-  }
-
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) button[type="submit"] {
     height: 46px !important;
     border-radius: 11px !important;
@@ -155,8 +149,8 @@
   body:has(button[aria-label="Return to store"]) footer {
     height: 56px !important;
     min-height: 56px !important;
-    border-top: 1px solid #e2e5df !important;
-    background: #fff !important;
+    border-top: 1px solid rgba(255,255,255,.25) !important;
+    background: linear-gradient(to right, #ef4444, #f97316, #facc15) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -170,8 +164,8 @@
     width: 100% !important;
     padding: 0 !important;
     background: transparent !important;
-    color: #70807a !important;
-    font-weight: 400 !important;
+    color: #fff !important;
+    font-weight: 700 !important;
     font-size: 12px !important;
   }
 }
