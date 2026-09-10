@@ -9,7 +9,7 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Store from "./pages/Store";
 import LegalPage from "./pages/LegalPage";
-import Settings from "./pages/Settings";
+import StoreManager from "./pages/StoreManager";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 
 const queryClient = new QueryClient();
@@ -49,7 +49,7 @@ const App = () => (
             <Route path="/login" element={<Auth />} />
             <Route path="/auth" element={<Navigate to="/login" replace />} />
             <Route path="/admin" element={<AdminRoute><BackendDashboard /></AdminRoute>} />
-            <Route path="/admin/settings" element={<AdminRoute><Settings /></AdminRoute>} />
+            <Route path="/admin/settings" element={<AdminRoute><StoreManager /></AdminRoute>} />
             <Route path="/privacy-policy" element={<LegalPage />} />
             <Route path="/terms-and-conditions" element={<LegalPage />} />
             <Route path="/shipping-policy" element={<LegalPage />} />
