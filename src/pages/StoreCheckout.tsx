@@ -56,19 +56,13 @@ const StoreCheckout = () => {
   const subtotal = hydratedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = subtotal === 0 || subtotal >= Number(settings.freeShippingAbove || 0) ? 0 : Number(settings.shippingFee || 0);
   const total = subtotal + shipping;
-
   const upiPaymentUri = useMemo(() => {
     const pa = String(settings.upiId || "").trim();
     if (!pa || total <= 0) return "";
     const payee = String(settings.upiPayeeName || settings.storeName || "Urban Delights").trim();
     return `upi://pay?pa=${encodeURIComponent(pa)}&pn=${encodeURIComponent(payee)}&am=${total.toFixed(2)}&cu=INR`;
   }, [settings.upiId, settings.upiPayeeName, settings.storeName, total]);
-
-  const dynamicQrCodeUrl = useMemo(() => {
-    if (!upiPaymentUri) return "";
-    return `https://quickchart.io/qr?size=320&margin=2&ecLevel=M&text=${encodeURIComponent(upiPaymentUri)}`;
-  }, [upiPaymentUri]);
-
+  const dynamicQrCodeUrl = useMemo(() => upiPaymentUri ? `https://quickchart.io/qr?size=320&margin=2&ecLevel=M&text=${encodeURIComponent(upiPaymentUri)}` : "", [upiPaymentUri]);
   const valid = Boolean(form.name.trim() && form.phone.trim() && form.address.trim() && hydratedItems.length > 0 && transactionId.trim());
   const changeQuantity = (key: string, delta: number) => setItems((current) => current.map((item) => item.key === key ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item));
   const removeItem = (key: string) => setItems((current) => current.filter((item) => item.key !== key));
@@ -100,7 +94,7 @@ const StoreCheckout = () => {
   );
 
   if (success) return (
-    <div className="flex min-h-screen flex-col bg-[#f7f8f4] text-slate-900">
+    <div className="flex h-[100dvh] min-h-0 max-h-[100dvh] flex-col overflow-hidden bg-[#f7f8f4] text-slate-900">
       <header className="shrink-0 mx-auto flex w-full max-w-[1680px] items-center justify-between px-5 py-3 sm:px-8"><CheckoutBrand /><button type="button" onClick={goHome} aria-label="Return to store" className="flex h-11 w-11 items-center justify-center rounded-xl border border-stone-200 bg-white text-slate-800 shadow-sm transition hover:bg-stone-50"><History className="h-5 w-5" /></button></header>
       <main className="flex min-h-0 flex-1 items-center"><div className="mx-auto w-full max-w-3xl px-4 py-12"><Card className="w-full rounded-2xl border-stone-200 p-8 text-center shadow-sm"><CheckCircle2 className="mx-auto h-16 w-16 text-emerald-600" /><h1 className="mt-5 font-serif text-3xl font-bold text-[#2f6b45]">Order Placed Successfully</h1><p className="mt-2 text-stone-500">Your order has been received successfully.</p><div className="mt-5 rounded-xl bg-stone-100 p-4 text-sm">Order ID: <span className="font-mono font-bold">{success.slice(0, 8).toUpperCase()}</span><div className="mt-1">Total: <span className="font-bold">₹{total.toFixed(0)}</span></div></div><div className="mt-6 flex flex-wrap justify-center gap-3"><Button onClick={goHome}><Home className="h-4 w-4" />Back to Home</Button><Button variant="outline" onClick={() => navigate("/?preview=1#products")}><ShoppingBag className="h-4 w-4" />Continue Shopping</Button></div></Card></div></main>
       <Footer />
@@ -108,14 +102,14 @@ const StoreCheckout = () => {
   );
 
   if (!hydratedItems.length) return (
-    <div className="flex min-h-screen flex-col bg-[#f7f8f4] text-slate-900">
+    <div className="flex h-[100dvh] min-h-0 max-h-[100dvh] flex-col overflow-hidden bg-[#f7f8f4] text-slate-900">
       <header className="shrink-0 mx-auto flex w-full max-w-[1680px] items-center justify-between px-5 py-3 sm:px-8"><CheckoutBrand /><button type="button" onClick={goHome} aria-label="Return to store" className="flex h-11 w-11 items-center justify-center rounded-xl border border-stone-200 bg-white text-slate-800 shadow-sm transition hover:bg-stone-50"><History className="h-5 w-5" /></button></header>
       <main className="flex min-h-0 flex-1 items-center"><div className="mx-auto max-w-3xl px-4 py-10"><Card className="rounded-2xl border-stone-200 p-10 text-center shadow-sm"><ShoppingBag className="mx-auto h-14 w-14 text-stone-300" /><h2 className="mt-4 font-serif text-2xl font-bold">Your basket is empty</h2><p className="mt-2 text-stone-500">Add products before opening checkout.</p><Button className="mt-6 bg-[#2f6b45] hover:bg-[#255536]" onClick={() => navigate("/?preview=1#products")}><Home className="h-4 w-4" />Back to Store</Button></Card></div></main><Footer />
     </div>
   );
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f7f8f4] text-slate-900">
+    <div className="flex h-[100dvh] min-h-0 max-h-[100dvh] flex-col overflow-hidden bg-[#f7f8f4] text-slate-900">
       <header className="shrink-0 mx-auto flex w-full max-w-[1680px] items-center justify-between px-5 py-3 sm:px-8">
         <CheckoutBrand />
         <div className="flex items-center gap-3"><h1 className="font-serif text-3xl font-bold tracking-tight text-[#2f6b45] sm:text-4xl">Checkout</h1><button type="button" onClick={goHome} aria-label="Return to store" className="flex h-11 w-11 items-center justify-center rounded-xl border border-stone-200 bg-white text-slate-800 shadow-sm transition hover:bg-stone-50"><History className="h-5 w-5" /></button></div>
