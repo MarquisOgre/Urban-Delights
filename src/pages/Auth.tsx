@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Home } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
@@ -17,10 +17,6 @@ const Auth: React.FC = () => {
   const navigate = useNavigate();
   const { session } = useAuth();
 
-  useEffect(() => {
-    if (session) navigate('/?preview=1', { replace: true });
-  }, [session, navigate]);
-
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -28,7 +24,9 @@ const Auth: React.FC = () => {
     setLoading(false);
     if (error) {
       toast({ title: 'Sign in failed', description: error.message, variant: 'destructive' });
+      return;
     }
+    navigate('/admin', { replace: true });
   };
 
   return (
@@ -49,6 +47,7 @@ const Auth: React.FC = () => {
           <CardHeader className="space-y-2 text-center">
             <img src="/logo.png" alt="Urban Delights" className="mx-auto h-14 w-auto object-contain" />
             <CardTitle className="text-lg">Admin Sign In</CardTitle>
+            {session && <p className="text-xs text-stone-500">You are currently signed in. Sign in again to switch accounts.</p>}
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSignIn} className="space-y-3">
