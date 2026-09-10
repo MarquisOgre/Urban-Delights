@@ -1,14 +1,18 @@
 /* Urban Delights checkout — sleek single-viewport desktop layout. */
 @media (min-width: 1024px) {
+  html:has(body:has(button[aria-label="Return to store"])),
   body:has(button[aria-label="Return to store"]) {
+    margin: 0 !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
     overflow: hidden !important;
-    height: 100vh !important;
     background: #f7f8f4;
   }
 
   body:has(button[aria-label="Return to store"]) > div {
-    height: 100vh !important;
-    min-height: 0 !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
     overflow: hidden !important;
     display: flex !important;
     flex-direction: column !important;
@@ -19,6 +23,8 @@
     flex: 0 0 50px !important;
     height: 50px !important;
     min-height: 50px !important;
+    max-height: 50px !important;
+    box-sizing: border-box !important;
     padding: 0 4.8vw !important;
     border-bottom: 1px solid #e5e8e2 !important;
     background: rgba(250,251,248,.98) !important;
@@ -49,12 +55,13 @@
     box-shadow: none !important;
   }
 
-  /* Main consumes every remaining pixel between header and footer. */
+  /* Main takes only the space between the fixed-height header and footer. */
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] {
-    flex: 1 1 auto !important;
+    flex: 1 1 0 !important;
     box-sizing: border-box !important;
     height: auto !important;
     min-height: 0 !important;
+    max-height: none !important;
     max-width: 1660px !important;
     width: 100% !important;
     margin: 0 auto !important;
@@ -156,11 +163,14 @@
     border-radius: 9px !important;
   }
 
-  /* Footer is compact but always visible. */
+  /* Footer is the final flex item and is pinned to the viewport bottom. */
   body:has(button[aria-label="Return to store"]) footer {
     flex: 0 0 32px !important;
     height: 32px !important;
     min-height: 32px !important;
+    max-height: 32px !important;
+    box-sizing: border-box !important;
+    margin-top: auto !important;
     border-top: 1px solid rgba(255,255,255,.25) !important;
     background: linear-gradient(to right, #ef4444, #f97316, #facc15) !important;
     display: flex !important;
