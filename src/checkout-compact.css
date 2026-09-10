@@ -10,12 +10,15 @@
     height: 100vh !important;
     min-height: 0 !important;
     overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
-  /* Slim header. */
+  /* Slim, premium header. */
   body:has(button[aria-label="Return to store"]) header {
-    height: 52px !important;
-    min-height: 52px !important;
+    flex: 0 0 50px !important;
+    height: 50px !important;
+    min-height: 50px !important;
     padding: 0 4.8vw !important;
     border-bottom: 1px solid #e5e8e2 !important;
     background: rgba(250,251,248,.98) !important;
@@ -23,15 +26,15 @@
 
   body:has(button[aria-label="Return to store"]) header button[aria-label="Urban Delights home"] { gap: 0 !important; }
   body:has(button[aria-label="Return to store"]) header button[aria-label="Urban Delights home"] img {
-    height: 30px !important;
-    max-height: 30px !important;
+    height: 29px !important;
+    max-height: 29px !important;
     width: auto !important;
   }
 
   body:has(button[aria-label="Return to store"]) header h1 {
     margin: 0 !important;
     font-family: Georgia, "Times New Roman", serif !important;
-    font-size: 28px !important;
+    font-size: 27px !important;
     line-height: 1 !important;
     font-weight: 700 !important;
     color: #2f6b45 !important;
@@ -39,98 +42,98 @@
   }
 
   body:has(button[aria-label="Return to store"]) header button[aria-label="Return to store"] {
-    height: 34px !important;
-    width: 34px !important;
+    height: 33px !important;
+    width: 33px !important;
     border-radius: 9px !important;
     background: #fafbf8 !important;
     box-shadow: none !important;
   }
 
-  /* Main fills the exact space between the slim header and footer. */
+  /* Main consumes every remaining pixel between header and footer. */
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] {
+    flex: 1 1 auto !important;
     box-sizing: border-box !important;
-    height: calc(100vh - 92px) !important;
+    height: auto !important;
     min-height: 0 !important;
     max-width: 1660px !important;
+    width: 100% !important;
     margin: 0 auto !important;
-    padding: 8px 4.8vw 8px !important;
+    padding: 7px 4.8vw 7px !important;
     overflow: hidden !important;
   }
 
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form {
     height: 100% !important;
     min-height: 0 !important;
-    gap: 26px !important;
+    gap: 24px !important;
     align-items: stretch !important;
   }
 
-  /* Equal-height, compact cards. */
+  /* Equal-height cards with refined spacing. */
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div {
     height: 100% !important;
     min-height: 0 !important;
-    border-radius: 15px !important;
+    border-radius: 14px !important;
     border: 1px solid #e1e5df !important;
     box-shadow: 0 1px 3px rgba(20,30,20,.035) !important;
     overflow: hidden !important;
   }
 
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div > div:first-child {
-    padding: 17px 26px 7px !important;
+    padding: 15px 25px 6px !important;
   }
 
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div > div:first-child h2 {
     font-family: Georgia, "Times New Roman", serif !important;
-    font-size: 20px !important;
+    font-size: 19px !important;
     line-height: 1.05 !important;
   }
 
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div > div:nth-child(2) {
-    padding: 0 26px 14px !important;
+    padding: 0 25px 12px !important;
   }
 
-  /* Compact form controls. */
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] input {
-    height: 42px !important;
-    min-height: 42px !important;
-    border-radius: 10px !important;
-    font-size: 13.5px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    border-radius: 9px !important;
+    font-size: 13px !important;
   }
 
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] textarea {
-    min-height: 68px !important;
-    height: 68px !important;
-    border-radius: 10px !important;
-    font-size: 13.5px !important;
+    min-height: 64px !important;
+    height: 64px !important;
+    border-radius: 9px !important;
+    font-size: 13px !important;
   }
 
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] label {
-    font-size: 12.5px !important;
+    font-size: 12px !important;
     line-height: 1.05 !important;
   }
 
-  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] .space-y-5 { gap: 8px !important; }
-  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:first-child .space-y-5 { gap: 7px !important; }
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] .space-y-5 { gap: 7px !important; }
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:first-child .space-y-5 { gap: 6px !important; }
 
-  /* Smaller order row. */
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:first-child img {
-    height: 40px !important;
-    width: 40px !important;
+    height: 38px !important;
+    width: 38px !important;
     border-radius: 6px !important;
   }
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:first-child .grid-cols-\[52px_1fr_auto\] {
-    grid-template-columns: 40px 1fr auto !important;
-    gap: 9px !important;
+    grid-template-columns: 38px 1fr auto !important;
+    gap: 8px !important;
   }
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:first-child .mt-6 {
-    margin-top: 8px !important;
-    padding-top: 8px !important;
+    margin-top: 7px !important;
+    padding-top: 7px !important;
   }
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:first-child .mt-4 {
-    margin-top: 6px !important;
-    padding-top: 6px !important;
+    margin-top: 5px !important;
+    padding-top: 5px !important;
   }
 
-  /* Payment card: compact QR panel + transaction field + button. */
+  /* Payment card: fit the entire payment flow without wasted vertical space. */
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) [class~="min-h-[390px]"] {
     min-height: 0 !important;
     height: auto !important;
@@ -138,25 +141,26 @@
     padding-top: 0 !important;
   }
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) [class~="h-48"] {
-    height: 128px !important;
-    width: 128px !important;
-    margin-top: 4px !important;
+    height: 120px !important;
+    width: 120px !important;
+    margin-top: 3px !important;
   }
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) > div:nth-child(2) {
     margin-top: 0 !important;
-    padding: 0 26px 8px !important;
+    padding: 0 25px 6px !important;
     border-top: 0 !important;
   }
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) button[type="submit"] {
-    height: 40px !important;
-    min-height: 40px !important;
-    border-radius: 10px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    border-radius: 9px !important;
   }
 
-  /* Footer stays visible in the same viewport. */
+  /* Footer is compact but always visible. */
   body:has(button[aria-label="Return to store"]) footer {
-    height: 40px !important;
-    min-height: 40px !important;
+    flex: 0 0 32px !important;
+    height: 32px !important;
+    min-height: 32px !important;
     border-top: 1px solid rgba(255,255,255,.25) !important;
     background: linear-gradient(to right, #ef4444, #f97316, #facc15) !important;
     display: flex !important;
@@ -171,7 +175,7 @@
     background: transparent !important;
     color: #fff !important;
     font-weight: 700 !important;
-    font-size: 11px !important;
+    font-size: 10px !important;
     line-height: 1 !important;
     text-align: center !important;
   }
