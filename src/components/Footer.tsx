@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { DEFAULT_STORE_SETTINGS, useStoreSettings } from "@/hooks/useStoreSettings";
 
-interface FooterProps { showTopButton?: boolean; }
+interface FooterProps { showTopButton?: boolean; showNavigation?: boolean; }
 
-const Footer: React.FC<FooterProps> = ({ showTopButton = false }) => {
+const Footer: React.FC<FooterProps> = ({ showTopButton = false, showNavigation = true }) => {
   const [visible, setVisible] = useState(false);
   const { data: settings = DEFAULT_STORE_SETTINGS } = useStoreSettings();
 
@@ -22,7 +22,7 @@ const Footer: React.FC<FooterProps> = ({ showTopButton = false }) => {
 
   return <>
     <footer className="bg-white text-stone-900">
-      {settings.showFooterLinks && links.length > 0 && <nav aria-label="Footer navigation" className="container mx-auto flex w-full flex-wrap items-center justify-center gap-x-8 gap-y-3 px-6 py-8 text-center text-sm sm:gap-x-10 sm:px-8 sm:py-10 sm:text-base">{links.map((link) => <Link key={`${link.path}-${link.label}`} to={link.path} className="shrink-0 font-semibold text-stone-700 transition-colors duration-200 hover:text-orange-700 hover:underline" onClick={backToTop}>{link.label}</Link>)}</nav>}
+      {showNavigation && settings.showFooterLinks && links.length > 0 && <nav aria-label="Footer navigation" className="container mx-auto flex w-full flex-wrap items-center justify-center gap-x-8 gap-y-3 px-6 py-8 text-center text-sm sm:gap-x-10 sm:px-8 sm:py-10 sm:text-base">{links.map((link) => <Link key={`${link.path}-${link.label}`} to={link.path} className="shrink-0 font-semibold text-stone-700 transition-colors duration-200 hover:text-orange-700 hover:underline" onClick={backToTop}>{link.label}</Link>)}</nav>}
       <div className="border-t border-white/20 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-400 py-3 text-center text-xs font-bold text-white sm:text-sm"><div className="container mx-auto px-4"><p>© {new Date().getFullYear()} {settings.footerCopyright || settings.storeName}.</p></div></div>
     </footer>
     {showTopButton && visible && <button onClick={backToTop} aria-label="Back to top" className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-orange-500 text-lg font-bold text-white shadow-xl transition-all duration-200 hover:-translate-y-1 hover:bg-orange-600 hover:shadow-2xl">↑</button>}
