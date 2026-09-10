@@ -6,7 +6,7 @@ export interface StoreBenefit { icon: "truck" | "shield" | "leaf" | "cart"; titl
 export interface StoreWhyUs { icon: "shield" | "sparkles" | "check" | "cart"; title: string; description: string; theme: "orange" | "green" | "gold" | "rose"; }
 export interface StoreProductMedia { name: string; imageUrl: string; }
 export interface StoreSettings {
-  storeName: string; businessName: string; phone: string; email: string; address: string; gstNumber: string; upiId: string; upiPayeeName: string;
+  logoUrl: string; storeName: string; businessName: string; phone: string; email: string; address: string; gstNumber: string; upiId: string; upiPayeeName: string;
   freeShippingAbove: number; shippingFee: number; heroEyebrow: string; heroTitle: string; heroTitleAccent: string; heroDescription: string; heroImageUrl: string;
   heroPrimaryButtonText: string; heroSecondaryButtonText: string; showHero: boolean; showBenefits: boolean; showCategories: boolean; showFeatured: boolean; showWhyUs: boolean;
   showFooterLinks: boolean; showAdminLogin: boolean; showBasket: boolean; footerCopyright: string; footerLinks: { label: string; path: string; enabled: boolean }[];
@@ -26,7 +26,7 @@ export const DEFAULT_PRODUCT_MEDIA: StoreProductMedia[] = [
 ];
 
 export const DEFAULT_STORE_SETTINGS: StoreSettings = {
-  storeName: "Urban Delights", businessName: "Urban Delights", phone: "", email: "", address: "", gstNumber: "", upiId: "", upiPayeeName: "Urban Delights",
+  logoUrl: "/logo.png", storeName: "Urban Delights", businessName: "Urban Delights", phone: "", email: "", address: "", gstNumber: "", upiId: "", upiPayeeName: "Urban Delights",
   freeShippingAbove: 999, shippingFee: 60, heroEyebrow: "SMALL-BATCH • SOUTH INDIAN FLAVOURS", heroTitle: "The taste of", heroTitleAccent: "home, ground fresh.",
   heroDescription: "Authentic podis and masalas made in small batches with carefully selected ingredients — full of aroma, warmth and the flavours you grew up with.", heroImageUrl: "/hero.png",
   heroPrimaryButtonText: "Shop our blends", heroSecondaryButtonText: "Why Urban Delights?", showHero: true, showBenefits: true, showCategories: true, showFeatured: true, showWhyUs: true,
@@ -59,6 +59,7 @@ const mapSettings = (data: any): StoreSettings => {
   const rawProductMedia = Array.isArray(raw.productMedia) ? raw.productMedia : DEFAULT_PRODUCT_MEDIA;
   return {
     ...DEFAULT_STORE_SETTINGS, ...raw,
+    logoUrl: typeof raw.logoUrl === "string" && raw.logoUrl.trim() ? raw.logoUrl : DEFAULT_STORE_SETTINGS.logoUrl,
     productMedia: rawProductMedia.map((item: any, index: number) => ({ ...DEFAULT_PRODUCT_MEDIA[index % DEFAULT_PRODUCT_MEDIA.length], ...item })).filter((item: any) => item?.name),
     footerLinks: Array.isArray(raw.footerLinks) ? raw.footerLinks : DEFAULT_STORE_SETTINGS.footerLinks,
     featuredProductNames: Array.isArray(raw.featuredProductNames) ? raw.featuredProductNames : DEFAULT_STORE_SETTINGS.featuredProductNames,
