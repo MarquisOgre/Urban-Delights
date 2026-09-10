@@ -16,20 +16,20 @@
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div > div:nth-child(2) { padding: 0 25px 12px !important; }
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] input { height: 40px !important; min-height: 40px !important; border-radius: 9px !important; font-size: 13px !important; }
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] textarea { min-height: 64px !important; height: 64px !important; border-radius: 9px !important; font-size: 13px !important; }
-  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px"] label { font-size: 12px !important; line-height: 1.05 !important; }
-  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px"] .space-y-5 { gap: 7px !important; }
-  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px"] > form > div:first-child .space-y-5 { gap: 6px !important; }
-  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px"] > form > div:first-child img { height: 38px !important; width: 38px !important; border-radius: 6px !important; }
-  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px"] > form > div:first-child .grid-cols-\[52px_1fr_auto\] { grid-template-columns: 38px 1fr auto !important; gap: 8px !important; }
-  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px"] > form > div:first-child .mt-6 { margin-top: 7px !important; padding-top: 7px !important; }
-  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px"] > form > div:first-child .mt-4 { margin-top: 5px !important; padding-top: 5px !important; }
-  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px"] > form > div:nth-child(3) { position: relative !important; }
-  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px"] > form > div:nth-child(3) [class~="min-h-[390px]"] { min-height: 0 !important; height: auto !important; justify-content: flex-start !important; padding-top: 0 !important; }
-  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px"] > form > div:nth-child(3) [class~="h-48"] { height: 120px !important; width: 120px !important; margin-top: 3px !important; }
-  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px"] > form > div:nth-child(3) > div:nth-child(2) { margin-top: 0 !important; padding: 0 25px 12px !important; border-top: 0 !important; display: block !important; }
-  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px"] > form > div:nth-child(3) button[type="submit"] { position: static !important; display: block !important; width: 100% !important; height: 38px !important; min-height: 38px !important; margin: 12px 0 0 !important; border-radius: 9px !important; }
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] label { font-size: 12px !important; line-height: 1.05 !important; }
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] .space-y-5 { gap: 7px !important; }
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:first-child .space-y-5 { gap: 6px !important; }
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:first-child img { height: 38px !important; width: 38px !important; border-radius: 6px !important; }
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:first-child .grid-cols-\[52px_1fr_auto\] { grid-template-columns: 38px 1fr auto !important; gap: 8px !important; }
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:first-child .mt-6 { margin-top: 7px !important; padding-top: 7px !important; }
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:first-child .mt-4 { margin-top: 5px !important; padding-top: 5px !important; }
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) { position: relative !important; }
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) [class~="min-h-[390px]"] { min-height: 0 !important; height: auto !important; justify-content: flex-start !important; padding-top: 0 !important; }
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) [class~="h-48"] { height: 120px !important; width: 120px !important; margin-top: 3px !important; }
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) > div:nth-child(2) { margin-top: 0 !important; padding: 0 25px 12px !important; border-top: 0 !important; display: block !important; }
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) button[type="submit"] { position: static !important; display: block !important; width: 100% !important; height: 38px !important; min-height: 38px !important; margin: 12px 0 0 !important; border-radius: 9px !important; }
   body:has(button[aria-label="Return to store"]) footer { flex: 0 0 32px !important; height: 32px !important; min-height: 32px !important; margin-top: auto !important; border-top: 1px solid rgba(255,255,255,.25) !important; background: linear-gradient(to right, #ef4444, #f97316, #facc15) !important; display: flex !important; align-items: center !important; justify-content: center !important; overflow: hidden !important; }
   body:has(button[aria-label="Return to store"]) footer nav { display: none !important; }
   body:has(button[aria-label="Return to store"]) footer > div:last-child { width: 100% !important; padding: 0 !important; background: transparent !important; color: #fff !important; font-weight: 700 !important; font-size: 10px !important; line-height: 1 !important; text-align: center !important; }
 }
-@media (max-width: 1023px) { body:has(button[aria-label="Return to store"]) { overflow-x: hidden; } body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px"] > form { gap: 14px !important; } }
+@media (max-width: 1023px) { body:has(button[aria-label="Return to store"]) { overflow-x: hidden; } body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form { gap: 14px !important; } }
