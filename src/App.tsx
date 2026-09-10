@@ -16,11 +16,7 @@ const queryClient = new QueryClient();
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-  }, [pathname]);
+  useEffect(() => { window.scrollTo({ top: 0, left: 0, behavior: "auto" }); document.documentElement.scrollTop = 0; document.body.scrollTop = 0; }, [pathname]);
   return null;
 };
 
@@ -32,36 +28,29 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 
 const HomeRoute = () => {
   const { session, loading } = useAuth();
+  const location = useLocation();
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  return session ? <Navigate to="/admin" replace /> : <Store />;
+  const preview = new URLSearchParams(location.search).get("preview") === "1";
+  return session && !preview ? <Navigate to="/admin" replace /> : <Store />;
 };
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AuthProvider>
-        <BrowserRouter>
-          <ScrollToTop />
-          <Routes>
-            <Route path="/" element={<HomeRoute />} />
-            <Route path="/login" element={<Auth />} />
-            <Route path="/auth" element={<Navigate to="/login" replace />} />
-            <Route path="/admin" element={<AdminRoute><BackendDashboard /></AdminRoute>} />
-            <Route path="/admin/settings" element={<AdminRoute><StoreManager /></AdminRoute>} />
-            <Route path="/privacy-policy" element={<LegalPage />} />
-            <Route path="/terms-and-conditions" element={<LegalPage />} />
-            <Route path="/shipping-policy" element={<LegalPage />} />
-            <Route path="/returns-refunds" element={<LegalPage />} />
-            <Route path="/about-us" element={<LegalPage />} />
-            <Route path="/contact-us" element={<LegalPage />} />
-            <Route path="/faq" element={<LegalPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </TooltipProvider>
+    <TooltipProvider><Toaster /><Sonner /><AuthProvider><BrowserRouter><ScrollToTop /><Routes>
+      <Route path="/" element={<HomeRoute />} />
+      <Route path="/login" element={<Auth />} />
+      <Route path="/auth" element={<Navigate to="/login" replace />} />
+      <Route path="/admin" element={<AdminRoute><BackendDashboard /></AdminRoute>} />
+      <Route path="/admin/settings" element={<AdminRoute><StoreManager /></AdminRoute>} />
+      <Route path="/privacy-policy" element={<LegalPage />} />
+      <Route path="/terms-and-conditions" element={<LegalPage />} />
+      <Route path="/shipping-policy" element={<LegalPage />} />
+      <Route path="/returns-refunds" element={<LegalPage />} />
+      <Route path="/about-us" element={<LegalPage />} />
+      <Route path="/contact-us" element={<LegalPage />} />
+      <Route path="/faq" element={<LegalPage />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes></BrowserRouter></AuthProvider></TooltipProvider>
   </QueryClientProvider>
 );
 
