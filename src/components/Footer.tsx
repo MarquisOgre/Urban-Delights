@@ -37,13 +37,13 @@ const Footer: React.FC<FooterProps> = ({ showTopButton = false }) => {
         <div className="container mx-auto px-6 py-8 sm:px-8 sm:py-10">
           <nav
             aria-label="Footer navigation"
-            className="flex flex-wrap items-center gap-x-8 gap-y-4 pr-16 text-sm sm:gap-x-9 sm:text-base"
+            className="flex w-full flex-nowrap items-center gap-x-8 overflow-x-auto whitespace-nowrap pr-20 text-sm sm:gap-x-9 sm:text-base"
           >
             {footerLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
-                className="text-stone-600 transition-colors duration-200 hover:text-orange-600"
+                className="shrink-0 text-stone-600 transition-colors duration-200 hover:text-orange-600"
                 onClick={backToTop}
               >
                 {link.label}
