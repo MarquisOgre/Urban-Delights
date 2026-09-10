@@ -12,6 +12,7 @@ import StoreCheckout from "./pages/StoreCheckout";
 import LegalPage from "./pages/LegalPage";
 import StoreManager from "./pages/StoreManager";
 import StoreProductImages from "./pages/StoreProductImages";
+import Header from "./components/Header";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 
 const queryClient = new QueryClient();
@@ -38,8 +39,8 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   return session ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
-const AdminStoreFooter = () => <footer className="mt-auto h-14 border-t border-white/25 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-400 text-center text-xs font-bold text-white sm:text-sm"><div className="flex h-full items-center justify-center px-4">© {new Date().getFullYear()} Crafted with ❤️ by Dexorzo Creations..</div></footer>;
-const AdminStorePage = ({ children }: { children: React.ReactNode }) => <div className="flex min-h-screen flex-col"><div className="flex-1">{children}</div><AdminStoreFooter /></div>;
+const AdminStoreFooter = () => <footer className="h-14 shrink-0 border-t border-white/25 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-400 text-center text-xs font-bold text-white sm:text-sm"><div className="flex h-full items-center justify-center px-4">© {new Date().getFullYear()} Crafted with ❤️ by Dexorzo Creations..</div></footer>;
+const AdminStorePage = ({ children }: { children: React.ReactNode }) => <div className="flex min-h-screen flex-col bg-slate-50"><Header /><div className="min-h-0 flex-1">{children}</div><AdminStoreFooter /></div>;
 const HomeRoute = () => <Store />;
 
 const App = () => (
