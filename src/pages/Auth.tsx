@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import Footer from '@/components/Footer';
 
 const Auth: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -31,47 +32,50 @@ const Auth: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-orange-50 px-4">
-      <Button
-        type="button"
-        variant="outline"
-        onClick={() => navigate('/?preview=1')}
-        className="absolute left-4 top-4 gap-2 border-orange-200 bg-white/90 text-orange-900 hover:bg-white sm:left-6 sm:top-6"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        <Home className="h-4 w-4" />
-        Home
-      </Button>
+    <div className="flex min-h-screen flex-col bg-orange-50 text-stone-900">
+      <main className="relative flex flex-1 items-center justify-center px-4 py-16">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => navigate('/?preview=1')}
+          className="absolute left-4 top-4 gap-2 border-orange-200 bg-white/90 text-orange-900 hover:bg-white sm:left-6 sm:top-6"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <Home className="h-4 w-4" />
+          Home
+        </Button>
 
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center space-y-2">
-          <img src="/logo.png" alt="Urban Delights" className="h-12 w-auto mx-auto" />
-          <CardTitle className="text-lg">Admin Sign In</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSignIn} className="space-y-3">
-            <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-            />
-            <Input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-            />
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign In'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+        <Card className="w-full max-w-sm rounded-2xl border-orange-100 shadow-lg">
+          <CardHeader className="space-y-2 text-center">
+            <img src="/logo.png" alt="Urban Delights" className="mx-auto h-14 w-auto object-contain" />
+            <CardTitle className="text-lg">Admin Sign In</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSignIn} className="space-y-3">
+              <Input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
+              <Input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+              />
+              <Button type="submit" className="w-full bg-stone-900 hover:bg-orange-700" disabled={loading}>
+                {loading ? 'Signing in...' : 'Sign In'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </main>
+      <Footer />
     </div>
   );
 };
