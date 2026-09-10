@@ -14,7 +14,6 @@
     overflow: hidden !important;
   }
 
-  /* Slim, premium checkout header. */
   body:has(button[aria-label="Return to store"]) header {
     height: 58px !important;
     min-height: 58px !important;
@@ -69,7 +68,6 @@
     align-items: stretch !important;
   }
 
-  /* Equal-height cards that never extend below the viewport. */
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div {
     height: 100% !important;
     min-height: 0 !important;
@@ -93,7 +91,6 @@
     padding: 0 28px 18px !important;
   }
 
-  /* Compact form controls. */
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] input {
     height: 45px !important;
     min-height: 45px !important;
@@ -121,7 +118,6 @@
     gap: 9px !important;
   }
 
-  /* Smaller order rows. */
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:first-child img {
     height: 44px !important;
     width: 44px !important;
@@ -138,12 +134,11 @@
     padding-top: 11px !important;
   }
 
-  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px"]) > form > div:first-child .mt-4 {
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:first-child .mt-4 {
     margin-top: 8px !important;
     padding-top: 8px !important;
   }
 
-  /* Payment column: fit QR, transaction ID and Place Order comfortably. */
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) [class~="min-h-[390px]"] {
     min-height: 0 !important;
     height: auto !important;
@@ -169,7 +164,6 @@
     border-radius: 10px !important;
   }
 
-  /* Footer is always visible inside the same viewport. */
   body:has(button[aria-label="Return to store"]) footer {
     height: 56px !important;
     min-height: 56px !important;
@@ -197,7 +191,6 @@
 }
 
 @media (max-width: 1023px) {
-  /* Mobile/tablet remains naturally scrollable and responsive. */
   body:has(button[aria-label="Return to store"]) {
     overflow-x: hidden;
   }
