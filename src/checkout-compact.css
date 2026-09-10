@@ -1,21 +1,34 @@
 /* Urban Delights checkout — sleek, compact, responsive three-column layout. */
 @media (min-width: 1024px) {
   body:has(button[aria-label="Return to store"]) {
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     background: #f7f8f4;
   }
 
   body:has(button[aria-label="Return to store"]) > div {
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
+    height: auto;
+    overflow: visible;
   }
 
+  /* Match the compact height used by the other site headers. */
   body:has(button[aria-label="Return to store"]) header {
-    height: 80px !important;
-    min-height: 80px !important;
-    padding: 0 4.8vw 8px !important;
+    height: 72px !important;
+    min-height: 72px !important;
+    padding: 0 4.8vw !important;
     border-bottom: 1px solid #e6e8e2 !important;
-    background: rgba(250,251,248,.96) !important;
+    background: rgba(250,251,248,.98) !important;
+  }
+
+  body:has(button[aria-label="Return to store"]) header button[aria-label="Urban Delights home"] {
+    gap: 0 !important;
+  }
+
+  body:has(button[aria-label="Return to store"]) header button[aria-label="Urban Delights home"] img {
+    height: 40px !important;
+    max-height: 40px !important;
+    width: auto !important;
   }
 
   body:has(button[aria-label="Return to store"]) header button[aria-label="Urban Delights home"] > span {
@@ -37,34 +50,35 @@
   }
 
   body:has(button[aria-label="Return to store"]) header button[aria-label="Return to store"] {
-    height: 48px !important;
-    width: 48px !important;
-    border-radius: 13px !important;
+    height: 44px !important;
+    width: 44px !important;
+    border-radius: 12px !important;
     background: #fafbf8 !important;
     box-shadow: none !important;
   }
 
+  /* Give the three cards breathing room below the header and enough room to show all content. */
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] {
-    height: calc(100vh - 136px) !important;
+    height: auto !important;
     max-width: 1660px !important;
-    padding: 0 4.8vw 10px !important;
+    padding: 20px 4.8vw 32px !important;
     margin: 0 auto !important;
   }
 
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form {
-    height: calc(100% - 84px) !important;
+    height: auto !important;
     gap: 28px !important;
     padding-bottom: 0 !important;
     align-items: stretch !important;
   }
 
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div {
-    min-height: 0 !important;
-    height: 100% !important;
+    min-height: 555px !important;
+    height: auto !important;
     border-radius: 16px !important;
     border: 1px solid #e2e5df !important;
     box-shadow: 0 1px 2px rgba(20,30,20,.025) !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
 
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > div:first-child {
