@@ -1,0 +1,149 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
+export interface StoreCategory {
+  title: string;
+  subtitle: string;
+  theme: "orange" | "green" | "gold" | "rose" | "plum";
+  imageUrl: string;
+  productNames: string[];
+}
+
+export interface StoreBenefit {
+  icon: "truck" | "shield" | "leaf" | "cart";
+  title: string;
+  subtitle: string;
+}
+
+export interface StoreWhyUs {
+  icon: "shield" | "sparkles" | "check" | "cart";
+  title: string;
+  description: string;
+  theme: "orange" | "green" | "gold" | "rose";
+}
+
+export interface StoreSettings {
+  storeName: string;
+  businessName: string;
+  phone: string;
+  email: string;
+  address: string;
+  gstNumber: string;
+  upiId: string;
+  upiPayeeName: string;
+  freeShippingAbove: number;
+  shippingFee: number;
+  heroEyebrow: string;
+  heroTitle: string;
+  heroTitleAccent: string;
+  heroDescription: string;
+  heroImageUrl: string;
+  heroPrimaryButtonText: string;
+  heroSecondaryButtonText: string;
+  showHero: boolean;
+  showBenefits: boolean;
+  showCategories: boolean;
+  showFeatured: boolean;
+  showWhyUs: boolean;
+  showFooterLinks: boolean;
+  showAdminLogin: boolean;
+  showBasket: boolean;
+  footerCopyright: string;
+  footerLinks: { label: string; path: string; enabled: boolean }[];
+  featuredProductNames: string[];
+  categories: StoreCategory[];
+  benefits: StoreBenefit[];
+  whyUs: StoreWhyUs[];
+}
+
+export const DEFAULT_STORE_SETTINGS: StoreSettings = {
+  storeName: "Urban Delights",
+  businessName: "Urban Delights",
+  phone: "",
+  email: "",
+  address: "",
+  gstNumber: "",
+  upiId: "",
+  upiPayeeName: "Urban Delights",
+  freeShippingAbove: 999,
+  shippingFee: 60,
+  heroEyebrow: "SMALL-BATCH • SOUTH INDIAN FLAVOURS",
+  heroTitle: "The taste of",
+  heroTitleAccent: "home, ground fresh.",
+  heroDescription: "Authentic podis and masalas made in small batches with carefully selected ingredients — full of aroma, warmth and the flavours you grew up with.",
+  heroImageUrl: "/hero.png",
+  heroPrimaryButtonText: "Shop our blends",
+  heroSecondaryButtonText: "Why Urban Delights?",
+  showHero: true,
+  showBenefits: true,
+  showCategories: true,
+  showFeatured: true,
+  showWhyUs: true,
+  showFooterLinks: true,
+  showAdminLogin: true,
+  showBasket: true,
+  footerCopyright: "Crafted with ❤️ by Dexorzo Creations.",
+  footerLinks: [
+    { label: "About Us", path: "/about-us", enabled: true },
+    { label: "Shipping Policy", path: "/shipping-policy", enabled: true },
+    { label: "Returns & Refunds", path: "/returns-refunds", enabled: true },
+    { label: "Terms & Conditions", path: "/terms-and-conditions", enabled: true },
+    { label: "Privacy Policy", path: "/privacy-policy", enabled: true },
+    { label: "FAQs", path: "/faq", enabled: true },
+  ],
+  featuredProductNames: [],
+  categories: [],
+  benefits: [
+    { icon: "truck", title: "Fast Delivery", subtitle: "Across India" },
+    { icon: "shield", title: "Quality Tested", subtitle: "Safe & Reliable" },
+    { icon: "leaf", title: "Thoughtfully Made", subtitle: "Small Batch" },
+    { icon: "cart", title: "Easy Ordering", subtitle: "Simple Checkout" },
+  ],
+  whyUs: [
+    { icon: "shield", title: "Quality You Can Trust", description: "Carefully selected ingredients and balanced recipes.", theme: "green" },
+    { icon: "sparkles", title: "Made for Everyday Meals", description: "Traditional flavour designed for modern kitchens.", theme: "orange" },
+    { icon: "check", title: "Honest Pricing", description: "Great food without unnecessary premium pricing.", theme: "gold" },
+    { icon: "cart", title: "Easy Ordering", description: "Choose your pack, add to basket and checkout.", theme: "rose" },
+  ],
+};
+
+const SETTING_TYPE = "storefront";
+
+const mapSettings = (data: any): StoreSettings => ({
+  ...DEFAULT_STORE_SETTINGS,
+  ...(data?.setting_data ?? {}),
+});
+
+export const useStoreSettings = () =>
+  useQuery({
+    queryKey: [SETTING_TYPE],
+    queryFn: async (): Promise<StoreSettings> => {
+      const { data, error } = await supabase.from("settings" as any).select("setting_data").eq("setting_type", SETTING_TYPE).is("user_id", null).maybeSingle();
+      if (error) throw error;
+      return mapSettings(data);
+    },
+    initialData: DEFAULT_STORE_SETTINGS,
+    staleTime: 30_000,
+  });
+
+export const useSaveStoreSettings = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (settings: StoreSettings) => {
+      const { data: existing, error: readError } = await supabase.from("settings" as any).select("id").eq("setting_type", SETTING_TYPE).is("user_id", null).maybeSingle();
+      if (readError) throw readError;
+      if (existing?.id) {
+        const { error } = await supabase.from("settings" as any).update({ setting_data: settings }).eq("id", existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("settings" as any).insert({ setting_type: SETTING_TYPE, user_id: null, setting_data: settings });
+        if (error) throw error;
+      }
+      return settings;
+    },
+    onSuccess: (settings) => {
+      qc.setQueryData([SETTING_TYPE], settings);
+      qc.invalidateQueries({ queryKey: [SETTING_TYPE] });
+    },
+  });
+};
