@@ -18,39 +18,17 @@ const queryClient = new QueryClient();
 
 class AppErrorBoundary extends Component<{ children: React.ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null };
-
-  static getDerivedStateFromError(error: Error) {
-    return { error };
-  }
-
-  componentDidCatch(error: Error) {
-    console.error("Urban Delights application error:", error);
-  }
-
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  componentDidCatch(error: Error) { console.error("Urban Delights application error:", error); }
   render() {
-    if (this.state.error) {
-      return (
-        <div className="min-h-screen bg-stone-50 px-6 py-16 text-stone-900">
-          <div className="mx-auto max-w-xl rounded-3xl border border-red-200 bg-white p-8 shadow-sm">
-            <h1 className="text-2xl font-black">Urban Delights could not load</h1>
-            <p className="mt-3 text-sm leading-6 text-stone-600">A browser-side error stopped the storefront from rendering. Refresh once to retry.</p>
-            <pre className="mt-5 max-h-48 overflow-auto rounded-xl bg-stone-100 p-4 text-xs text-red-700">{this.state.error.message}</pre>
-            <button onClick={() => window.location.reload()} className="mt-5 rounded-xl bg-stone-900 px-5 py-3 text-sm font-bold text-white">Refresh Store</button>
-          </div>
-        </div>
-      );
-    }
+    if (this.state.error) return <div className="min-h-screen bg-stone-50 px-6 py-16 text-stone-900"><div className="mx-auto max-w-xl rounded-3xl border border-red-200 bg-white p-8 shadow-sm"><h1 className="text-2xl font-black">Urban Delights could not load</h1><p className="mt-3 text-sm leading-6 text-stone-600">A browser-side error stopped the storefront from rendering. Refresh once to retry.</p><pre className="mt-5 max-h-48 overflow-auto rounded-xl bg-stone-100 p-4 text-xs text-red-700">{this.state.error.message}</pre><button onClick={() => window.location.reload()} className="mt-5 rounded-xl bg-stone-900 px-5 py-3 text-sm font-bold text-white">Refresh Store</button></div></div>;
     return this.props.children;
   }
 }
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-  }, [pathname]);
+  useEffect(() => { window.scrollTo({ top: 0, left: 0, behavior: "auto" }); document.documentElement.scrollTop = 0; document.body.scrollTop = 0; }, [pathname]);
   return null;
 };
 
@@ -60,6 +38,8 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   return session ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
+const AdminStoreFooter = () => <footer className="mt-auto h-14 border-t border-white/25 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-400 text-center text-xs font-bold text-white sm:text-sm"><div className="flex h-full items-center justify-center px-4">© {new Date().getFullYear()} Crafted with ❤️ by Dexorzo Creations..</div></footer>;
+const AdminStorePage = ({ children }: { children: React.ReactNode }) => <div className="flex min-h-screen flex-col"><div className="flex-1">{children}</div><AdminStoreFooter /></div>;
 const HomeRoute = () => <Store />;
 
 const App = () => (
@@ -77,8 +57,8 @@ const App = () => (
               <Route path="/auth" element={<Navigate to="/login" replace />} />
               <Route path="/checkout" element={<StoreCheckout />} />
               <Route path="/admin" element={<AdminRoute><BackendDashboard /></AdminRoute>} />
-              <Route path="/admin/settings" element={<AdminRoute><StoreManager /></AdminRoute>} />
-              <Route path="/admin/store-products" element={<AdminRoute><StoreProductImages /></AdminRoute>} />
+              <Route path="/admin/settings" element={<AdminRoute><AdminStorePage><StoreManager /></AdminStorePage></AdminRoute>} />
+              <Route path="/admin/store-products" element={<AdminRoute><AdminStorePage><StoreProductImages /></AdminStorePage></AdminRoute>} />
               <Route path="/privacy-policy" element={<LegalPage />} />
               <Route path="/terms-and-conditions" element={<LegalPage />} />
               <Route path="/shipping-policy" element={<LegalPage />} />
