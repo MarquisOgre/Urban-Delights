@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Home } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,7 @@ const Auth: React.FC = () => {
   const { session } = useAuth();
 
   useEffect(() => {
-    if (session) navigate('/', { replace: true });
+    if (session) navigate('/?preview=1', { replace: true });
   }, [session, navigate]);
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -30,7 +31,18 @@ const Auth: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-orange-50 px-4">
+    <div className="relative min-h-screen flex items-center justify-center bg-orange-50 px-4">
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => navigate('/?preview=1')}
+        className="absolute left-4 top-4 gap-2 border-orange-200 bg-white/90 text-orange-900 hover:bg-white sm:left-6 sm:top-6"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        <Home className="h-4 w-4" />
+        Home
+      </Button>
+
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center space-y-2">
           <img src="/logo.png" alt="Urban Delights" className="h-12 w-auto mx-auto" />
