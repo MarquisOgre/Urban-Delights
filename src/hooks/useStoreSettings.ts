@@ -91,8 +91,11 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
     { label: "Privacy Policy", path: "/privacy-policy", enabled: true },
     { label: "FAQs", path: "/faq", enabled: true },
   ],
-  featuredProductNames: [],
-  categories: [],
+  featuredProductNames: ["Chicken Masala", "Garam Masala", "Sambar Podi", "Palli Podi"],
+  categories: [
+    { title: "Masalas", subtitle: "Aromatic blends for everyday cooking", theme: "orange", imageUrl: "/hero.png", productNames: ["Chicken Masala", "Garam Masala", "Sambar Podi", "Rasam Podi"] },
+    { title: "Podis", subtitle: "Roasted South Indian favourites", theme: "green", imageUrl: "/hero.png", productNames: ["Karvepaku Podi", "Kobari Podi", "Palli Podi", "Putnalu Podi", "Idly Podi"] },
+  ],
   benefits: [
     { icon: "truck", title: "Fast Delivery", subtitle: "Across India" },
     { icon: "shield", title: "Quality Tested", subtitle: "Safe & Reliable" },
@@ -109,22 +112,31 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
 
 const SETTING_TYPE = "storefront";
 
-const mapSettings = (data: any): StoreSettings => ({
-  ...DEFAULT_STORE_SETTINGS,
-  ...(data?.setting_data ?? {}),
-});
+const mapSettings = (data: any): StoreSettings => {
+  const raw = data?.setting_data ?? {};
+  return {
+    ...DEFAULT_STORE_SETTINGS,
+    ...raw,
+    footerLinks: Array.isArray(raw.footerLinks) ? raw.footerLinks : DEFAULT_STORE_SETTINGS.footerLinks,
+    featuredProductNames: Array.isArray(raw.featuredProductNames) ? raw.featuredProductNames : DEFAULT_STORE_SETTINGS.featuredProductNames,
+    categories: Array.isArray(raw.categories) ? raw.categories : DEFAULT_STORE_SETTINGS.categories,
+    benefits: Array.isArray(raw.benefits) ? raw.benefits : DEFAULT_STORE_SETTINGS.benefits,
+    whyUs: Array.isArray(raw.whyUs) ? raw.whyUs : DEFAULT_STORE_SETTINGS.whyUs,
+    freeShippingAbove: Number(raw.freeShippingAbove ?? DEFAULT_STORE_SETTINGS.freeShippingAbove),
+    shippingFee: Number(raw.shippingFee ?? DEFAULT_STORE_SETTINGS.shippingFee),
+  };
+};
 
-export const useStoreSettings = () =>
-  useQuery({
-    queryKey: [SETTING_TYPE],
-    queryFn: async (): Promise<StoreSettings> => {
-      const { data, error } = await supabase.from("settings" as any).select("setting_data").eq("setting_type", SETTING_TYPE).is("user_id", null).maybeSingle();
-      if (error) throw error;
-      return mapSettings(data);
-    },
-    initialData: DEFAULT_STORE_SETTINGS,
-    staleTime: 30_000,
-  });
+export const useStoreSettings = () => useQuery({
+  queryKey: [SETTING_TYPE],
+  queryFn: async (): Promise<StoreSettings> => {
+    const { data, error } = await supabase.from("settings" as any).select("setting_data").eq("setting_type", SETTING_TYPE).is("user_id", null).maybeSingle();
+    if (error) throw error;
+    return mapSettings(data);
+  },
+  initialData: DEFAULT_STORE_SETTINGS,
+  staleTime: 30_000,
+});
 
 export const useSaveStoreSettings = () => {
   const qc = useQueryClient();
