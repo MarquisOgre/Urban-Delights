@@ -12,10 +12,10 @@
     overflow: visible;
   }
 
-  /* Match the compact height used by the other site headers. */
+  /* Extra-compact checkout header. */
   body:has(button[aria-label="Return to store"]) header {
-    height: 72px !important;
-    min-height: 72px !important;
+    height: 58px !important;
+    min-height: 58px !important;
     padding: 0 4.8vw !important;
     border-bottom: 1px solid #e6e8e2 !important;
     background: rgba(250,251,248,.98) !important;
@@ -26,8 +26,8 @@
   }
 
   body:has(button[aria-label="Return to store"]) header button[aria-label="Urban Delights home"] img {
-    height: 40px !important;
-    max-height: 40px !important;
+    height: 34px !important;
+    max-height: 34px !important;
     width: auto !important;
   }
 
@@ -38,7 +38,7 @@
   body:has(button[aria-label="Return to store"]) header h1 {
     margin: 0;
     font-family: Georgia, "Times New Roman", serif !important;
-    font-size: 30px !important;
+    font-size: 27px !important;
     font-style: normal !important;
     font-weight: 700 !important;
     color: #2f6b45 !important;
@@ -50,9 +50,9 @@
   }
 
   body:has(button[aria-label="Return to store"]) header button[aria-label="Return to store"] {
-    height: 44px !important;
-    width: 44px !important;
-    border-radius: 12px !important;
+    height: 38px !important;
+    width: 38px !important;
+    border-radius: 10px !important;
     background: #fafbf8 !important;
     box-shadow: none !important;
   }
@@ -61,7 +61,7 @@
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] {
     height: auto !important;
     max-width: 1660px !important;
-    padding: 20px 4.8vw 32px !important;
+    padding: 16px 4.8vw 32px !important;
     margin: 0 auto !important;
   }
 
