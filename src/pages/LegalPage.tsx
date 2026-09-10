@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
-import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, Clock3, Heart, Leaf, Mail, MapPin, ShieldCheck, Sparkles, Truck, UtensilsCrossed } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, Heart, Mail, ShieldCheck, Sparkles, Truck, UtensilsCrossed } from "lucide-react";
+import { useState, type ElementType } from "react";
 import { Button } from "@/components/ui/button";
 import Footer from "@/components/Footer";
 
@@ -9,7 +9,7 @@ type PageData = {
   eyebrow: string;
   intro: string;
   accent: string;
-  icon: React.ElementType;
+  icon: ElementType;
   sections: [string, string][];
 };
 
