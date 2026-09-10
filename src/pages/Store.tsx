@@ -1,12 +1,13 @@
 import { useMemo, useState } from "react";
+import { ArrowRight, Check, Leaf, Minus, Plus, ShieldCheck, ShoppingBag, Sparkles, Trash2, Truck } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { Minus, Plus, ShoppingBag, Trash2, ArrowRight, Leaf, ShieldCheck, Sparkles } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import Footer from "@/components/Footer";
 import { fetchRecipePricing, type RecipePricing } from "@/services/pricingService";
+import { useStoreSettings, type StoreBenefit, type StoreSettings, type StoreWhyUs } from "@/hooks/useStoreSettings";
 import chickenMasala from "@/assets/chicken-masala.jpg";
 import garamMasala from "@/assets/garam-masala.jpg";
 import sambarPodi from "@/assets/sambar-powder.jpg";
@@ -17,66 +18,115 @@ import palliPodi from "@/assets/palli-podi.jpg";
 import putnaluPodi from "@/assets/putnalu-podi.jpg";
 import idlyPodi from "@/assets/idly-podi.jpg";
 
-type Category = "All" | "Masala" | "Podi";
-interface StoreProduct { id: string; name: string; category: Exclude<Category, "All">; image: string; description: string; aliases: string[]; }
-interface CartItem { key: string; product: StoreProduct; pack: string; price: number; quantity: number; }
+type Product = { name: string; image: string; description: string; aliases: string[] };
+type CartItem = { key: string; product: Product; pack: string; price: number; quantity: number };
 
-const products: StoreProduct[] = [
-  { id: "chicken-masala", name: "Chicken Masala", category: "Masala", image: chickenMasala, description: "A robust, aromatic blend for deeply flavoured chicken dishes.", aliases: ["chicken masala"] },
-  { id: "garam-masala", name: "Garam Masala", category: "Masala", image: garamMasala, description: "A warming finishing spice with whole-spice depth and aroma.", aliases: ["garam masala"] },
-  { id: "sambar-podi", name: "Sambar Podi", category: "Masala", image: sambarPodi, description: "A balanced lentil and spice blend for homestyle sambar.", aliases: ["sambar podi", "sambar powder"] },
-  { id: "rasam-podi", name: "Rasam Podi", category: "Masala", image: rasamPodi, description: "Peppery, tangy and fragrant for a comforting bowl of rasam.", aliases: ["rasam podi", "rasam powder"] },
-  { id: "karvepaku-podi", name: "Karvepaku Podi", category: "Podi", image: karvepakuPodi, description: "Earthy curry leaves ground with lentils and traditional spices.", aliases: ["karvepaku podi", "curry leaf"] },
-  { id: "kobari-podi", name: "Kobari Podi", category: "Podi", image: kobariPodi, description: "A savoury coconut blend with a gently roasted finish.", aliases: ["kobari podi", "kobari powder", "coconut"] },
-  { id: "palli-podi", name: "Palli Podi", category: "Podi", image: palliPodi, description: "Roasted peanut podi with a satisfying nutty flavour.", aliases: ["palli podi", "peanut"] },
-  { id: "putnalu-podi", name: "Putnalu Podi", category: "Podi", image: putnaluPodi, description: "Classic roasted gram podi, simple and full of flavour.", aliases: ["putnalu podi", "roasted gram"] },
-  { id: "idly-podi", name: "Idly Podi", category: "Podi", image: idlyPodi, description: "The everyday South Indian companion for idli and dosa.", aliases: ["idly podi", "idli podi"] },
+type Filter = "All" | string;
+
+const products: Product[] = [
+  { name: "Chicken Masala", image: chickenMasala, description: "A robust, aromatic blend for deeply flavoured chicken dishes.", aliases: ["chicken masala"] },
+  { name: "Garam Masala", image: garamMasala, description: "A warming finishing spice with whole-spice depth and aroma.", aliases: ["garam masala"] },
+  { name: "Sambar Podi", image: sambarPodi, description: "A balanced lentil and spice blend for homestyle sambar.", aliases: ["sambar podi", "sambar powder"] },
+  { name: "Rasam Podi", image: rasamPodi, description: "Peppery, tangy and fragrant for a comforting bowl of rasam.", aliases: ["rasam podi", "rasam powder"] },
+  { name: "Karvepaku Podi", image: karvepakuPodi, description: "Earthy curry leaves ground with lentils and traditional spices.", aliases: ["karvepaku podi", "curry leaf"] },
+  { name: "Kobari Podi", image: kobariPodi, description: "A savoury coconut blend with a gently roasted finish.", aliases: ["kobari podi", "kobari powder", "coconut"] },
+  { name: "Palli Podi", image: palliPodi, description: "Roasted peanut podi with a satisfying nutty flavour.", aliases: ["palli podi", "peanut"] },
+  { name: "Putnalu Podi", image: putnaluPodi, description: "Classic roasted gram podi, simple and full of flavour.", aliases: ["putnalu podi", "roasted gram"] },
+  { name: "Idly Podi", image: idlyPodi, description: "The everyday South Indian companion for idli and dosa.", aliases: ["idly podi", "idli podi"] },
 ];
 
-const fallbackPacks = ["100 g", "250 g"];
 const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
-const findPricing = (product: StoreProduct, pricing: RecipePricing[]) => pricing.filter((entry) => entry.is_enabled && product.aliases.some((alias) => normalize(entry.recipe_name).includes(normalize(alias))));
+const findPricing = (product: Product, pricing: RecipePricing[]) => pricing.filter((entry) => entry.is_enabled && product.aliases.some((alias) => normalize(entry.recipe_name).includes(normalize(alias))));
+const findProduct = (name: string) => products.find((product) => normalize(product.name) === normalize(name) || product.aliases.some((alias) => normalize(name).includes(normalize(alias))));
+
+const iconForBenefit = (icon: StoreBenefit["icon"]) => icon === "truck" ? Truck : icon === "shield" ? ShieldCheck : icon === "leaf" ? Leaf : ShoppingBag;
+const iconForWhy = (icon: StoreWhyUs["icon"]) => icon === "shield" ? ShieldCheck : icon === "sparkles" ? Sparkles : icon === "check" ? Check : ShoppingBag;
+const themeClass = (theme: string) => ({ orange: "bg-orange-50 border-orange-200", green: "bg-emerald-50 border-emerald-200", gold: "bg-amber-50 border-amber-200", rose: "bg-rose-50 border-rose-200", plum: "bg-purple-50 border-purple-200" }[theme] ?? "bg-stone-50 border-stone-200");
 
 const Store = () => {
-  const [category, setCategory] = useState<Category>("All");
+  const navigate = useNavigate();
+  const { data: settings = {} as StoreSettings } = useStoreSettings();
+  const { data: pricing = [], isLoading: pricingLoading } = useQuery({ queryKey: ["store-pricing"], queryFn: fetchRecipePricing });
+  const [filter, setFilter] = useState<Filter>("All");
   const [selectedPacks, setSelectedPacks] = useState<Record<string, string>>({});
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
-  const navigate = useNavigate();
-  const { data: pricing = [] } = useQuery({ queryKey: ["store-pricing"], queryFn: fetchRecipePricing });
-  const visibleProducts = category === "All" ? products : products.filter((product) => product.category === category);
-  const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
-  const cartTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
-  const productPricing = useMemo(() => new Map(products.map((product) => [product.id, findPricing(product, pricing)])), [pricing]);
-  const getPack = (product: StoreProduct) => { const entries = productPricing.get(product.id) ?? []; return selectedPacks[product.id] || entries[0]?.quantity_type || fallbackPacks[0]; };
-  const addToCart = (product: StoreProduct) => { const entries = productPricing.get(product.id) ?? []; const pack = getPack(product); const price = entries.find((entry) => entry.quantity_type === pack)?.price ?? 0; if (price <= 0) return; const key = `${product.id}-${pack}`; setCart((current) => { const existing = current.find((item) => item.key === key); if (existing) return current.map((item) => item.key === key ? { ...item, quantity: item.quantity + 1 } : item); return [...current, { key, product, pack, price, quantity: 1 }]; }); setCartOpen(true); };
-  const updateQuantity = (key: string, change: number) => setCart((current) => current.map((item) => item.key === key ? { ...item, quantity: item.quantity + change } : item).filter((item) => item.quantity > 0));
-  const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 
-  return <div className="min-h-screen bg-stone-50 text-stone-900 pb-8">
+  const productPricing = useMemo(() => new Map(products.map((product) => [product.name, findPricing(product, pricing)])), [pricing]);
+  const featuredProducts = useMemo(() => settings.featuredProductNames.map(findProduct).filter(Boolean) as Product[], [settings.featuredProductNames]);
+  const allCategoryNames = useMemo(() => settings.categories.map((category) => category.title), [settings.categories]);
+  const filteredProducts = useMemo(() => {
+    if (filter === "All") return products;
+    const category = settings.categories.find((item) => item.title === filter);
+    if (!category) return products;
+    const allowed = new Set(category.productNames.map(normalize));
+    return products.filter((product) => allowed.has(normalize(product.name)) || product.aliases.some((alias) => allowed.has(normalize(alias))));
+  }, [filter, settings.categories]);
+
+  const getPack = (product: Product) => {
+    const entries = productPricing.get(product.name) ?? [];
+    return selectedPacks[product.name] || entries[0]?.quantity_type || "100 g";
+  };
+  const getPrice = (product: Product) => {
+    const pack = getPack(product);
+    return (productPricing.get(product.name) ?? []).find((entry) => entry.quantity_type === pack)?.price ?? 0;
+  };
+  const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const shipping = subtotal === 0 || subtotal >= settings.freeShippingAbove ? 0 : settings.shippingFee;
+  const total = subtotal + shipping;
+
+  const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const addToCart = (product: Product) => {
+    const price = getPrice(product);
+    const pack = getPack(product);
+    if (price <= 0) return;
+    const key = `${product.name}-${pack}`;
+    setCart((current) => {
+      const existing = current.find((item) => item.key === key);
+      if (existing) return current.map((item) => item.key === key ? { ...item, quantity: item.quantity + 1 } : item);
+      return [...current, { key, product, pack, price, quantity: 1 }];
+    });
+    setCartOpen(true);
+  };
+  const updateQuantity = (key: string, delta: number) => setCart((current) => current.map((item) => item.key === key ? { ...item, quantity: item.quantity + delta } : item).filter((item) => item.quantity > 0));
+
+  const ProductCard = ({ product }: { product: Product }) => {
+    const entries = productPricing.get(product.name) ?? [];
+    const pack = getPack(product);
+    const price = getPrice(product);
+    return <article className="group overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+      <div className="aspect-[4/3] overflow-hidden bg-stone-100"><img src={product.image} alt={product.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" /></div>
+      <div className="p-4 sm:p-5"><h3 className="font-bold text-stone-900">{product.name}</h3><p className="mt-1 min-h-10 text-sm leading-5 text-stone-500">{product.description}</p>
+        <div className="mt-4 flex items-center gap-2">{entries.length > 0 ? <Select value={pack} onValueChange={(value) => setSelectedPacks((current) => ({ ...current, [product.name]: value }))}><SelectTrigger className="h-10 flex-1"><SelectValue /></SelectTrigger><SelectContent>{entries.map((entry) => <SelectItem key={entry.quantity_type} value={entry.quantity_type}>{entry.quantity_type} · ₹{entry.price.toFixed(0)}</SelectItem>)}</SelectContent></Select> : <div className="flex-1 rounded-md bg-stone-50 px-3 py-2 text-xs text-stone-500">Price not configured</div>}
+          <Button disabled={pricingLoading || price <= 0} onClick={() => addToCart(product)} className="h-10 rounded-xl bg-stone-900 px-4 hover:bg-orange-700">Add</Button>
+        </div>{price > 0 && <div className="mt-2 text-sm font-bold text-orange-700">₹{price.toFixed(0)}</div>}
+      </div>
+    </article>;
+  };
+
+  return <div className="min-h-screen bg-stone-50 text-stone-900">
     <header className="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur"><div className="container flex h-[72px] items-center justify-between gap-4 px-4 sm:px-6">
-      <button onClick={() => scrollTo("top")} aria-label="Urban Delights home"><img src="/logo.png" alt="Urban Delights" className="h-10 w-auto sm:h-12" /></button>
-      <div className="flex items-center gap-3"><button onClick={() => scrollTo("products")} className="hidden text-sm font-medium text-stone-600 hover:text-orange-700 sm:block">Shop</button><button onClick={() => scrollTo("story")} className="hidden text-sm font-medium text-stone-600 hover:text-orange-700 sm:block">Our Promise</button>
-        <Button variant="outline" size="sm" onClick={() => navigate('/login')} className="hidden rounded-full border-stone-200 sm:inline-flex">Admin Login</Button>
-        <Sheet open={cartOpen} onOpenChange={setCartOpen}><SheetTrigger asChild><Button className="relative rounded-full bg-stone-900 px-4 text-white hover:bg-orange-700"><ShoppingBag className="mr-2 h-4 w-4" /> Basket <span className="ml-2 rounded-full bg-white/15 px-2 py-0.5 text-xs">{itemCount}</span></Button></SheetTrigger>
-          <SheetContent className="flex w-full flex-col bg-white sm:max-w-md"><SheetHeader><SheetTitle>Your basket</SheetTitle><SheetDescription>{itemCount ? `${itemCount} item${itemCount === 1 ? "" : "s"} selected` : "Your basket is ready for something delicious."}</SheetDescription></SheetHeader><div className="mt-5 flex-1 space-y-4 overflow-y-auto">{cart.length === 0 && <div className="border-y border-stone-200 py-10 text-center text-sm text-stone-500">Your basket is empty.</div>}{cart.map((item) => <div key={item.key} className="grid grid-cols-[64px_1fr_auto] gap-3 border-b border-stone-200 pb-4"><img src={item.product.image} alt="" className="h-16 w-16 rounded-lg object-cover" /><div><p className="font-semibold">{item.product.name}</p><p className="text-xs text-stone-500">{item.pack} · ₹{item.price.toFixed(0)}</p><div className="mt-2 flex items-center gap-1"><Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.key, -1)}><Minus /></Button><span className="w-8 text-center text-sm font-semibold">{item.quantity}</span><Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.key, 1)}><Plus /></Button></div></div><Button variant="ghost" size="icon" className="text-destructive" onClick={() => setCart((current) => current.filter((entry) => entry.key !== item.key))}><Trash2 /></Button></div>)}</div><div className="border-t border-stone-200 pt-5"><div className="mb-4 flex items-center justify-between text-lg font-bold"><span>Total</span><span>₹{cartTotal.toFixed(0)}</span></div><Button className="w-full bg-stone-900 hover:bg-orange-700" disabled={!cart.length}>Proceed to order</Button></div></SheetContent>
-        </Sheet></div>
+      <button onClick={() => scrollTo("top")} className="flex items-center gap-3" aria-label={`${settings.storeName} home`}><img src="/logo.png" alt={settings.storeName} className="h-10 w-auto sm:h-12" /><span className="hidden font-black tracking-tight text-stone-900 md:block">{settings.storeName}</span></button>
+      <nav className="hidden items-center gap-6 sm:flex"><button onClick={() => scrollTo("products")} className="text-sm font-semibold text-stone-600 hover:text-orange-700">Shop</button>{settings.showCategories && settings.categories.length > 0 && <button onClick={() => scrollTo("categories")} className="text-sm font-semibold text-stone-600 hover:text-orange-700">Categories</button>}{settings.showWhyUs && <button onClick={() => scrollTo("why-us")} className="text-sm font-semibold text-stone-600 hover:text-orange-700">Why Us</button>}</nav>
+      <div className="flex items-center gap-2">{settings.showAdminLogin && <Button variant="outline" size="sm" onClick={() => navigate("/login")} className="hidden rounded-full sm:inline-flex">Admin Login</Button>}{settings.showBasket && <Sheet open={cartOpen} onOpenChange={setCartOpen}><SheetTrigger asChild><Button className="relative rounded-full bg-stone-900 px-4 text-white hover:bg-orange-700"><ShoppingBag className="mr-2 h-4 w-4" /> Basket <span className="ml-2 rounded-full bg-white/15 px-2 py-0.5 text-xs">{itemCount}</span></Button></SheetTrigger><SheetContent className="flex w-full flex-col bg-white sm:max-w-md"><SheetHeader><SheetTitle>Your basket</SheetTitle><SheetDescription>{itemCount ? `${itemCount} item${itemCount === 1 ? "" : "s"} selected` : "Your basket is ready for something delicious."}</SheetDescription></SheetHeader><div className="mt-5 flex-1 space-y-4 overflow-y-auto">{cart.length === 0 && <div className="border-y border-stone-200 py-10 text-center text-sm text-stone-500">Your basket is empty.</div>}{cart.map((item) => <div key={item.key} className="grid grid-cols-[56px_1fr_auto] gap-3 border-b border-stone-200 pb-4"><img src={item.product.image} alt="" className="h-14 w-14 rounded-lg object-cover" /><div><p className="font-semibold">{item.product.name}</p><p className="text-xs text-stone-500">{item.pack} · ₹{item.price.toFixed(0)}</p><div className="mt-2 flex items-center gap-1"><Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.key, -1)}><Minus className="h-3 w-3" /></Button><span className="w-7 text-center text-sm font-semibold">{item.quantity}</span><Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.key, 1)}><Plus className="h-3 w-3" /></Button></div></div><Button variant="ghost" size="icon" className="text-destructive" onClick={() => setCart((current) => current.filter((entry) => entry.key !== item.key))}><Trash2 className="h-4 w-4" /></Button></div>)}</div><div className="border-t border-stone-200 pt-5"><div className="flex items-center justify-between text-sm"><span>Subtotal</span><span>₹{subtotal.toFixed(0)}</span></div><div className="mt-2 flex items-center justify-between text-sm"><span>Shipping</span><span>{shipping === 0 ? "FREE" : `₹${shipping.toFixed(0)}`}</span></div><div className="my-4 flex items-center justify-between text-lg font-black"><span>Total</span><span>₹{total.toFixed(0)}</span></div><Button className="w-full bg-stone-900 hover:bg-orange-700" disabled={!cart.length}>Proceed to order</Button></div></SheetContent></Sheet>}</div>
     </div></header>
 
     <main id="top">
-      <section className="relative overflow-hidden border-b border-stone-200 bg-gradient-to-br from-orange-50 via-amber-50 to-stone-100"><div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-orange-200/30 blur-3xl" /><div className="absolute -bottom-32 left-0 h-80 w-80 rounded-full bg-yellow-200/25 blur-3xl" />
-        <div className="container relative grid min-h-[500px] items-center gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[1.05fr_.95fr] lg:py-24"><div className="max-w-2xl"><div className="mb-5 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white/70 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-orange-800"><Sparkles className="h-3.5 w-3.5" /> Small-batch · South Indian flavours</div><h1 className="text-4xl font-bold leading-[1.05] tracking-tight text-stone-950 sm:text-6xl lg:text-7xl">The taste of <span className="text-orange-700">home</span>, ground fresh.</h1><p className="mt-6 max-w-xl text-base leading-7 text-stone-600 sm:text-lg">Authentic podis and masalas made in small batches with carefully selected ingredients — full of aroma, warmth and the flavours you grew up with.</p><div className="mt-8 flex flex-wrap gap-3"><Button size="lg" onClick={() => scrollTo("products")} className="rounded-full bg-stone-900 px-7 text-white hover:bg-orange-700">Shop our blends <ArrowRight className="ml-2 h-4 w-4" /></Button><Button variant="outline" size="lg" onClick={() => scrollTo("story")} className="rounded-full border-stone-300 bg-white/60">Why Urban Delights?</Button></div><div className="mt-8 flex flex-wrap gap-6 text-sm text-stone-600"><span className="flex items-center gap-2"><Leaf className="h-4 w-4 text-orange-700" /> Thoughtfully sourced</span><span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-orange-700" /> Made with care</span></div></div>
-          <div className="relative mx-auto w-full max-w-xl"><div className="absolute inset-5 rounded-[2rem] bg-orange-900/10 blur-2xl" /><div className="relative grid grid-cols-2 gap-3 rounded-[2rem] border border-white/80 bg-white/50 p-3 shadow-2xl backdrop-blur-sm sm:gap-4 sm:p-4"><div className="overflow-hidden rounded-[1.5rem]"><img src={chickenMasala} alt="Chicken Masala" className="h-full min-h-[210px] w-full object-cover sm:min-h-[280px]" /></div><div className="grid gap-3 sm:gap-4"><div className="overflow-hidden rounded-[1.5rem]"><img src={palliPodi} alt="Palli Podi" className="h-full min-h-[125px] w-full object-cover" /></div><div className="overflow-hidden rounded-[1.5rem]"><img src={idlyPodi} alt="Idly Podi" className="h-full min-h-[125px] w-full object-cover" /></div></div></div></div>
-        </div>
-      </section>
+      {settings.showHero && <section className="relative overflow-hidden border-b border-stone-200 bg-gradient-to-br from-orange-50 via-amber-50 to-stone-100"><div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-orange-200/30 blur-3xl" /><div className="container relative grid min-h-[520px] items-center gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[1.05fr_.95fr] lg:py-24"><div className="max-w-2xl"><div className="mb-5 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white/70 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-orange-800"><Sparkles className="h-3.5 w-3.5" /> {settings.heroEyebrow}</div><h1 className="text-4xl font-bold leading-[1.05] tracking-tight text-stone-950 sm:text-6xl lg:text-7xl">{settings.heroTitle} <span className="text-orange-700">{settings.heroTitleAccent}</span></h1><p className="mt-6 max-w-xl text-base leading-7 text-stone-600 sm:text-lg">{settings.heroDescription}</p><div className="mt-8 flex flex-wrap gap-3"><Button size="lg" onClick={() => scrollTo("products")} className="rounded-full bg-stone-900 px-7 text-white hover:bg-orange-700">{settings.heroPrimaryButtonText} <ArrowRight className="ml-2 h-4 w-4" /></Button><Button variant="outline" size="lg" onClick={() => scrollTo("why-us")} className="rounded-full border-stone-300 bg-white/60">{settings.heroSecondaryButtonText}</Button></div></div><div className="relative mx-auto w-full max-w-xl"><div className="absolute inset-5 rounded-[2rem] bg-orange-900/10 blur-2xl" /><div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/50 p-3 shadow-2xl backdrop-blur-sm sm:p-4"><img src={settings.heroImageUrl || chickenMasala} alt="" className="h-[300px] w-full rounded-[1.5rem] object-cover sm:h-[400px]" onError={(event) => { event.currentTarget.src = chickenMasala; }} /></div></div></div></section>}
 
-      <section id="story" className="scroll-mt-24 border-b border-stone-200 bg-white"><div className="container grid gap-8 px-4 py-12 sm:px-6 sm:py-16 md:grid-cols-3"><div className="md:pr-8"><p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-700">Our promise</p><h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Simple ingredients. Big flavour.</h2></div><div className="flex gap-4"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-orange-50 text-orange-700"><Leaf className="h-5 w-5" /></div><div><h3 className="font-semibold">Carefully blended</h3><p className="mt-1 text-sm leading-6 text-stone-500">Balanced recipes designed to bring out the natural character of every spice.</p></div></div><div className="flex gap-4"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-orange-50 text-orange-700"><Sparkles className="h-5 w-5" /></div><div><h3 className="font-semibold">Fresh & flavourful</h3><p className="mt-1 text-sm leading-6 text-stone-500">Small-batch preparation for the aroma, colour and warmth that make every meal special.</p></div></div></div></section>
+      {settings.showBenefits && <section className="border-b border-stone-200 bg-white"><div className="container grid grid-cols-2 gap-4 px-4 py-8 sm:grid-cols-4 sm:px-6">{settings.benefits.map((benefit, index) => { const Icon = iconForBenefit(benefit.icon); return <div key={`${benefit.title}-${index}`} className="flex items-center gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-50 text-orange-700"><Icon className="h-5 w-5" /></div><div><p className="text-sm font-bold">{benefit.title}</p><p className="text-xs text-stone-500">{benefit.subtitle}</p></div></div>; })}</div></section>}
 
-      <section id="products" className="scroll-mt-24 container px-4 py-12 sm:px-6 sm:py-16"><div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-700">The collection</p><h2 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">Made for everyday meals</h2><p className="mt-2 max-w-xl text-sm text-stone-500 sm:text-base">Pick your favourite masala or podi, choose your pack size and bring a little more flavour to the table.</p></div><div className="flex gap-2" aria-label="Product categories">{(["All", "Masala", "Podi"] as Category[]).map((item) => <Button key={item} variant="outline" size="sm" onClick={() => setCategory(item)} className={`rounded-full ${category === item ? "border-orange-700 bg-orange-50 text-orange-800" : "border-stone-200 text-stone-600"}`}>{item}{item !== "All" ? "s" : ""}</Button>)}</div></div><div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">{visibleProducts.map((product) => { const entries = productPricing.get(product.id) ?? []; const pack = getPack(product); const price = entries.find((entry) => entry.quantity_type === pack)?.price ?? 0; const packOptions = entries.length ? entries.map((entry) => entry.quantity_type) : fallbackPacks; return <article key={product.id} className="group overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"><div className="relative aspect-square overflow-hidden bg-orange-50"><img src={product.image} alt={`${product.name} spice blend`} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" /><span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-orange-800 shadow-sm">{product.category}</span></div><div className="p-4 sm:p-5"><h3 className="text-base font-bold sm:text-lg">{product.name}</h3><p className="mt-1 hidden min-h-10 text-xs leading-relaxed text-stone-500 sm:block">{product.description}</p><div className="mt-4 flex items-center justify-between gap-2"><Select value={pack} onValueChange={(value) => setSelectedPacks((current) => ({ ...current, [product.id]: value }))}><SelectTrigger className="h-9 w-[96px] rounded-full border-stone-200 text-xs"><SelectValue /></SelectTrigger><SelectContent>{packOptions.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select><span className="text-lg font-bold text-stone-900">{price > 0 ? `₹${price.toFixed(0)}` : "—"}</span></div><Button className="mt-3 w-full rounded-full bg-stone-900 hover:bg-orange-700" disabled={price <= 0} onClick={() => addToCart(product)}><ShoppingBag className="mr-2 h-4 w-4" />{price > 0 ? "Add to Basket" : "Price unavailable"}</Button></div></article>; })}</div></section>
+      {settings.showCategories && settings.categories.length > 0 && <section id="categories" className="scroll-mt-24 border-b border-stone-200 bg-white"><div className="container px-4 py-12 sm:px-6 sm:py-16"><div className="mb-8"><p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-700">Browse the store</p><h2 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">Shop by category</h2></div><div className="grid gap-5 md:grid-cols-2">{settings.categories.map((category, index) => <button key={`${category.title}-${index}`} onClick={() => { setFilter(category.title); scrollTo("products"); }} className={`group overflow-hidden rounded-3xl border p-5 text-left transition hover:-translate-y-1 hover:shadow-xl ${themeClass(category.theme)}`}><div className="flex items-center gap-5"><img src={category.imageUrl || chickenMasala} alt="" className="h-24 w-24 rounded-2xl object-cover" onError={(event) => { event.currentTarget.src = findProduct(category.productNames[0])?.image ?? chickenMasala; }} /><div><h3 className="text-xl font-black">{category.title}</h3><p className="mt-1 text-sm text-stone-600">{category.subtitle}</p><span className="mt-3 inline-flex items-center text-sm font-bold text-orange-700">Shop category <ArrowRight className="ml-1 h-4 w-4 transition group-hover:translate-x-1" /></span></div></div></button>)}</div></div></section>}
 
-      <section className="border-t border-stone-200 bg-white"><div className="container grid gap-8 px-4 py-12 sm:px-6 sm:py-14 md:grid-cols-[1.3fr_2fr]"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-700">Need help?</p><h2 className="mt-2 text-2xl font-bold">We're here for you.</h2><p className="mt-2 text-sm leading-6 text-stone-500">Find answers, policies and useful information before or after your purchase.</p></div><div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3"><Link className="text-stone-600 hover:text-orange-700" to="/about-us">About Us</Link><Link className="text-stone-600 hover:text-orange-700" to="/contact-us">Contact Us</Link><Link className="text-stone-600 hover:text-orange-700" to="/faq">FAQs</Link><Link className="text-stone-600 hover:text-orange-700" to="/shipping-policy">Shipping Policy</Link><Link className="text-stone-600 hover:text-orange-700" to="/returns-refunds">Returns & Refunds</Link><Link className="text-stone-600 hover:text-orange-700" to="/privacy-policy">Privacy Policy</Link><Link className="text-stone-600 hover:text-orange-700" to="/terms-and-conditions">Terms & Conditions</Link><Link className="text-stone-600 hover:text-orange-700" to="/login">Admin Login</Link></div></div></section>
+      {settings.showFeatured && featuredProducts.length > 0 && <section className="container px-4 py-12 sm:px-6 sm:py-16"><div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-700">Handpicked</p><h2 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">Featured favourites</h2></div><Button variant="outline" className="w-fit rounded-full" onClick={() => scrollTo("products")}>View all <ArrowRight className="ml-2 h-4 w-4" /></Button></div><div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">{featuredProducts.map((product) => <ProductCard key={product.name} product={product} />)}</div></section>}
+
+      <section id="products" className="scroll-mt-24 border-t border-stone-200 bg-stone-50"><div className="container px-4 py-12 sm:px-6 sm:py-16"><div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-700">The collection</p><h2 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">Made for everyday meals</h2><p className="mt-2 max-w-xl text-sm text-stone-500 sm:text-base">Choose a pack, add it to your basket and order directly from the store.</p></div><div className="flex max-w-full gap-2 overflow-x-auto pb-1"><Button variant="outline" size="sm" onClick={() => setFilter("All")} className={`shrink-0 rounded-full ${filter === "All" ? "border-orange-700 bg-orange-50 text-orange-800" : ""}`}>All</Button>{allCategoryNames.map((name) => <Button key={name} variant="outline" size="sm" onClick={() => setFilter(name)} className={`shrink-0 rounded-full ${filter === name ? "border-orange-700 bg-orange-50 text-orange-800" : ""}`}>{name}</Button>)}</div></div><div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">{filteredProducts.map((product) => <ProductCard key={product.name} product={product} />)}</div></div></section>
+
+      {settings.showWhyUs && settings.whyUs.length > 0 && <section id="why-us" className="scroll-mt-24 border-y border-stone-200 bg-white"><div className="container px-4 py-12 sm:px-6 sm:py-16"><div className="mx-auto max-w-2xl text-center"><p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-700">Why {settings.storeName}</p><h2 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">Good food. Thoughtfully made.</h2></div><div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{settings.whyUs.map((item, index) => { const Icon = iconForWhy(item.icon); return <div key={`${item.title}-${index}`} className={`rounded-3xl border p-5 ${themeClass(item.theme)}`}><div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/80 text-orange-700"><Icon className="h-5 w-5" /></div><h3 className="mt-4 font-bold">{item.title}</h3><p className="mt-2 text-sm leading-6 text-stone-600">{item.description}</p></div>; })}</div></div></section>}
     </main>
-    <Footer showTopButton={true} />
+    <Footer showTopButton />
   </div>;
 };
+
 export default Store;
