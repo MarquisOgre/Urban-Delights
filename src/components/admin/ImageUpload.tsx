@@ -18,6 +18,7 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 export default function ImageUpload({ label, value, onChange, folder, hint }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const isLogo = label.toLowerCase().includes("logo");
 
   const upload = async (file: File) => {
     if (!ALLOWED_TYPES.includes(file.type)) {
@@ -71,8 +72,8 @@ export default function ImageUpload({ label, value, onChange, folder, hint }: Im
 
       <div className="overflow-hidden rounded-2xl border bg-slate-50">
         {value ? (
-          <div className="relative aspect-[16/7] bg-white">
-            <img src={value} alt="Storefront preview" className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+          <div className={`${isLogo ? "min-h-28" : "aspect-[16/7]"} relative bg-white`}>
+            <img src={value} alt={isLogo ? "Store logo preview" : "Storefront preview"} className={isLogo ? "mx-auto h-28 max-w-full object-contain p-4" : "h-full w-full object-cover"} onError={(e) => { e.currentTarget.style.display = "none"; }} />
             <div className="absolute bottom-3 left-3 right-3 flex justify-end">
               <Button type="button" size="sm" className="bg-orange-600 shadow hover:bg-orange-700" onClick={() => inputRef.current?.click()} disabled={uploading}>
                 {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
