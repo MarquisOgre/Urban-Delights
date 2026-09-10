@@ -80,9 +80,6 @@ All colors MUST be HSL.
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
 
@@ -118,5 +115,184 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* Premium storefront hero refresh */
+  main#top > section:first-child {
+    position: relative;
+    min-height: calc(100vh - 72px);
+    border-bottom: 0;
+    background:
+      radial-gradient(circle at 78% 22%, hsl(24 100% 70% / 0.20), transparent 30%),
+      radial-gradient(circle at 8% 88%, hsl(43 100% 60% / 0.18), transparent 28%),
+      linear-gradient(120deg, hsl(38 100% 98%) 0%, hsl(40 100% 96%) 48%, hsl(30 100% 91%) 100%);
+  }
+
+  main#top > section:first-child::before {
+    content: "";
+    position: absolute;
+    width: 34rem;
+    height: 34rem;
+    right: -13rem;
+    top: -13rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, hsl(14 85% 48% / 0.16), hsl(42 100% 60% / 0.10));
+    filter: blur(8px);
+    pointer-events: none;
+  }
+
+  main#top > section:first-child::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 7px;
+    background: linear-gradient(90deg, hsl(8 88% 56%), hsl(24 94% 51%), hsl(45 96% 54%));
+    pointer-events: none;
+  }
+
+  main#top > section:first-child > div:last-child {
+    min-height: calc(100vh - 72px);
+    padding-top: clamp(3rem, 7vw, 6rem);
+    padding-bottom: clamp(3rem, 6vw, 5rem);
+    gap: clamp(2.5rem, 5vw, 6rem);
+  }
+
+  main#top > section:first-child > div:last-child > div:first-child {
+    position: relative;
+    z-index: 2;
+  }
+
+  main#top > section:first-child h1 {
+    max-width: 11ch;
+    font-weight: 900;
+    letter-spacing: -0.055em;
+    text-wrap: balance;
+    text-shadow: 0 2px 0 hsl(0 0% 100% / 0.45);
+  }
+
+  main#top > section:first-child h1 span {
+    position: relative;
+    display: inline-block;
+    color: hsl(17 87% 42%);
+  }
+
+  main#top > section:first-child h1 span::after {
+    content: "";
+    position: absolute;
+    left: 3%;
+    right: 1%;
+    bottom: 0.04em;
+    height: 0.12em;
+    border-radius: 999px;
+    background: hsl(17 87% 42% / 0.22);
+    transform: rotate(-2deg);
+    z-index: -1;
+  }
+
+  main#top > section:first-child p {
+    max-width: 34rem;
+  }
+
+  main#top > section:first-child > div:last-child > div:last-child {
+    position: relative;
+    z-index: 2;
+    transform: translateY(0.5rem) rotate(1.2deg);
+  }
+
+  main#top > section:first-child > div:last-child > div:last-child::before {
+    content: "";
+    position: absolute;
+    inset: -1.25rem -1.5rem 1.5rem 1.5rem;
+    border-radius: 2.75rem;
+    background: linear-gradient(135deg, hsl(17 87% 42%), hsl(37 96% 52%));
+    opacity: 0.92;
+    transform: rotate(-3deg);
+    box-shadow: 0 28px 70px hsl(17 60% 25% / 0.20);
+    z-index: -1;
+  }
+
+  main#top > section:first-child > div:last-child > div:last-child::after {
+    content: "FRESH • SMALL BATCH • SOUTH INDIAN";
+    position: absolute;
+    right: -1.5rem;
+    bottom: -1.4rem;
+    padding: 0.65rem 1rem;
+    border: 1px solid hsl(0 0% 100% / 0.8);
+    border-radius: 999px;
+    background: hsl(22 27% 13% / 0.94);
+    color: white;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    box-shadow: 0 14px 30px hsl(0 0% 0% / 0.18);
+    transform: rotate(-2deg);
+    white-space: nowrap;
+  }
+
+  main#top > section:first-child > div:last-child > div:last-child > div {
+    border: 1px solid hsl(0 0% 100% / 0.85);
+    background: hsl(0 0% 100% / 0.72);
+    box-shadow: 0 28px 65px hsl(22 35% 20% / 0.22);
+    backdrop-filter: blur(12px);
+  }
+
+  main#top > section:first-child > div:last-child > div:last-child img {
+    filter: saturate(1.08) contrast(1.04);
+  }
+
+  main#top > section:first-child > div:last-child > div:first-child > div:first-child {
+    border-color: hsl(17 87% 42% / 0.28);
+    background: hsl(0 0% 100% / 0.78);
+    box-shadow: 0 8px 24px hsl(17 50% 35% / 0.08);
+  }
+
+  main#top > section:first-child button {
+    transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+  }
+
+  main#top > section:first-child button:hover {
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 1023px) {
+    main#top > section:first-child {
+      min-height: auto;
+    }
+
+    main#top > section:first-child > div:last-child {
+      min-height: auto;
+    }
+
+    main#top > section:first-child > div:last-child > div:last-child {
+      max-width: 40rem;
+      margin-top: 1rem;
+    }
+  }
+
+  @media (max-width: 639px) {
+    main#top > section:first-child > div:last-child {
+      padding-top: 2.5rem;
+      padding-bottom: 3.5rem;
+    }
+
+    main#top > section:first-child h1 {
+      max-width: 12ch;
+      letter-spacing: -0.045em;
+    }
+
+    main#top > section:first-child > div:last-child > div:last-child::before {
+      inset: -0.65rem -0.5rem 0.8rem 0.5rem;
+    }
+
+    main#top > section:first-child > div:last-child > div:last-child::after {
+      right: 0;
+      bottom: -1.1rem;
+      font-size: 0.52rem;
+      letter-spacing: 0.1em;
+    }
   }
 }
