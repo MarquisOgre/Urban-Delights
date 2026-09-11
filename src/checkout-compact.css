@@ -11,6 +11,7 @@
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] { flex: 1 1 auto !important; box-sizing: border-box !important; height: auto !important; min-height: 0 !important; max-width: 1660px !important; width: 100% !important; margin: 0 auto !important; padding: 7px 4.8vw 7px !important; overflow: hidden !important; }
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form { height: 100% !important; min-height: 0 !important; gap: 24px !important; align-items: stretch !important; }
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div { height: 100% !important; min-height: 0 !important; border-radius: 14px !important; border: 1px solid #e1e5df !important; box-shadow: 0 1px 3px rgba(20,30,20,.035) !important; overflow: hidden !important; }
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) { position: relative !important; height: auto !important; align-self: flex-start !important; }
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div > div:first-child { padding: 15px 25px 6px !important; }
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div > div:first-child h2 { font-family: Georgia, "Times New Roman", serif !important; font-size: 19px !important; line-height: 1.05 !important; }
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div > div:nth-child(2) { padding: 0 25px 12px !important; }
@@ -23,7 +24,6 @@
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:first-child .grid-cols-\[52px_1fr_auto\] { grid-template-columns: 38px 1fr auto !important; gap: 8px !important; }
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:first-child .mt-6 { margin-top: 7px !important; padding-top: 7px !important; }
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:first-child .mt-4 { margin-top: 5px !important; padding-top: 5px !important; }
-  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) { position: relative !important; }
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) [class~="min-h-[390px]"] { min-height: 0 !important; height: auto !important; justify-content: flex-start !important; padding-top: 0 !important; }
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) [class~="h-48"] { height: 120px !important; width: 120px !important; margin-top: 3px !important; }
   body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form > div:nth-child(3) > div:nth-child(2) { margin-top: 0 !important; padding: 0 25px 12px !important; border-top: 0 !important; display: block !important; }
