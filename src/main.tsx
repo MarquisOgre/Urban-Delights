@@ -3,5 +3,6 @@ import App from './App.tsx'
 import './index.css'
 import './checkout-compact.css'
 import './checkout-mobile-scroll.css'
+import './checkout-footer.css'
 
 createRoot(document.getElementById("root")!).render(<App />);
