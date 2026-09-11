@@ -1,0 +1,5 @@
+/* Remove the checkout/admin footer divider and keep the gradient clean. */
+body:has(button[aria-label="Return to store"]) footer,
+footer {
+  border-top: 0 !important;
+}
