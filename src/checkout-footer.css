@@ -1,0 +1,33 @@
+/* Checkout footer polish: no top divider, slightly taller, more readable. */
+
+body:has(button[aria-label="Return to store"]) footer {
+  border-top: none !important;
+  box-shadow: none !important;
+}
+
+@media (min-width: 1024px) {
+  body:has(button[aria-label="Return to store"]) footer {
+    flex-basis: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+  }
+
+  body:has(button[aria-label="Return to store"]) footer > div:last-child {
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    padding: 0 !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  body:has(button[aria-label="Return to store"]) footer {
+    min-height: 64px !important;
+    height: 64px !important;
+  }
+
+  body:has(button[aria-label="Return to store"]) footer > div:last-child {
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+    padding: 0 12px !important;
+  }
+}
