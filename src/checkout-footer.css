@@ -5,6 +5,8 @@ body:has(button[aria-label="Return to store"]) footer > div:last-child {
   border: 0 !important;
   border-top: 0 !important;
   border-bottom: 0 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
   box-shadow: none !important;
   outline: 0 !important;
 }
@@ -20,6 +22,25 @@ body:has(button[aria-label="Return to store"]) footer > div:last-child::after {
 }
 
 @media (min-width: 1024px) {
+  body:has(button[aria-label="Return to store"]) header {
+    flex-basis: 60px !important;
+    height: 60px !important;
+    min-height: 60px !important;
+  }
+
+  /* Match the storefront's desktop logo size: sm:h-12 = 48px. */
+  body:has(button[aria-label="Return to store"]) header button[aria-label="Urban Delights home"] img {
+    height: 48px !important;
+    max-height: 48px !important;
+    width: auto !important;
+  }
+
+  /* More breathing room between the checkout header and all three cards. */
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] {
+    padding-top: 18px !important;
+    padding-bottom: 7px !important;
+  }
+
   body:has(button[aria-label="Return to store"]) footer {
     flex-basis: 44px !important;
     height: 44px !important;
@@ -37,6 +58,16 @@ body:has(button[aria-label="Return to store"]) footer > div:last-child::after {
 }
 
 @media (max-width: 1023px) {
+  /* Match the storefront's mobile logo size: h-10 = 40px. */
+  body:has(button[aria-label="Return to store"]) header button[aria-label="Urban Delights home"] img {
+    height: 40px !important;
+    max-height: 40px !important;
+  }
+
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] {
+    padding-top: 24px !important;
+  }
+
   body:has(button[aria-label="Return to store"]) footer {
     min-height: 64px !important;
     height: 64px !important;
