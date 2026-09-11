@@ -1,0 +1,52 @@
+/* Mobile checkout: allow the page itself to scroll while keeping desktop viewport behavior unchanged. */
+@media (max-width: 1023px) {
+  html:has(body:has(button[aria-label="Return to store"])) {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    height: auto !important;
+    min-height: 100% !important;
+  }
+
+  body:has(button[aria-label="Return to store"]) {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    height: auto !important;
+    min-height: 100% !important;
+  }
+
+  body:has(button[aria-label="Return to store"]) #root {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  body:has(button[aria-label="Return to store"]) #root > div {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  body:has(button[aria-label="Return to store"]) main[class~="max-w-[1680px]"] > form {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  body:has(button[aria-label="Return to store"]) footer {
+    position: static !important;
+  }
+}
