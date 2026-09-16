@@ -2,13 +2,13 @@
 UPDATE auth.users 
 SET email_confirmed_at = NOW(), 
     updated_at = NOW()
-WHERE email = 'admin@artisandelights.com';
+WHERE email = 'admin@urbandelights.com';
 
 -- Ensure the profile exists for the admin user
 INSERT INTO public.profiles (user_id, email, full_name)
 SELECT id, email, 'Admin User'
 FROM auth.users 
-WHERE email = 'admin@artisandelights.com'
+WHERE email = 'admin@urbandelights.com'
 ON CONFLICT (user_id) DO UPDATE SET
   email = EXCLUDED.email,
   full_name = EXCLUDED.full_name;
@@ -17,5 +17,5 @@ ON CONFLICT (user_id) DO UPDATE SET
 INSERT INTO public.user_roles (user_id, role)
 SELECT id, 'admin'::app_role
 FROM auth.users 
-WHERE email = 'admin@artisandelights.com'
+WHERE email = 'admin@urbandelights.com'
 ON CONFLICT (user_id, role) DO NOTHING;

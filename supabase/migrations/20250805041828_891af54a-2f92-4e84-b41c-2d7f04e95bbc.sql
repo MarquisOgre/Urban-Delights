@@ -55,7 +55,7 @@ BEGIN
   );
   
   -- Assign role (admin for specific email, user for others)
-  IF NEW.email = 'admin@artisandelights.com' THEN
+  IF NEW.email = 'admin@urbandelights.com' THEN
     INSERT INTO public.user_roles (user_id, role)
     VALUES (NEW.id, 'admin');
   ELSE

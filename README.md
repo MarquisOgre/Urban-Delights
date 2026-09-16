@@ -1,16 +1,16 @@
-# Welcome to your Artisan Delights project
+# Welcome to your Urban Delights project
 
 **Project info**  
-URL: https://artisan-delights.vercel.app/
+URL: https://urban-delights.vercel.app/
 
 ---
 
 ```bash
 # Step 1: Clone the repository using the project's Git URL.
-git clone https://github.com/MarquisOgre/Artisan-Delights
+git clone https://github.com/MarquisOgre/Urban-Delights
 
 # Step 2: Navigate to the project directory.
-cd Artisan-Delights
+cd Urban-Delights
 
 # Step 3: Install the necessary dependencies.
 npm i

@@ -147,7 +147,7 @@ RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 BEGIN
   INSERT INTO public.profiles (user_id, email, full_name)
   VALUES (NEW.id, NEW.email, COALESCE(NEW.raw_user_meta_data ->> 'full_name', ''));
-  IF NEW.email = 'admin@artisandelights.com' THEN
+  IF NEW.email = 'admin@urbandelights.com' THEN
     INSERT INTO public.user_roles (user_id, role) VALUES (NEW.id, 'admin');
   ELSE
     INSERT INTO public.user_roles (user_id, role) VALUES (NEW.id, 'user');

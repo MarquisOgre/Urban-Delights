@@ -1,9 +1,9 @@
 // Local Storage Keys
 const STORAGE_KEYS = {
-  MASTER_INGREDIENTS: 'artisan_master_ingredients',
-  RECIPES: 'artisan_recipes',
-  RECIPE_PRICING: 'artisan_recipe_pricing',
-  LAST_SYNC: 'artisan_last_sync',
+  MASTER_INGREDIENTS: 'urban_master_ingredients',
+  RECIPES: 'urban_recipes',
+  RECIPE_PRICING: 'urban_recipe_pricing',
+  LAST_SYNC: 'urban_last_sync',
 };
 
 // Generic storage functions
