@@ -15,7 +15,7 @@ INSERT INTO auth.users (
 ) VALUES (
   '00000000-0000-0000-0000-000000000001'::uuid,
   '00000000-0000-0000-0000-000000000000'::uuid,
-  'admin@artisandelights.com',
+  'admin@urbandelights.com',
   crypt('123456', gen_salt('bf')),
   NOW(),
   NOW(),
@@ -32,7 +32,7 @@ VALUES (
   gen_random_uuid(),
   '00000000-0000-0000-0000-000000000001'::uuid,
   'Admin User',
-  'admin@artisandelights.com'
+  'admin@urbandelights.com'
 ) ON CONFLICT (user_id) DO NOTHING;
 
 -- Assign admin role
