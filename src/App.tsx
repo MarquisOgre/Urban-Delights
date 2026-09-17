@@ -14,7 +14,7 @@ import LegalPage from "./pages/LegalPage";
 import StoreManager from "./pages/StoreManager";
 import StoreProductImages from "./pages/StoreProductImages";
 import Header from "./components/Header";
-import TrackOrderHeaderLink from "./components/TrackOrderHeaderLink";
+import StorefrontHeader from "./components/StorefrontHeader";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 
 const queryClient = new QueryClient();
@@ -45,6 +45,11 @@ const AdminStoreFooter = () => <footer className="h-14 shrink-0 bg-gradient-to-r
 const AdminStorePage = ({ children }: { children: React.ReactNode }) => <div className="flex min-h-screen flex-col bg-slate-50"><Header /><div className="min-h-0 flex-1">{children}</div><AdminStoreFooter /></div>;
 const HomeRoute = () => <Store />;
 
+const PublicHeader = () => {
+  const { pathname } = useLocation();
+  return pathname.startsWith("/admin") ? null : <StorefrontHeader />;
+};
+
 const App = () => (
   <AppErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -54,7 +59,7 @@ const App = () => (
         <AuthProvider>
           <BrowserRouter>
             <ScrollToTop />
-            <TrackOrderHeaderLink />
+            <PublicHeader />
             <Routes>
               <Route path="/" element={<HomeRoute />} />
               <Route path="/login" element={<Auth />} />
