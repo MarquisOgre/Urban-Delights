@@ -14,6 +14,7 @@ import LegalPage from "./pages/LegalPage";
 import StoreManager from "./pages/StoreManager";
 import StoreProductImages from "./pages/StoreProductImages";
 import Header from "./components/Header";
+import TrackOrderHeaderLink from "./components/TrackOrderHeaderLink";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 
 const queryClient = new QueryClient();
@@ -53,6 +54,7 @@ const App = () => (
         <AuthProvider>
           <BrowserRouter>
             <ScrollToTop />
+            <TrackOrderHeaderLink />
             <Routes>
               <Route path="/" element={<HomeRoute />} />
               <Route path="/login" element={<Auth />} />
