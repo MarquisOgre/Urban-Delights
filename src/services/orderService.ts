@@ -34,7 +34,7 @@ export const computeTotal = (items: OrderItem[], discountPercent: number = 0, ta
 export const formatInvoiceNumber = (num: number, orderDate?: string | null): string => {
   const dateMatch = orderDate?.match(/^(\d{4})-/);
   const year = dateMatch?.[1] || String(new Date().getFullYear());
-  return `US-${year}-${String(Number(num) || 0).padStart(3, '0')}`;
+  return `UD-${year}-${String(Number(num) || 0).padStart(4, '0')}`;
 };
 
 const getNextAvailableInvoiceNumber = async (): Promise<number> => {
