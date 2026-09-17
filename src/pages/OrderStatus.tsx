@@ -34,7 +34,7 @@ const steps = [
   { key: "delivered", label: "Delivered", icon: CheckCircle2 },
 ];
 
-const normalizePhone = (value: string) => value.replace(/[^0-9+]/g, "");
+const normalizePhone = (value: string) => value.replace(/\D/g, "");
 const normalizeStatus = (value: string) => value.trim().toLowerCase().replace(/\s+/g, "_");
 
 const OrderStatus = () => {
@@ -57,8 +57,8 @@ const OrderStatus = () => {
       setError("Please enter a valid Order ID, for example UD-2026-0001.");
       return;
     }
-    if (cleanedPhone.length < 7 || cleanedPhone.length > 20) {
-      setError("Please enter the phone number used when placing the order.");
+    if (!/^\d{10}$/.test(cleanedPhone)) {
+      setError("Phone Number must be exactly 10 digits.");
       return;
     }
 
@@ -69,9 +69,13 @@ const OrderStatus = () => {
         p_phone_number: cleanedPhone,
       } as never);
       if (rpcError) throw rpcError;
+      if (!data) {
+        setError("Order not found. Please check your Order ID and 10-digit phone number.");
+        return;
+      }
       setOrder(data as unknown as GuestOrder);
     } catch (err: any) {
-      setError(err?.message || "Order not found. Please check your Order ID and phone number.");
+      setError(err?.message || "Order not found. Please check your Order ID and 10-digit phone number.");
     } finally {
       setLoading(false);
     }
@@ -120,7 +124,7 @@ const OrderStatus = () => {
             <CardContent className="px-6 pb-7 sm:px-8">
               <form onSubmit={trackOrder} className="grid gap-5 sm:grid-cols-2">
                 <div><Label htmlFor="order-id">Order ID</Label><Input id="order-id" value={orderId} onChange={(e) => setOrderId(e.target.value.toUpperCase())} placeholder="UD-2026-0001" className="mt-2 h-12 rounded-xl" autoComplete="off" /></div>
-                <div><Label htmlFor="order-phone">Phone Number</Label><Input id="order-phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="10-digit mobile number" inputMode="tel" className="mt-2 h-12 rounded-xl" autoComplete="tel" /></div>
+                <div><Label htmlFor="order-phone">Phone Number</Label><Input id="order-phone" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))} placeholder="10-digit mobile number" inputMode="numeric" maxLength={10} className="mt-2 h-12 rounded-xl" autoComplete="tel" /></div>
                 <div className="sm:col-span-2"><Button type="submit" disabled={loading} className="h-12 w-full rounded-xl bg-[#2f6b45] text-white hover:bg-[#255536]"><Search className="mr-2 h-4 w-4" />{loading ? "Checking Order..." : "Track Order"}</Button></div>
               </form>
               {error && <div role="alert" className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
