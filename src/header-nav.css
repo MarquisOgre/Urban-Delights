@@ -1,37 +1,35 @@
 /* Unified storefront header layout: logo left, navigation + basket + profile on the right. */
-@layer components {
-  header > div.container {
-    justify-content: flex-start !important;
-  }
+header > div.container {
+  justify-content: flex-start !important;
+}
 
+header > div.container > nav {
+  margin-left: auto;
+}
+
+/* Storefront: Shop / Categories / Why Us -> Basket -> Profile */
+header > div.container > div:last-child > button:first-child {
+  order: 2;
+}
+
+header > div.container > div:last-child > button:last-child {
+  order: 1;
+}
+
+/* Keep the standard Urban Delights logo size consistent across public pages. */
+header > div.container > button:first-child img {
+  height: 3rem !important;
+  width: auto !important;
+  max-width: 230px;
+  object-fit: contain;
+}
+
+@media (max-width: 639px) {
   header > div.container > nav {
-    margin-left: auto;
+    display: none;
   }
 
-  /* Storefront: Shop / Categories / Why Us -> Basket -> Profile */
-  header > div.container > div:last-child > button:first-child {
-    order: 2;
-  }
-
-  header > div.container > div:last-child > button:last-child {
-    order: 1;
-  }
-
-  /* Keep the standard Urban Delights logo size consistent across public pages. */
   header > div.container > button:first-child img {
-    height: 3rem !important;
-    width: auto !important;
-    max-width: 230px;
-    object-fit: contain;
-  }
-
-  @media (max-width: 639px) {
-    header > div.container > nav {
-      display: none;
-    }
-
-    header > div.container > button:first-child img {
-      height: 2.75rem !important;
-    }
+    height: 2.75rem !important;
   }
 }
