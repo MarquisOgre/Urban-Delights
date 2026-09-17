@@ -15,10 +15,13 @@ import EditOrderDialog from './EditOrderDialog';
 
 interface OrdersListProps { onBackToDashboard: () => void; onEditOrder?: (order: Order) => void; }
 
+// Customer-facing order workflow: exactly five steps.
 const statusOptions = [
-  ['pending', 'Pending'], ['received', 'Received'], ['confirmed', 'Confirmed'],
-  ['processing', 'Processing'], ['order_sent', 'Order Sent'], ['shipped', 'Shipped'],
-  ['delivered', 'Delivered'], ['cancelled', 'Cancelled'],
+  ['received', 'Received'],
+  ['confirmed', 'Confirmed'],
+  ['processing', 'Processing'],
+  ['shipped', 'Shipped'],
+  ['delivered', 'Delivered'],
 ] as const;
 
 const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard }) => {
@@ -135,8 +138,8 @@ const OrdersList: React.FC<OrdersListProps> = ({ onBackToDashboard }) => {
                 {(order.items || []).length > 0 && <div className="grid grid-cols-[35px_minmax(155px,1fr)_65px_90px_90px] gap-x-2 border-t mt-1 pt-1 text-xs font-semibold"><span></span><span>Total Quantity</span><span>{getTotalQuantity(order)}</span><span></span><span></span></div>}
               </div></TableCell>
               <TableCell className="align-top whitespace-nowrap">{formatRupee(totals.subtotal)}</TableCell><TableCell className="align-top whitespace-nowrap">{totals.discountPercent > 0 ? `-${formatRupee(totals.discount)}` : formatRupee(0)}{totals.discountPercent > 0 && <div className="text-xs text-muted-foreground">{totals.discountPercent}%</div>}</TableCell><TableCell className="align-top whitespace-nowrap">{formatRupee(totals.tax)}<div className="text-xs text-muted-foreground">{totals.taxRate}%</div></TableCell><TableCell className="font-medium align-top whitespace-nowrap">{formatRupee(totals.total || Number(order.total_amount || 0))}</TableCell>
-              <TableCell className="align-top"><Select value={order.status || 'pending'} onValueChange={v => handleStatusChange(order.id, v)}><SelectTrigger className="w-[135px] h-8 text-xs"><SelectValue /></SelectTrigger><SelectContent>{statusOptions.map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select></TableCell>
-              <TableCell className="align-top"><Select value={order.payment_status || 'pending'} onValueChange={v => handlePaymentChange(order.id, v)}><SelectTrigger className="w-[110px] h-8 text-xs"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="pending">Pending</SelectItem><SelectItem value="unpaid">Unpaid</SelectItem><SelectItem value="paid">Paid</SelectItem><SelectItem value="failed">Failed</SelectItem></SelectContent></Select></TableCell>
+              <TableCell className="align-top"><Select value={order.status || 'received'} onValueChange={v => handleStatusChange(order.id, v)}><SelectTrigger className="w-[135px] h-8 text-xs"><SelectValue /></SelectTrigger><SelectContent>{statusOptions.map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select></TableCell>
+              <TableCell className="align-top"><Select value={order.payment_status || 'pending'} onValueChange={v => handlePaymentChange(order.id, v)}><SelectTrigger className="w-[110px] h-8 text-xs"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="pending">Pending</SelectItem><SelectItem value="unpaid">Unpaid</SelectItem><SelectItem value="paid">Paid</SelectItem><SelectItem value="failed">Failed</SelectItem></Select></TableCell>
               <TableCell className="align-top"><div className="flex gap-1"><Button variant="ghost" size="icon" className="h-8 w-8" title="Print Invoice" onClick={() => printInvoice(order)}><Printer className="h-4 w-4" /></Button><Button variant="ghost" size="icon" className="h-8 w-8" title="Download Invoice PDF" onClick={() => downloadInvoicePDF(order)}><Download className="h-4 w-4" /></Button><Button variant="ghost" size="icon" className="h-8 w-8" title="Edit Order" onClick={() => setEditingOrder(order)}><Pencil className="h-4 w-4" /></Button><Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" title="Delete Order" onClick={() => handleDelete(order.id)}><Trash2 className="h-4 w-4" /></Button></div></TableCell>
             </TableRow>; })}
           </TableBody></Table>
