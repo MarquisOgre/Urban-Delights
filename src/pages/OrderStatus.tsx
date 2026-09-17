@@ -90,26 +90,19 @@ const OrderStatus = () => {
       </header>
 
       <main className="min-h-0 flex-1">
-        <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
+        <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 sm:py-6">
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-orange-700">Guest Order Tracking</p>
+            <h1 className="mt-1 font-serif text-3xl font-bold tracking-tight text-[#2f6b45] sm:text-4xl">Track Your Order</h1>
+            <p className="mt-1.5 text-xs text-stone-500 sm:text-sm">Enter your Order ID and the phone number used at checkout. No login is required.</p>
           </div>
 
-          <Card className="mx-auto mt-4 max-w-4xl rounded-2xl border-stone-200 bg-white shadow-sm">
-            <CardHeader className="hidden"><CardTitle>Find your order</CardTitle></CardHeader>
-            <CardContent className="px-5 py-4 sm:px-6">
-              <form onSubmit={trackOrder} className="grid grid-cols-1 items-end gap-3 sm:grid-cols-[1fr_1fr_auto]">
-                <div>
-                  <Label className="text-xs" htmlFor="order-id">Order ID</Label>
-                  <Input id="order-id" value={orderId} onChange={(e) => setOrderId(e.target.value.toUpperCase())} placeholder="UD-2026-0001" className="mt-1 h-10 rounded-lg text-sm" autoComplete="off" />
-                </div>
-                <div>
-                  <Label className="text-xs" htmlFor="order-phone">Phone Number</Label>
-                  <Input id="order-phone" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))} placeholder="10-digit mobile number" inputMode="numeric" maxLength={10} className="mt-1 h-10 rounded-lg text-sm" autoComplete="tel" />
-                </div>
-                <Button type="submit" disabled={loading} className="h-10 rounded-lg bg-[#2f6b45] px-6 text-sm text-white hover:bg-[#255536] sm:mb-0">
-                  <Search className="mr-1.5 h-3.5 w-3.5" />{loading ? "Checking..." : "Track Order"}
-                </Button>
+          <Card className="mx-auto mt-4 max-w-xl rounded-2xl border-stone-200 bg-white shadow-sm">
+            <CardContent className="px-5 pb-4 sm:px-6">
+              <form onSubmit={trackOrder} className="grid gap-3 sm:grid-cols-2">
+                <div><Label className="text-xs" htmlFor="order-id">Order ID</Label><Input id="order-id" value={orderId} onChange={(e) => setOrderId(e.target.value.toUpperCase())} placeholder="UD-2026-0001" className="mt-1 h-9 rounded-lg text-sm" autoComplete="off" /></div>
+                <div><Label className="text-xs" htmlFor="order-phone">Phone Number</Label><Input id="order-phone" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))} placeholder="10-digit mobile number" inputMode="numeric" maxLength={10} className="mt-1 h-9 rounded-lg text-sm" autoComplete="tel" /></div>
+                <div className="sm:col-span-2"><Button type="submit" disabled={loading} className="h-9 w-full rounded-lg bg-[#2f6b45] text-sm text-white hover:bg-[#255536]"><Search className="mr-1.5 h-3.5 w-3.5" />{loading ? "Checking Order..." : "Track Order"}</Button></div>
               </form>
               {error && <div role="alert" className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{error}</div>}
             </CardContent>
