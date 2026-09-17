@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Store from "./pages/Store";
 import StoreCheckout from "./pages/StoreCheckout";
+import OrderStatus from "./pages/OrderStatus";
 import LegalPage from "./pages/LegalPage";
 import StoreManager from "./pages/StoreManager";
 import StoreProductImages from "./pages/StoreProductImages";
@@ -57,6 +58,7 @@ const App = () => (
               <Route path="/login" element={<Auth />} />
               <Route path="/auth" element={<Navigate to="/login" replace />} />
               <Route path="/checkout" element={<StoreCheckout />} />
+              <Route path="/order-status" element={<OrderStatus />} />
               <Route path="/admin" element={<AdminRoute><BackendDashboard /></AdminRoute>} />
               <Route path="/admin/settings" element={<AdminRoute><AdminStorePage><StoreManager /></AdminStorePage></AdminRoute>} />
               <Route path="/admin/store-products" element={<AdminRoute><AdminStorePage><StoreProductImages /></AdminStorePage></AdminRoute>} />
