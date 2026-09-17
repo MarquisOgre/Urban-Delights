@@ -47,14 +47,24 @@ const getNextAvailableInvoiceNumber = async (): Promise<number> => {
 };
 
 export const fetchOrders = async (): Promise<Order[]> => {
-  const { data: orders, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+  const { data, error } = await supabase.rpc('fetch_admin_orders' as never, {} as never);
   if (error) throw error;
-  const ordersWithItems: Order[] = [];
-  for (const order of orders || []) {
-    const { data: items } = await supabase.from('order_items').select('*').eq('order_id', order.id);
-    ordersWithItems.push({ ...order, items: (items || []).map((item: any) => ({ ...item, quantity: Number(item.quantity ?? 1) })) } as Order);
-  }
-  return ordersWithItems;
+  if (!Array.isArray(data)) return [];
+
+  return data.map((order: any) => ({
+    ...order,
+    invoice_number: Number(order.invoice_number),
+    total_amount: Number(order.total_amount),
+    discount_percent: order.discount_percent == null ? order.discount_percent : Number(order.discount_percent),
+    tax_rate: order.tax_rate == null ? order.tax_rate : Number(order.tax_rate),
+    items: Array.isArray(order.items)
+      ? order.items.map((item: any) => ({
+          ...item,
+          amount: Number(item.amount || 0),
+          quantity: Number(item.quantity ?? 1),
+        }))
+      : [],
+  })) as Order[];
 };
 
 export const createOrder = async (customerName: string, phoneNumber: string, address: string, items: OrderItem[], discountPercent: number = 0, taxRate: number = 0, notes: string = ''): Promise<void> => {
