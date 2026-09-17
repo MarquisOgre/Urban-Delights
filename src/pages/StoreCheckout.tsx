@@ -27,7 +27,7 @@ import { useQuery } from "@tanstack/react-query";
 type CheckoutItem = { key: string; productName: string; pack: string; quantity: number; price: number; image: string };
 
 const defaultProductImages: Record<string, string> = {
-"Chicken Masala": "/assets/chicken-masala.jpg", "Garam Masala": "/assets/garam-masala.jpg", "Sambar Podi": "/assets/sambar-powder.jpg", "Rasam Podi": "/assets/rasam-powder.jpg", "Karvepaku Podi": "/assets/karvepaku-podi.jpg", "Kobari Podi": "/assets/kobari-powder.jpg", "Palli Podi": "/assets/palli-podi.jpg", "Putnalu Podi": "/assets/putnalu-podi.jpg", "Idly Podi": "/assets/idly-podi.jpg",
+  "Chicken Masala": "/assets/chicken-masala.jpg", "Garam Masala": "/assets/garam-masala.jpg", "Sambar Podi": "/assets/sambar-powder.jpg", "Rasam Podi": "/assets/rasam-powder.jpg", "Karvepaku Podi": "/assets/karvepaku-podi.jpg", "Kobari Podi": "/assets/kobari-powder.jpg", "Palli Podi": "/assets/palli-podi.jpg", "Putnalu Podi": "/assets/putnalu-podi.jpg", "Idly Podi": "/assets/idly-podi.jpg",
 };
 
 const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -75,9 +75,16 @@ setSubmitting(true);
 try {
 const orderItems = hydratedItems.map((item) => ({ recipe_name: item.productName, quantity_type: item.pack, quantity: item.quantity, amount: item.price * item.quantity }));
 const { data, error } = await supabase.rpc("place_storefront_order" as never, {
-p_customer_name: form.name.trim(), p_phone_number: form.phone.trim(), p_address: form.address.trim(), p_total_amount: total, p_payment_status: "pending",
+p_customer_name: form.name.trim(),
+p_phone_number: form.phone.trim(),
+p_address: form.address.trim(),
+p_total_amount: total,
+p_payment_status: "pending",
 p_notes: [form.email.trim() ? `Email: ${form.email.trim()}` : "", "Payment Method: UPI", form.notes.trim(), `UPI Transaction: ${transactionId.trim()}`].filter(Boolean).join(" | ") || null,
 p_items: orderItems,
+p_customer_email: form.email.trim() || null,
+p_discount_percent: 0,
+p_tax_rate: 0,
 } as never);
 if (error) throw error;
 sessionStorage.removeItem("urban-delights-checkout-cart");
@@ -118,110 +125,11 @@ return (
 <main className="mx-auto flex min-h-0 w-full max-w-[1680px] flex-1 flex-col px-5 pb-12 pt-5 sm:px-8">
 <form onSubmit={submitOrder} className="grid min-h-0 flex-1 items-stretch gap-7 lg:grid-cols-3">
 <Card className="min-h-0 h-full rounded-2xl border border-stone-200 bg-white shadow-sm">
-<CardHeader className="px-7 pb-4 pt-8">
-<CardTitle className="font-serif text-xl font-bold">
-Order Summary
-</CardTitle>
-</CardHeader>
-
-<CardContent className="px-7 pb-8">
-<div className="space-y-5">
-{hydratedItems.map((item) => (
-<div
-key={item.key}
-className="grid grid-cols-[52px_1fr_auto] gap-3 border-b border-stone-200 pb-5"
->
-<img
-src={item.image}
-alt={item.productName}
-className="h-14 w-14 rounded-md object-cover"
-onError={(event) => {
-event.currentTarget.src = "/placeholder.svg";
-}}
-/>
-
-<div className="min-w-0">
-<p className="truncate text-[15px] font-medium">
-{item.productName}
-</p>
-
-<div className="mt-2 flex items-center gap-2">
-<button
-type="button"
-onClick={() => changeQuantity(item.key, -1)}
-className="flex h-7 w-7 items-center justify-center rounded-full border border-stone-200 text-stone-700 hover:bg-stone-50"
->
-<Minus className="h-3.5 w-3.5" />
-</button>
-
-<span className="w-5 text-center text-sm">
-{item.quantity}
-</span>
-
-<button
-type="button"
-onClick={() => changeQuantity(item.key, 1)}
-className="flex h-7 w-7 items-center justify-center rounded-full border border-stone-200 text-stone-700 hover:bg-stone-50"
->
-<Plus className="h-3.5 w-3.5" />
-</button>
-
-<button
-type="button"
-onClick={() => removeItem(item.key)}
-aria-label={`Remove ${item.productName}`}
-className="ml-1 text-red-500 hover:text-red-700"
->
-<Trash2 className="h-4 w-4" />
-</button>
-</div>
-</div>
-
-<div className="pt-1 text-sm font-semibold">
-₹{(item.price * item.quantity).toFixed(0)}
-</div>
-</div>
-))}
-</div>
-
-{/* Subtotal and Shipping — no line above */}
-<div className="mt-6 pt-5">
-<div className="space-y-3 text-sm">
-<div className="flex items-center justify-between">
-<span className="text-stone-500">Subtotal</span>
-<span className="font-medium">
-₹{subtotal.toFixed(2)}
-</span>
-</div>
-
-<div className="flex items-center justify-between">
-<span className="text-stone-500">Shipping</span>
-<span className="font-medium">
-{shipping === 0
-? "FREE"
-: `₹${shipping.toFixed(2)}`}
-</span>
-</div>
-</div>
-
-{/* Keep line above Total */}
-<div className="mt-4 border-t border-stone-200 pt-4">
-<div className="flex items-center justify-between">
-<span className="font-serif text-xl font-bold">
-Total
-</span>
-
-<span className="font-serif text-xl font-bold text-[#2f6b45]">
-₹{total.toFixed(2)}
-</span>
-</div>
-</div>
-</div>
-</CardContent>
+<CardHeader className="px-7 pb-4 pt-8"><CardTitle className="font-serif text-xl font-bold">Order Summary</CardTitle></CardHeader>
+<CardContent className="px-7 pb-8"><div className="space-y-5">{hydratedItems.map((item) => (<div key={item.key} className="grid grid-cols-[52px_1fr_auto] gap-3 border-b border-stone-200 pb-5"><img src={item.image} alt={item.productName} className="h-14 w-14 rounded-md object-cover" onError={(event) => { event.currentTarget.src = "/placeholder.svg"; }} /><div className="min-w-0"><p className="truncate text-[15px] font-medium">{item.productName}</p><div className="mt-2 flex items-center gap-2"><button type="button" onClick={() => changeQuantity(item.key, -1)} className="flex h-7 w-7 items-center justify-center rounded-full border border-stone-200 text-stone-700 hover:bg-stone-50"><Minus className="h-3.5 w-3.5" /></button><span className="w-5 text-center text-sm">{item.quantity}</span><button type="button" onClick={() => changeQuantity(item.key, 1)} className="flex h-7 w-7 items-center justify-center rounded-full border border-stone-200 text-stone-700 hover:bg-stone-50"><Plus className="h-3.5 w-3.5" /></button><button type="button" onClick={() => removeItem(item.key)} aria-label={`Remove ${item.productName}`} className="ml-1 text-red-500 hover:text-red-700"><Trash2 className="h-4 w-4" /></button></div></div><div className="pt-1 text-sm font-semibold">₹{(item.price * item.quantity).toFixed(0)}</div></div>))}</div><div className="mt-6 pt-5"><div className="space-y-3 text-sm"><div className="flex items-center justify-between"><span className="text-stone-500">Subtotal</span><span className="font-medium">₹{subtotal.toFixed(2)}</span></div><div className="flex items-center justify-between"><span className="text-stone-500">Shipping</span><span className="font-medium">{shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}</span></div></div><div className="mt-4 border-t border-stone-200 pt-4"><div className="flex items-center justify-between"><span className="font-serif text-xl font-bold">Total</span><span className="font-serif text-xl font-bold text-[#2f6b45]">₹{total.toFixed(2)}</span></div></div></div></CardContent>
 </Card>
-<Card className="min-h-0 h-full rounded-2xl border-stone-200 bg-white shadow-sm"><CardHeader className="px-7 pb-2 pt-8"><CardTitle className="font-serif text-xl font-bold">Your Details</CardTitle></CardHeader><CardContent className="px-7 pb-8"><div className="space-y-5"><div><Label className="text-sm font-medium">Full Name<span className="text-red-500">*</span></Label><div className="relative mt-2"><Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="Enter your name" className="h-12 rounded-xl border-stone-200 bg-[#fbfcf8] pr-11" required /><UserRound className="absolute right-3 top-3.5 h-5 w-5 text-stone-400" /></div></div><div><Label className="text-sm font-medium">Email</Label><Input type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} placeholder="Enter email (optional)" className="mt-2 h-12 rounded-xl border-stone-200 bg-[#fbfcf8]" /></div><div><Label className="text-sm font-medium">Phone Number<span className="text-red-500">*</span></Label><div className="relative mt-2"><Input inputMode="tel" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} placeholder="10-digit mobile number" className="h-12 rounded-xl border-stone-200 bg-[#fbfcf8] pr-11" required /><Phone className="absolute right-3 top-3.5 h-5 w-5 text-stone-400" /></div></div><div><Label className="text-sm font-medium">Delivery Address<span className="text-red-500">*</span></Label><div className="relative mt-2"><Textarea value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} placeholder="Enter full address" className="min-h-[100px] rounded-xl border-stone-200 bg-[#fbfcf8] pr-11" required /><MapPin className="absolute right-3 top-3.5 h-5 w-5 text-stone-400" /></div></div></div></CardContent></Card>
-
-<Card className="min-h-0 h-full rounded-2xl border-stone-200 bg-white shadow-sm"><CardHeader className="px-7 pb-2 pt-8"><CardTitle className="font-serif text-xl font-bold">UPI Payment</CardTitle></CardHeader><CardContent className="px-7 pb-8"><div className="flex min-h-[390px] flex-col justify-center"><div className="rounded-xl border border-[#2f6b45] bg-[#f4faf6] p-5"><div className="rounded-xl border border-stone-200 bg-white p-4 text-center shadow-sm"><div className="text-sm font-medium text-stone-700"></div>{dynamicQrCodeUrl ? <img src={dynamicQrCodeUrl} alt="Dynamic UPI payment QR code" className="mx-auto mt-3 h-48 w-48 rounded-lg object-contain" /> : <div className="mx-auto mt-3 flex h-48 w-48 items-center justify-center rounded-lg border border-dashed border-stone-300 bg-stone-50 px-6 text-sm text-stone-500">UPI ID has not been configured in Admin Settings.</div>}<div className="mt-3 text-xs text-stone-500">{settings.upiId || "UPI ID not configured"}</div>{settings.upiPayeeName && <div className="mt-1 text-xs text-stone-400">Payee: {settings.upiPayeeName}</div>}{upiPaymentUri && <a href={upiPaymentUri} className="mt-4 inline-flex h-10 items-center justify-center rounded-lg bg-[#2f6b45] px-5 text-sm font-semibold text-white transition hover:bg-[#255536]">Open UPI App to Pay ₹{total.toFixed(2)}</a>}</div><div className="mt-4"><Label className="text-left text-sm">UPI Transaction ID<span className="text-red-500">*</span></Label><Input className="mt-2 h-12 rounded-xl border-stone-200 bg-white" value={transactionId} onChange={(e) => setTransactionId(e.target.value)} placeholder="Enter transaction reference after payment" required /></div></div></div><div className="border-t border-stone-200 pt-3"><Button type="submit" size="lg" className="h-12 w-full rounded-xl bg-[#2f6b45] text-white hover:bg-[#255536]" disabled={!valid || submitting}>{submitting ? <><Loader2 className="h-4 w-4 animate-spin" />Placing Order...</> : "Place Order"}</Button></div></CardContent></Card>
+<Card className="min-h-0 h-full rounded-2xl border-stone-200 bg-white shadow-sm"><CardHeader className="px-7 pb-2 pt-8"><CardTitle className="font-serif text-xl font-bold">Your Details</CardTitle></CardHeader><CardContent className="px-7 pb-8"><div className="space-y-5"><div><Label className="text-sm font-medium">Full Name<span className="text-red-500">*</span></Label><div className="relative mt-2"><Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="Enter your name" className="h-12 rounded-xl border-stone-200 bg-[#fbfcf8] pr-11" required /><UserRound className="absolute right-3 top-3.5 h-5 w-5 text-stone-400" /></div></div><div><Label className="text-sm font-medium">Email</Label><Input type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} placeholder="Enter email (optional)" className="mt-2 h-12 rounded-xl border-stone-200 bg-[#fbfcf8]" /></div><div><Label className="text-sm font-medium">Phone Number<span className="text-red-500">*</span></Label><div className="relative mt-2"><Input inputMode="tel" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} placeholder="10-digit mobile number" className="h-12 rounded-xl border-stone-200 bg-[#fbfcf8] pr-11" required /><Phone className="absolute right-3 top-3.5 h-5 w-5 text-stone-400" /></div></div><div><Label className="text-sm font-medium">Delivery Address<span className="text-red-500">*</span></Label><div className="relative mt-2"><Textarea value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} placeholder="Enter full address" className="min-h-[100px] rounded-xl border-stone-200 bg-[#fbfcf8] pr-11" required /><MapPin className="absolute right-3 top-3.5 h-5 w-5 text-stone-400" /></div></div><div><Label className="text-sm font-medium">Order Notes</Label><Textarea value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} placeholder="Any delivery instructions?" className="min-h-[90px] rounded-xl border-stone-200 bg-[#fbfcf8]" /></div></div></CardContent></Card>
+<Card className="min-h-0 h-full rounded-2xl border-stone-200 bg-white shadow-sm"><CardHeader className="px-7 pb-2 pt-8"><CardTitle className="font-serif text-xl font-bold">Payment</CardTitle></CardHeader><CardContent className="px-7 pb-8"><div className="space-y-5"><div className="rounded-2xl bg-[#f5f8f1] p-5 text-center"><p className="text-sm font-medium text-stone-600">Scan & Pay via UPI</p><p className="mt-1 text-2xl font-serif font-bold text-[#2f6b45]">₹{total.toFixed(2)}</p>{dynamicQrCodeUrl ? <img src={dynamicQrCodeUrl} alt="UPI payment QR code" className="mx-auto mt-4 h-48 w-48 rounded-xl bg-white p-2" /> : <p className="mt-3 text-xs text-red-500">UPI payment is not configured.</p>}</div><div><Label className="text-sm font-medium">UPI Transaction ID<span className="text-red-500">*</span></Label><Input value={transactionId} onChange={(e) => setTransactionId(e.target.value)} placeholder="Enter UPI transaction/reference ID" className="mt-2 h-12 rounded-xl border-stone-200 bg-[#fbfcf8]" required /></div><Button type="submit" disabled={!valid || submitting} className="h-12 w-full rounded-xl bg-[#2f6b45] text-white hover:bg-[#255536] disabled:opacity-50">{submitting ? <><Loader2 className="h-4 w-4 animate-spin" />Placing Order...</> : "Place Order"}</Button><p className="text-center text-xs text-stone-500">Your order will be added to the Urban Delights admin Orders page.</p></div></CardContent></Card>
 </form>
 </main>
 <Footer />
