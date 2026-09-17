@@ -1,0 +1,42 @@
+name: Fix storefront order ID display
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update checkout order ID formatting
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('src/pages/StoreCheckout.tsx')
+          s = p.read_text()
+          old = '{success.slice(0, 8).toUpperCase()}'
+          new = '{success.toUpperCase()}'
+          if old in s:
+              p.write_text(s.replace(old, new))
+          else:
+              print('Checkout display already patched or source differs; no change needed.')
+          PY
+
+      - name: Commit checkout change
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/pages/StoreCheckout.tsx
+          if git diff --cached --quiet; then
+            echo "No checkout change required."
+            exit 0
+          fi
+          git commit -m "Show full UD order ID at checkout"
+          git push
