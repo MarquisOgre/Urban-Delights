@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      customers: {
+        Row: {
+          address: string
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone_number: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone_number: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone_number?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       indent_sessions: {
         Row: {
           available_qty: Json
@@ -107,8 +140,12 @@ export type Database = {
         Row: {
           address: string
           created_at: string
+          customer_email: string | null
+          customer_id: string | null
           customer_name: string
+          delivered_date: string | null
           discount_percent: number
+          expected_delivery_date: string | null
           id: string
           invoice_number: number
           notes: string | null
@@ -124,8 +161,12 @@ export type Database = {
         Insert: {
           address: string
           created_at?: string
+          customer_email?: string | null
+          customer_id?: string | null
           customer_name: string
+          delivered_date?: string | null
           discount_percent?: number
+          expected_delivery_date?: string | null
           id?: string
           invoice_number?: number
           notes?: string | null
@@ -141,8 +182,12 @@ export type Database = {
         Update: {
           address?: string
           created_at?: string
+          customer_email?: string | null
+          customer_id?: string | null
           customer_name?: string
+          delivered_date?: string | null
           discount_percent?: number
+          expected_delivery_date?: string | null
           id?: string
           invoice_number?: number
           notes?: string | null
@@ -155,7 +200,15 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       podi_stock_entries: {
         Row: {
@@ -408,6 +461,21 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      place_storefront_order: {
+        Args: {
+          p_address: string
+          p_customer_email?: string
+          p_customer_name: string
+          p_discount_percent?: number
+          p_items: Json
+          p_notes?: string
+          p_payment_status?: string
+          p_phone_number?: string
+          p_tax_rate?: number
+          p_total_amount?: number
+        }
+        Returns: string
       }
     }
     Enums: {
