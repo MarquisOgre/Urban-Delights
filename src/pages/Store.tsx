@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import Footer from "@/components/Footer";
-import { fetchRecipePricing, type RecipePricing } from "@/services/pricingService";
+import { fetchEnabledRecipePricing, type RecipePricing } from "@/services/pricingService";
 import { useStoreSettings, type StoreBenefit, type StoreSettings, type StoreWhyUs } from "@/hooks/useStoreSettings";
 import chickenMasala from "@/assets/chicken-masala.jpg";
 import garamMasala from "@/assets/garam-masala.jpg";
@@ -45,7 +45,14 @@ const themeClass = (theme: string) => ({ orange: "bg-orange-50 border-orange-200
 const Store = () => {
   const navigate = useNavigate();
   const { data: settings = {} as StoreSettings } = useStoreSettings();
-  const { data: pricing = [], isLoading: pricingLoading } = useQuery({ queryKey: ["store-pricing"], queryFn: fetchRecipePricing });
+  const { data: pricing = [], isLoading: pricingLoading } = useQuery({
+    queryKey: ["store-pricing-enabled"],
+    queryFn: fetchEnabledRecipePricing,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+  });
   const [filter, setFilter] = useState<Filter>("All");
   const [selectedPacks, setSelectedPacks] = useState<Record<string, string>>({});
   const [cart, setCart] = useState<CartItem[]>(() => {
