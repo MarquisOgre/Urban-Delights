@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import Footer from "@/components/Footer";
-import { fetchEnabledRecipePricing, type RecipePricing } from "@/services/pricingService";
+import { fetchRecipePricing, type RecipePricing } from "@/services/pricingService";
 import { useStoreSettings, type StoreBenefit, type StoreSettings, type StoreWhyUs } from "@/hooks/useStoreSettings";
 import chickenMasala from "@/assets/chicken-masala.jpg";
 import garamMasala from "@/assets/garam-masala.jpg";
@@ -36,7 +36,16 @@ const products: Product[] = [
   { name: "Idly Podi", image: idlyPodi, description: "The everyday South Indian companion for idli and dosa.", aliases: ["idly podi", "idli podi"] },
 ];
 const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
-const findPricing = (product: Product, pricing: RecipePricing[]) => pricing.filter((entry) => entry.is_enabled && product.aliases.some((alias) => normalize(entry.recipe_name).includes(normalize(alias))));
+const matchesProductPricing = (product: Product, entry: RecipePricing) =>
+  product.aliases.some((alias) => normalize(entry.recipe_name) === normalize(alias));
+
+const findPricing = (product: Product, pricing: RecipePricing[]) =>
+  pricing.filter((entry) => entry.is_enabled && matchesProductPricing(product, entry));
+
+const isProductEnabled = (product: Product, pricing: RecipePricing[]) => {
+  const entries = pricing.filter((entry) => matchesProductPricing(product, entry));
+  return entries.length > 0 && entries.every((entry) => entry.is_enabled === true);
+};
 const findProduct = (name: string) => products.find((product) => normalize(product.name) === normalize(name) || product.aliases.some((alias) => normalize(name).includes(normalize(alias))));
 const iconForBenefit = (icon: StoreBenefit["icon"]) => icon === "truck" ? Truck : icon === "shield" ? ShieldCheck : icon === "leaf" ? Leaf : ShoppingBag;
 const iconForWhy = (icon: StoreWhyUs["icon"]) => icon === "shield" ? ShieldCheck : icon === "sparkles" ? Sparkles : icon === "check" ? Check : ShoppingBag;
@@ -46,8 +55,8 @@ const Store = () => {
   const navigate = useNavigate();
   const { data: settings = {} as StoreSettings } = useStoreSettings();
   const { data: pricing = [], isLoading: pricingLoading } = useQuery({
-    queryKey: ["store-pricing-enabled"],
-    queryFn: fetchEnabledRecipePricing,
+    queryKey: ["store-pricing-v2"],
+    queryFn: fetchRecipePricing,
     staleTime: 0,
     gcTime: 0,
     refetchOnMount: "always",
@@ -81,7 +90,10 @@ const Store = () => {
   const productImages = useMemo(() => new Map((settings.productMedia ?? []).map((item) => [normalize(item.name), item.imageUrl]).filter((item) => item[1])), [settings.productMedia]);
   const getImage = (product: Product) => productImages.get(normalize(product.name)) || product.image;
   const productPricing = useMemo(() => new Map(products.map((product) => [product.name, findPricing(product, pricing)])), [pricing]);
-  const visibleProducts = useMemo(() => products.filter((product) => (productPricing.get(product.name) ?? []).length > 0), [productPricing]);
+  const visibleProducts = useMemo(
+    () => products.filter((product) => isProductEnabled(product, pricing)),
+    [pricing]
+  );
   const featuredProducts = useMemo(() => settings.featuredProductNames.map(findProduct).filter((product): product is Product => Boolean(product) && visibleProducts.some((item) => item.name === product.name)), [settings.featuredProductNames, visibleProducts]);
   const allCategoryNames = useMemo(() => settings.categories.map((category) => category.title), [settings.categories]);
   const filteredProducts = useMemo(() => {
