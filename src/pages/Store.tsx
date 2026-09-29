@@ -25,8 +25,7 @@ type Filter = "All" | string;
 const CART_STORAGE_KEY = "urban-delights-checkout-cart";
 
 const products: Product[] = [
-  // Chicken Masala temporarily hidden from the storefront.
-  // { name: "Chicken Masala", image: chickenMasala, description: "A robust, aromatic blend for deeply flavoured chicken dishes.", aliases: ["chicken masala"] },
+  { name: "Chicken Masala", image: chickenMasala, description: "A robust, aromatic blend for deeply flavoured chicken dishes.", aliases: ["chicken masala"] },
   { name: "Garam Masala", image: garamMasala, description: "A warming finishing spice with whole-spice depth and aroma.", aliases: ["garam masala"] },
   { name: "Sambar Podi", image: sambarPodi, description: "A balanced lentil and spice blend for homestyle sambar.", aliases: ["sambar podi", "sambar powder"] },
   { name: "Rasam Podi", image: rasamPodi, description: "Peppery, tangy and fragrant for a comforting bowl of rasam.", aliases: ["rasam podi", "rasam powder"] },
@@ -75,9 +74,16 @@ const Store = () => {
   const productImages = useMemo(() => new Map((settings.productMedia ?? []).map((item) => [normalize(item.name), item.imageUrl]).filter((item) => item[1])), [settings.productMedia]);
   const getImage = (product: Product) => productImages.get(normalize(product.name)) || product.image;
   const productPricing = useMemo(() => new Map(products.map((product) => [product.name, findPricing(product, pricing)])), [pricing]);
-  const featuredProducts = useMemo(() => settings.featuredProductNames.map(findProduct).filter(Boolean) as Product[], [settings.featuredProductNames]);
+  const visibleProducts = useMemo(() => products.filter((product) => (productPricing.get(product.name) ?? []).length > 0), [productPricing]);
+  const featuredProducts = useMemo(() => settings.featuredProductNames.map(findProduct).filter((product): product is Product => Boolean(product) && visibleProducts.some((item) => item.name === product.name)), [settings.featuredProductNames, visibleProducts]);
   const allCategoryNames = useMemo(() => settings.categories.map((category) => category.title), [settings.categories]);
-  const filteredProducts = useMemo(() => { if (filter === "All") return products; const category = settings.categories.find((item) => item.title === filter); if (!category) return products; const allowed = new Set(category.productNames.map(normalize)); return products.filter((product) => allowed.has(normalize(product.name)) || product.aliases.some((alias) => allowed.has(normalize(alias)))); }, [filter, settings.categories]);
+  const filteredProducts = useMemo(() => {
+    if (filter === "All") return visibleProducts;
+    const category = settings.categories.find((item) => item.title === filter);
+    if (!category) return visibleProducts;
+    const allowed = new Set(category.productNames.map(normalize));
+    return visibleProducts.filter((product) => allowed.has(normalize(product.name)) || product.aliases.some((alias) => allowed.has(normalize(alias))));
+  }, [filter, settings.categories, visibleProducts]);
   const getPack = (product: Product) => { const entries = productPricing.get(product.name) ?? []; return selectedPacks[product.name] || entries[0]?.quantity_type || "100 g"; };
   const getPrice = (product: Product) => { const pack = getPack(product); return (productPricing.get(product.name) ?? []).find((entry) => entry.quantity_type === pack)?.price ?? 0; };
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
