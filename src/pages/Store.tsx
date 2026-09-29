@@ -25,7 +25,8 @@ type Filter = "All" | string;
 const CART_STORAGE_KEY = "urban-delights-checkout-cart";
 
 const products: Product[] = [
-  { name: "Chicken Masala", image: chickenMasala, description: "A robust, aromatic blend for deeply flavoured chicken dishes.", aliases: ["chicken masala"] },
+  // Chicken Masala temporarily hidden from the storefront.
+  // { name: "Chicken Masala", image: chickenMasala, description: "A robust, aromatic blend for deeply flavoured chicken dishes.", aliases: ["chicken masala"] },
   { name: "Garam Masala", image: garamMasala, description: "A warming finishing spice with whole-spice depth and aroma.", aliases: ["garam masala"] },
   { name: "Sambar Podi", image: sambarPodi, description: "A balanced lentil and spice blend for homestyle sambar.", aliases: ["sambar podi", "sambar powder"] },
   { name: "Rasam Podi", image: rasamPodi, description: "Peppery, tangy and fragrant for a comforting bowl of rasam.", aliases: ["rasam podi", "rasam powder"] },
