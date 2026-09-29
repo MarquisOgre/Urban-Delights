@@ -45,6 +45,21 @@ export const fetchRecipePricing = async (): Promise<RecipePricing[]> => {
   return (data || []) as RecipePricing[];
 };
 
+/**
+ * Fetch only pricing rows that are explicitly enabled for the public storefront.
+ * Keeping this filter in the database query prevents disabled products from
+ * reaching the Store page, even if stale/cached pricing data exists in memory.
+ */
+export const fetchEnabledRecipePricing = async (): Promise<RecipePricing[]> => {
+  const { data, error } = await supabase
+    .from('recipe_pricing')
+    .select('*')
+    .eq('is_enabled', true)
+    .order('recipe_name');
+  if (error) throw error;
+  return (data || []) as RecipePricing[];
+};
+
 export const updateRecipePrice = async (id: string, price: number): Promise<void> => {
   try {
     const { error } = await supabase
