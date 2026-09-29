@@ -109,18 +109,27 @@ const PricingManager: React.FC<{ onBackToDashboard: () => void }> = ({ onBackToD
     }
   };
 
-  const toggleEnabled = async (pricingId: string, currentEnabled: boolean) => {
+  const toggleEnabled = async (recipeName: string) => {
+    const recipeEntries = pricing.filter(p => p.recipe_name === recipeName);
+    if (!recipeEntries.length) return;
+
+    const currentEnabled = recipeEntries.every(p => p.is_enabled);
+    const nextEnabled = !currentEnabled;
+
     try {
-      await updateRecipeEnabled(pricingId, !currentEnabled);
-      
-      // Update local state
-      setPricing(prev => prev.map(p => 
-        p.id === pricingId ? { ...p, is_enabled: !currentEnabled } : p
+      await Promise.all(
+        recipeEntries.map(entry => updateRecipeEnabled(entry.id, nextEnabled))
+      );
+
+      setPricing(prev => prev.map(entry =>
+        entry.recipe_name === recipeName
+          ? { ...entry, is_enabled: nextEnabled }
+          : entry
       ));
 
       toast({
         title: 'Success',
-        description: `Recipe ${!currentEnabled ? 'enabled' : 'disabled'} successfully`,
+        description: `Recipe ${nextEnabled ? 'enabled' : 'disabled'} successfully`,
       });
     } catch (error) {
       toast({
@@ -190,8 +199,8 @@ const PricingManager: React.FC<{ onBackToDashboard: () => void }> = ({ onBackToD
       {/* Mobile Card Layout */}
       <div className="block sm:hidden space-y-3">
         {recipes.map((recipe) => {
-          const anyPriceEntry = pricing.find(p => p.recipe_name === recipe.name);
-          const isRecipeEnabled = anyPriceEntry?.is_enabled ?? true;
+          const recipePricingEntries = pricing.filter(p => p.recipe_name === recipe.name);
+          const isRecipeEnabled = recipePricingEntries.length > 0 && recipePricingEntries.every(p => p.is_enabled);
           return (
             <Card key={recipe.id} className={`${!isRecipeEnabled ? 'opacity-60' : ''}`}>
               <CardHeader className="p-3 pb-2">
@@ -200,7 +209,7 @@ const PricingManager: React.FC<{ onBackToDashboard: () => void }> = ({ onBackToD
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => anyPriceEntry && toggleEnabled(anyPriceEntry.id, isRecipeEnabled)}
+                    onClick={() => toggleEnabled(recipe.name)}
                     className={`p-1 h-7 w-7 ${isRecipeEnabled ? "text-green-600" : "text-red-600"}`}
                   >
                     {isRecipeEnabled ? <Eye size={14} /> : <EyeOff size={14} />}
@@ -257,9 +266,8 @@ const PricingManager: React.FC<{ onBackToDashboard: () => void }> = ({ onBackToD
             </TableHeader>
             <TableBody>
               {recipes.map((recipe) => {
-                // Get any pricing entry for this recipe to check if enabled
-                const anyPriceEntry = pricing.find(p => p.recipe_name === recipe.name);
-                const isRecipeEnabled = anyPriceEntry?.is_enabled ?? true;
+                const recipePricingEntries = pricing.filter(p => p.recipe_name === recipe.name);
+                const isRecipeEnabled = recipePricingEntries.length > 0 && recipePricingEntries.every(p => p.is_enabled);
                 
                 return (
                   <TableRow key={recipe.id}>
