@@ -37,7 +37,7 @@ const StorefrontHeader = () => {
     <header className="urban-global-header sticky top-0 z-50 shrink-0 border-b border-stone-200 bg-white/95 backdrop-blur">
       <div className="container mx-auto flex h-[72px] items-center gap-4 px-4 sm:px-6">
         <button type="button" onClick={goHome} className="flex shrink-0 items-center" aria-label="Urban Delights home">
-          <img src={settings.logoUrl || "/logo.png"} alt={settings.storeName || "Urban Delights"} className="h-12 w-auto max-w-[230px] object-contain" />
+          <img src={settings.logoUrl || "/logo.png"} alt={settings.storeName || "Urban Delights"} className="h-12 w-auto max-w-[180px] object-contain sm:max-w-[230px]" />
         </button>
 
         <nav className="ml-auto hidden items-center gap-7 sm:flex" aria-label="Main navigation">
@@ -48,7 +48,7 @@ const StorefrontHeader = () => {
         </nav>
 
         <div className="flex shrink-0 items-center gap-2">
-          <button type="button" onClick={openBasket} className="urban-header-basket relative inline-flex h-10 items-center rounded-full bg-stone-900 px-4 text-sm font-semibold text-white transition-colors hover:bg-orange-700" aria-label="Open Basket">
+          <button type="button" onClick={openBasket} className="urban-header-basket relative inline-flex h-10 items-center rounded-full bg-stone-900 px-3 text-sm font-semibold text-white transition-colors hover:bg-orange-700 sm:px-4" aria-label="Open Basket">
             <ShoppingBag className="mr-2 h-4 w-4" />
             Basket
           </button>
