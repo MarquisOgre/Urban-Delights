@@ -43,7 +43,8 @@ const StorefrontHeader = () => {
         <nav className="ml-auto hidden items-center gap-7 sm:flex" aria-label="Main navigation">
           <button type="button" onClick={() => goSection("products")} className={`text-sm font-semibold transition-colors ${pathname === "/" ? "text-stone-700 hover:text-orange-700" : "text-stone-600 hover:text-orange-700"}`}>Shop</button>
           {settings.showCategories && settings.categories.length > 0 && <button type="button" onClick={() => goSection("categories")} className="text-sm font-semibold text-stone-600 transition-colors hover:text-orange-700">Categories</button>}
-          {settings.showWhyUs && <button type="button" onClick={() => goSection("why-us")} className="text-sm font-semibold text-stone-600 transition-colors hover:text-orange-700">Why Us</button>}\n          <button type="button" onClick={() => navigate("/contact-us")} className={`text-sm font-semibold transition-colors ${pathname === "/contact-us" ? "font-bold text-orange-700" : "text-stone-600 hover:text-orange-700"}`}>Contact Us</button>
+          {settings.showWhyUs && <button type="button" onClick={() => goSection("why-us")} className="text-sm font-semibold text-stone-600 transition-colors hover:text-orange-700">Why Us</button>}
+          <button type="button" onClick={() => navigate("/contact-us")} className={`text-sm font-semibold transition-colors ${pathname === "/contact-us" ? "font-bold text-orange-700" : "text-stone-600 hover:text-orange-700"}`}>Contact Us</button>
           <button type="button" onClick={() => navigate("/order-status")} className={`text-sm font-semibold transition-colors ${pathname === "/order-status" ? "font-bold text-orange-700" : "text-stone-600 hover:text-orange-700"}`}>Track Order</button>
         </nav>
 
