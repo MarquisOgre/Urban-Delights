@@ -72,7 +72,6 @@ export default function LegalPage() {
         <div className="mt-10 rounded-[1.5rem] border border-orange-200 bg-gradient-to-r from-orange-600 to-amber-400 p-[1px] shadow-lg"><div className="rounded-[1.45rem] bg-white/95 p-6 sm:p-8"><div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-700">Explore more</p><h2 className="mt-1 text-2xl font-black">Looking for something else?</h2></div><Button asChild className="rounded-full bg-stone-900 px-6 hover:bg-orange-700"><Link to={pathname === "/contact-us" ? "/faq" : "/contact-us"}>{pathname === "/contact-us" ? "Read FAQs" : "Need Help?"}<ArrowRight className="ml-2 h-4 w-4" /></Link></Button></div></div></div>
       </section>}
 
-      <section className="border-t border-orange-100 bg-white"><div className="container mx-auto px-4 py-10 sm:px-6"><div className="flex flex-wrap gap-x-6 gap-y-3 text-sm">{quickLinks.map(([label, href]) => <Link key={href} to={href} className={`font-semibold transition hover:text-orange-700 ${href === pathname ? "text-orange-700" : "text-stone-500"}`}>{label}</Link>)}</div></div></section>
     </main>
     <Footer showTopButton />
   </div>;
