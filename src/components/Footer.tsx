@@ -32,7 +32,7 @@ const Footer: React.FC<FooterProps> = ({ showTopButton = false, showNavigation =
   const configuredLinks = (settings.footerLinks ?? []).filter((link) => link.enabled && link.label.trim() && link.path.trim());
   const configuredPaths = new Set(configuredLinks.map((link) => link.path));
   const links = configuredLinks.length > 0
-    ? [...configuredLinks, ...fallbackLinks.filter((link) => !configuredPaths.has(link.path) && link.path === "/order-status")]
+    ? [...configuredLinks, ...fallbackLinks.filter((link) => !configuredPaths.has(link.path) && (link.path === "/contact-us" || link.path === "/order-status"))]
     : fallbackLinks;
 
   return <footer className="shrink-0 bg-white text-stone-900">
