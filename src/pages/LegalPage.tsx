@@ -23,11 +23,6 @@ const content: Record<string, PageData> = {
   "/faq": { title: "Questions? We've got answers.", eyebrow: "FAQ", intro: "Quick answers to common questions about shopping with Urban Delights.", accent: "Everything you need before you order.", icon: Sparkles, sections: [["How do I choose a pack size?", "Select an available pack size on the product card before adding the item to your basket."], ["Why is a price unavailable?", "A product shows Price unavailable when an enabled selling price has not been configured in Pricing Manager."], ["Can I change my order?", "Contact support as soon as possible. Changes depend on whether the order has already been processed or dispatched."], ["What if my order arrives damaged?", "Keep the packaging, take photographs and contact support promptly with your order details."]] },
 };
 
-const quickLinks = [
-  ["About Us", "/about-us"], ["Shipping Policy", "/shipping-policy"], ["Returns & Refunds", "/returns-refunds"],
-  ["Terms & Conditions", "/terms-and-conditions"], ["Privacy Policy", "/privacy-policy"], ["FAQs", "/faq"],
-] as const;
-
 export default function LegalPage() {
   const { pathname } = useLocation();
   const page = content[pathname] ?? content["/privacy-policy"];
@@ -36,12 +31,6 @@ export default function LegalPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   return <div className="min-h-screen bg-[#fffaf2] text-stone-900 pb-8">
-    <header className="sticky top-0 z-40 border-b border-orange-100/80 bg-[#fffaf2]/95 backdrop-blur-xl">
-      <div className="container mx-auto flex h-[72px] items-center justify-between px-4 sm:px-6">
-        <Link to="/" className="shrink-0"><img src="/logo.png" alt="Urban Delights" className="h-10 w-auto" /></Link>
-        <Button asChild variant="outline" className="rounded-full border-orange-200 bg-white/70 px-4 hover:border-orange-400 hover:bg-white"><Link to="/"><ArrowLeft className="mr-2 h-4 w-4" /> Back to Home</Link></Button>
-      </div>
-    </header>
 
     <main>
       <section className="relative overflow-hidden border-b border-orange-100 bg-gradient-to-br from-[#fff7e9] via-[#fffaf2] to-[#ffe9d2]">
